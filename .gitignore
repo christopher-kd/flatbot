@@ -1,0 +1,10 @@
+node_modules/
+profiles/
+logs/
+CLAUDE.md
+TODO.md
+photon/
+.zed/
+.env
+src/scraper/searchMessages.json
+.claude

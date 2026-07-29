@@ -1,0 +1,175 @@
+import type { HTMLElement } from "node-html-parser"
+import type { ApartmentListing, Organization } from "../../types"
+import Scraper from "../Scraper"
+import { parseAddress } from "../util/address"
+import { required } from "../util/assert"
+import type { FeatureArray } from "./InBerlinWohnen.types"
+
+const WOHNUNGSFINDER_URL = "https://www.inberlinwohnen.de/wohnungsfinder"
+
+export default class InBerlinWohnenScraper extends Scraper {
+	constructor() {
+		super("inberlinwohnen")
+	}
+
+	private getOrganizationByURL(url: string): Organization | null {
+		if (url.includes("gewobag.de")) return "Gewobag"
+		if (url.includes("stadtundland.de")) return "Stadt und Land"
+		if (url.includes("gesobau.de")) return "GESOBAU"
+		if (url.includes("howoge.de")) return "HOWOGE"
+		if (url.includes("wbm.de")) return "WBM"
+		if (url.includes("degewo.de")) return "degewo"
+		if (url.includes("berlinovo.de")) return "Berlinovo"
+		return null
+	}
+
+	private getPropertyIdByURL(url: string, organization: Organization): string {
+		if (organization === "HOWOGE")
+			return required(
+				url.match(/\d+-\d+-\d+(?=.html\?)/),
+				"HOWOGE propertyId match",
+			)[0]
+		if (organization === "WBM")
+			return required(url.match(/\d+-\d+\/\d+\/\d+/), "WBM propertyId match")[0]
+		if (organization === "Stadt und Land")
+			return decodeURIComponent(
+				required(
+					url.match(/\d{4}%2F\w+%2F\d+/),
+					"Stadt und Land propertyId match",
+				)[0],
+			)
+		if (organization === "Gewobag")
+			return required(
+				url.match(/\d+-\d+-\d+\d-\d+/),
+				"Gewobag propertyId match",
+			)[0]
+		if (organization === "degewo")
+			return required(
+				url.match(/W\d+-\d+-\d+\d-\d+/),
+				"degewo propertyId match",
+			)[0]
+		if (organization === "GESOBAU")
+			return required(
+				url.match(/\d{2}-\d+-\d+(?=-)/),
+				"GESOBAU propertyId match",
+			)[0]
+		if (organization === "Berlinovo")
+			return required(
+				url.match(/\d{4}-\d{4}-\d{1,}/),
+				"Berlinovo propertyId match",
+			)[0]
+		return ""
+	}
+
+	private parseDtDdTable(apartment: HTMLElement): Record<string, string> {
+		const keys = apartment
+			.querySelectorAll(".list__details .table dt")
+			.map((sel) => sel.textContent.trim().slice(0, -1))
+		const values = apartment
+			.querySelectorAll(".list__details .table dd")
+			.map((sel) => sel.textContent.trim())
+		const table: Record<string, string> = {}
+		for (let i = 0; i < keys.length; i++) {
+			table[keys[i]] = values[i]
+		}
+		return table
+	}
+
+	private extractListing(apartment: HTMLElement): ApartmentListing {
+		const title = required(
+			apartment.querySelector(".list__details>span:first-child"),
+			"apartment title",
+		).textContent
+
+		const table = this.parseDtDdTable(apartment)
+
+		const coordsRaw = required(
+			apartment.querySelector("button.text-right"),
+			"map button",
+		).getAttribute("wire:click")
+
+		const coordsMatch = required(
+			required(coordsRaw, "attribute of raw coords").match(/{.*}/),
+			"coords JSON in raw attribute",
+		)
+		const coords: { lat: string; lon: string } = JSON.parse(coordsMatch[0])
+
+		const url = required(
+			apartment.querySelector(".list__details a")?.getAttribute("href"),
+			"apartment url",
+		)
+
+		const features: FeatureArray = apartment
+			.querySelectorAll(".list__details span:has(i)")
+			.map((sel) => sel.textContent.trim())
+
+		const organization = (() => this.getOrganizationByURL(url))()
+		if (!organization) throw new Error("Couldn't determine organization")
+		const addr = parseAddress(
+			table.Adresse,
+			"{street} {houseNumber}, {postalCode}, {precinct}",
+		)
+
+		return {
+			organization,
+			propertyId: this.getPropertyIdByURL(url, organization),
+			lastSeenAt: Date.now(),
+			title,
+			fullUrl: url,
+			location: {
+				postalCode: required(addr.postalCode, "postalcode"),
+				city: "Berlin",
+				street: required(addr.street, "street"),
+				houseNumber: required(addr.houseNumber, "houseNumber"),
+				neighborhood: addr.precinct,
+				coordinates: {
+					lat: Number(coords.lat),
+					lng: Number(coords.lon),
+				},
+			},
+			spaceQm: this.parseGermanFloat(table.Wohnfläche),
+			rooms: this.parseGermanFloat(table.Zimmeranzahl),
+			newBuilding: Number(table.Baujahr.trim()) >= 2014,
+			costs: {
+				coldRentEur: this.parseGermanFloat(table.Kaltmiete),
+				utilityEur: this.parseGermanFloat(table.Nebenkosten),
+				totalRentEur: this.parseGermanFloat(table.Gesamtmiete),
+			},
+			accessibility: {
+				barrierFree: features.includes("Barrierefrei"),
+				senior: features.includes("Seniorenwohnung"),
+				wheelchair: features.includes("Weitgehend rollstuhlgerecht"),
+			},
+			restrictions: {
+				kind: table.WBS.trim() === "erforderlich" ? "wbs-required" : "free",
+			},
+			features,
+			images: [],
+		}
+	}
+
+	protected async getListings(): Promise<ApartmentListing[]> {
+		// .pagination .flex button:last-child names the total page count, read
+		// off page 1 only — same shape as Gewobag/Berlinovo, see paginateHtmlPages.
+		const pages = await this.paginateHtmlPages(
+			(pageNumber) =>
+				this.fetchHtml(
+					pageNumber === 1
+						? WOHNUNGSFINDER_URL
+						: `${WOHNUNGSFINDER_URL}?page=${pageNumber}`,
+				),
+			(firstPage) =>
+				Number(
+					firstPage.querySelector(".pagination .flex button:last-child")
+						?.textContent,
+				),
+			8,
+		)
+
+		return pages.flatMap((page) =>
+			page
+				.querySelectorAll("[id^=apartment]")
+				.map((apartment) => this.extractListing(apartment)),
+		)
+	}
+}
