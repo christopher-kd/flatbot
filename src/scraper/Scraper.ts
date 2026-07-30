@@ -50,30 +50,6 @@ abstract class Scraper {
 
 	protected abstract getListings(): Promise<ApartmentListing[]>
 
-	protected createURL(): URL {
-		throw new Error(`${this.organization} does not implement createURL`)
-	}
-
-	protected async manageCookies(_page: Page): Promise<void> {
-		throw new Error(`${this.organization} does not implement manageCookies`)
-	}
-
-	protected async applyFor(_url: string): Promise<void> {
-		throw new Error(`${this.organization} does not implement applyFor`)
-	}
-
-	protected async clickUntilHidden(button: Locator): Promise<void> {
-		const page = button.page()
-		while (await button.isVisible()) {
-			try {
-				await button.click({ timeout: 250 })
-				await page.waitForLoadState("networkidle")
-			} catch {
-				break
-			}
-		}
-	}
-
 	protected parseGermanFloat(value: string): number {
 		return parseFloat(
 			String(value)
