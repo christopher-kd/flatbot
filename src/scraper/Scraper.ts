@@ -1,5 +1,4 @@
 import parse, { type HTMLElement } from "node-html-parser"
-import type { BrowserContext, Locator, Page } from "playwright"
 import log from "../logger/logger"
 import type { ApartmentListing, Organization } from "../types"
 import { buildListingId } from "./listingId"

@@ -1,4 +1,3 @@
-import type { BrowserContext } from "playwright"
 import type { ApartmentListing, ApartmentListingImage } from "../../types"
 import Scraper from "../Scraper"
 import type { HTMLElement } from "node-html-parser"
@@ -6,7 +5,7 @@ import { parseAddress } from "../util/address"
 import { restrictionFromTitle } from "../wbs"
 
 export default class Gewobag extends Scraper {
-	constructor(_browserContext: BrowserContext | null = null) {
+	constructor() {
 		super("Gewobag")
 	}
 
