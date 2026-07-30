@@ -1,7 +1,6 @@
-import Scraper from "../Scraper"
 import type { ApartmentListing } from "../../types"
+import Scraper from "../Scraper"
 import { restrictionFromTitle } from "../wbs"
-import log from "../../logger/logger"
 import type { DistrictData, StadtUndLandReponse } from "./StadtUndLand.types"
 
 type StadtUndLandApartment = StadtUndLandReponse["data"][number]
@@ -70,7 +69,7 @@ class StadtUndLand extends Scraper {
 			lastSeenAt: Date.now(),
 			title,
 			fullUrl:
-				"https://stadtundland.de/wohnungssuche/" + apartment.details.immoNumber,
+				`https://stadtundland.de/wohnungssuche/${apartment.details.immoNumber}`,
 			location: {
 				postalCode: apartment.address.postal_code,
 				city: "Berlin",
