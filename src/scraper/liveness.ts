@@ -45,7 +45,12 @@ export async function checkListingLiveness(
 		case "WBM":
 			// TODO: implement liveness check for WBM
 			return "not-implemented"
-		case "HOWOGE":
+    case "HOWOGE": {
+      const response = await fetch(listing.fullUrl)
+      if (!response.ok) return "inactive"
+      if (response.url.endsWith("/404")) return "inactive"
+      return "active"
+    }
     case "Vonovia":
     case "GESOBAU":
 		case "Deutsche Wohnen":
