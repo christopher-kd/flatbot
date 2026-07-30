@@ -1,6 +1,6 @@
 import type { HTMLElement } from "node-html-parser"
 import log from "../../logger/logger"
-import type { ApartmentListing } from "../../types"
+import type { ApartmentListing, ApartmentListingImage } from "../../types"
 import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
@@ -55,7 +55,8 @@ export default class Berlinovo extends Scraper {
 
 	private extractListing(listing: HTMLElement): ApartmentListing {
 		const title = listing.querySelector(".title a")
-		const href = title.getAttribute("href")
+    const href = title.getAttribute("href")
+		const img = listing.querySelector("img")
 		const wbsRequired = (() => {
 			const sel = listing.querySelectorAll(
 				".block-field-blocknodeapartmentfield-wbs" +
@@ -67,7 +68,16 @@ export default class Berlinovo extends Scraper {
 			listing.querySelector(".address-line1")?.textContent,
 			"Berlinovo listing .address-line1",
 		)
-		const streetxNr = parseAddress(addressLine, "{street} {houseNumber}")
+    const streetxNr = parseAddress(addressLine.split(',')[0], "{street} {houseNumber}")
+
+    const image: ApartmentListingImage | null = (() => {
+      if (img) {
+        return {
+          fullUrl: img.getAttribute('href')
+        } as ApartmentListingImage
+      }
+      return null
+    })()
 
 		return {
 			propertyId: href.split("/")[2],
@@ -109,11 +119,7 @@ export default class Berlinovo extends Scraper {
 						.textContent,
 				),
 			},
-			images: [
-				{
-					fullUrl: listing.querySelector("img").getAttribute("src"),
-				},
-			],
+			images: image ? [image] : []
 		}
 	}
 
