@@ -27,8 +27,11 @@ export async function checkListingLiveness(
 			// TODO: implement liveness check for Stadt und Land
 			return "not-implemented"
 		case "degewo": {
-			const response = await fetch(listing.fullUrl)
-			if (!response.ok) return "inactive"
+      const response = await fetch(listing.fullUrl)
+
+      if (!response.ok) return "inactive"
+      if (response.url.endsWith("/404")) return "inactive"
+
 			const parsedHTML = parse(await response.text())
 			const listingDeactivatedText = parsedHTML.querySelector(
 				".c-copy .c-headline.c-headline--h2",
