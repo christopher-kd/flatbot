@@ -42,7 +42,7 @@ class Howoge extends Scraper {
 		super("HOWOGE")
 	}
 
-	public async fetchYearBuilt(propertyId: string) {
+	public async fetchDetailTable(propertyId: string): Promise<Record<string, string>> {
 		const html = await this.fetchHtml(
 			"https://www.howoge.de/immobiliensuche/wohnungssuche/detail/" +
 				`${propertyId}.html`,
@@ -62,36 +62,41 @@ class Howoge extends Scraper {
 		const data: Record<string, string> = {}
 		for (let i = 0; i < keys.length; i++) {
 			data[keys[i]] = values[i]
-		}
-		return data.Baujahr ? Number(data.Baujahr) : undefined
+    }
+		return data
 	}
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
-		await this.runBackfillStep("newBuilding", () =>
-			this.backfillNewBuilding(listings),
-		)
+		await this.runBackfillStep("costs and is new building", () =>
+			this.backfillWithDetailTable(listings),
+    )
 	}
 
-	private async backfillNewBuilding(
+	private async backfillWithDetailTable(
 		listings: ApartmentListing[],
 	): Promise<void> {
 		const targets = listings.filter(
-			(listing) => listing.newBuilding === undefined,
+      (listing) =>
+        listing.newBuilding === undefined ||
+        listing.costs.coldRentEur === 0 ||
+        listing.costs.depositEur === 0 ||
+        listing.costs.totalRentEur === 0 ||
+        listing.costs.utilityEur === 0,
 		)
 		await runConcurrent(targets, this.concurrency, async (listing) => {
 			try {
-				const yearBuilt = await this.fetchYearBuilt(listing.propertyId)
-				if (yearBuilt) {
-					listing.newBuilding = yearBuilt >= 2014
-				} else {
-					log.warn(
-						" -> Couldn't fetch year built from HOWOGE - " +
-							`propertyId: ${listing.propertyId}`,
-					)
-				}
+        const detailTable = await this.fetchDetailTable(listing.propertyId)
+
+        const yearBuilt = Number(detailTable["Baujahr"])
+        listing.costs.coldRentEur = this.parseGermanFloat(detailTable["Kaltmiete"])
+        listing.costs.utilityEur = this.parseGermanFloat(detailTable["Nebenkosten"])
+        listing.costs.totalRentEur = this.parseGermanFloat(detailTable["Warmmiete"])
+        listing.costs.depositEur = this.parseGermanFloat(detailTable["Kaution"])
+
+        listing.newBuilding = yearBuilt >= 2014
 			} catch (err) {
 				log.warn(
-					" -> Failed to backfill year built from HOWOGE - " +
+					" -> Failed to backfill data from HOWOGE - " +
 						`propertyId: ${listing.propertyId}: ${err}`,
 				)
 			}

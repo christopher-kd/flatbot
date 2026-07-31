@@ -11,7 +11,7 @@ export interface KnownBackfillFields {
 	location?: Pick<ApartmentListingLocation, "coordinates">
 	costs?: Pick<
 		ApartmentListingCosts,
-		"depositEur" | "heatingEur" | "coldRentEur" | "utilityEur"
+		"depositEur" | "heatingEur" | "coldRentEur" | "utilityEur" | "totalRentEur"
 	>
 }
 
@@ -28,6 +28,7 @@ export const BACKFILL_FIELD_PATHS = [
 	"costs.heatingEur",
 	"costs.coldRentEur",
 	"costs.utilityEur",
+	"costs.totalRentEur",
 ] as const
 
 export default interface ListingRepository {
