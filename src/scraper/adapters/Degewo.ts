@@ -5,13 +5,67 @@ import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { runConcurrent } from "../util/concurrency"
 import { restrictionFromTitle } from "../wbs"
+import { required } from "../util/assert"
 
 const BASE_URL = "https://www.degewo.de"
 
 export default class Degewo extends Scraper {
 	constructor() {
 		super("degewo")
-	}
+  }
+
+  public async backfill(listings: ApartmentListing[]): Promise<void> {
+    await this.runBackfillStep("costs", () =>
+      this.backfillCosts(listings)
+    )
+  }
+
+  private async fetchDetailPageData(url: string): Promise<Record<string, string>> {
+    const html = await this.fetchHtml(url)
+
+    const header = required(
+      html.querySelector(".c-info-box"),
+      "header with blue bg and two circles"
+    )
+    const headerKeyItems = header.querySelectorAll("dt").map(item => item.innerText.trim())
+    const headerValueItems = header.querySelectorAll("dd").map(item => item.innerText.trim())
+
+    const headerDetailData: Record<string, string> = {}
+    headerKeyItems.forEach((key, index) => {
+      headerDetailData[key] = headerValueItems[index]
+    })
+
+    const tables = required(
+      html.querySelector("#section-def-list-rent-details"),
+      "tables: kosten, objektdetails, energiedaten"
+    )
+    const tableKeyItems = tables.querySelectorAll("dt").map(item => item.innerText.trim())
+    const tableValueItems = tables.querySelectorAll("dd").map(item => item.innerText.trim())
+
+    const tableDetailData: Record<string, string> = {}
+    tableKeyItems.forEach((key, index) => {
+      tableDetailData[key] = tableValueItems[index]
+    })
+
+    return { ...headerDetailData, ...tableDetailData }
+  }
+
+  private async backfillCosts(listings: ApartmentListing[]): Promise<void> {
+    const listingTargets = listings.filter(listing =>
+      listing.costs.depositEur === 0 ||
+      listing.costs.coldRentEur === 0 ||
+      listing.costs.utilityEur === 0
+    )
+
+    await runConcurrent(listingTargets, this.concurrency, async listing => {
+      const data = await this.fetchDetailPageData(listing.fullUrl)
+
+      const coldRentEur = this.parseGermanFloat(data["Nettokaltmiete"])
+      listing.costs.coldRentEur = coldRentEur
+      listing.costs.utilityEur = this.parseGermanFloat(data["Betriebskosten (warm)"])
+      listing.costs.depositEur = coldRentEur * 3
+    })
+  }
 
 	private async fetchPage(page: number, cHash?: string) {
 		const url = new URL("https://www.degewo.de/immosuche")
