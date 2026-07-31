@@ -21,7 +21,10 @@
 	},
 	"overrides": [
 		{
-			"includes": ["src/scraper/adapters/Gesobau.ts"],
+			"includes": [
+			"src/scraper/adapters/Gesobau.ts",
+			"src/scraper/adapters/Howoge.ts"
+			],
 			"linter": {
 				"rules": {
 					"complexity": {
