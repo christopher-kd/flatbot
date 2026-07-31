@@ -58,12 +58,16 @@ export default class Degewo extends Scraper {
     )
 
     await runConcurrent(listingTargets, this.concurrency, async listing => {
-      const data = await this.fetchDetailPageData(listing.fullUrl)
+      try {
+        const data = await this.fetchDetailPageData(listing.fullUrl)
 
-      const coldRentEur = this.parseGermanFloat(data["Nettokaltmiete"])
-      listing.costs.coldRentEur = coldRentEur
-      listing.costs.utilityEur = this.parseGermanFloat(data["Betriebskosten (warm)"])
-      listing.costs.depositEur = coldRentEur * 3
+        const coldRentEur = this.parseGermanFloat(data["Nettokaltmiete"])
+        listing.costs.coldRentEur = coldRentEur
+        listing.costs.utilityEur = this.parseGermanFloat(data["Betriebskosten (warm)"])
+        listing.costs.depositEur = coldRentEur * 3
+      } catch (err) {
+        log.warn(` -> Failed to backfill data for id ${listing.propertyId}: ${err}`)
+      }
     })
   }
 
