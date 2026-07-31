@@ -42,9 +42,6 @@ export async function checkListingLiveness(
 		case "Gewobag":
 			// TODO: implement liveness check for Gewobag
 			return "not-implemented"
-		case "Berlinovo":
-			// TODO: implement liveness check for Berlinovo
-			return "not-implemented"
 		case "WBM":
 			// TODO: implement liveness check for WBM
 			return "not-implemented"
@@ -56,7 +53,8 @@ export async function checkListingLiveness(
     }
     case "Vonovia":
     case "GESOBAU":
-		case "Deutsche Wohnen":
+    case "Deutsche Wohnen":
+    case "Berlinovo":
 			return checkStatusOnly(listing.fullUrl)
 		case "inberlinwohnen":
 			// TODO: implement liveness check for inberlinwohnen
