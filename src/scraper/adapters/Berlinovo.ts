@@ -1,4 +1,5 @@
-import type { HTMLElement } from "node-html-parser"
+import { parse, type HTMLElement } from "node-html-parser"
+import { parse as parse5Parse, serialize } from "parse5"
 import log from "../../logger/logger"
 import type { ApartmentListing, ApartmentListingImage } from "../../types"
 import Scraper from "../Scraper"
@@ -17,7 +18,7 @@ export default class Berlinovo extends Scraper {
 		return await this.fetchHtml(
 			`https://www.berlinovo.de/de/wohnungen/suche?page=${pageNumber - 1}`,
 		)
-	}
+  }
 
 	public async fetchArea(propertyId: string): Promise<number | null> {
 		const page = await this.fetchHtml(
@@ -31,24 +32,59 @@ export default class Berlinovo extends Scraper {
 		return this.parseGermanFloat(areaElem.textContent.trim())
 	}
 
+
+  public async fetchDetails(url: string): Promise<Record<string, string>> {
+    const rawHtml = await this.fetchText(url)
+
+    // page sometimes is malformed which is why we sanitize before
+    const sanitized = parse5Parse(rawHtml)
+    const page = parse(serialize(sanitized))
+
+    const details = required(
+      page.querySelector(".details"),
+      "details, right sidebar"
+    )
+    const detailKeys = details.querySelectorAll(".content .field .field__label").map(e => e.textContent.trim())
+    const detailValues = details.querySelectorAll(".content .field .field__item").map(e => e.textContent.trim())
+    const detailsRecord: Record<string, string> = {}
+    for (let i = 0; i < detailKeys.length; i++) {
+      detailsRecord[detailKeys[i]] = detailValues[i]
+    }
+
+    return detailsRecord
+  }
+
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
-		await this.runBackfillStep("area", () => this.backfillArea(listings))
+		await this.runBackfillStep("area and costs", () => this.backfillData(listings))
 	}
 
-	private async backfillArea(listings: ApartmentListing[]): Promise<void> {
-		const targets = listings.filter((listing) => !listing.spaceQm)
-		await runConcurrent(targets, this.concurrency, async (listing) => {
-			try {
-				const area = await this.fetchArea(listing.propertyId)
-				if (area) {
-					listing.spaceQm = area
-				} else {
-					log.warn(` -> Couldn't find area of property: ${listing.propertyId}`)
-				}
+	private async backfillData(listings: ApartmentListing[]): Promise<void> {
+    const listingTargets = listings.filter((listing) =>
+      !listing.spaceQm ||
+      listing.costs.coldRentEur === 0 ||
+      listing.costs.depositEur === 0 ||
+      listing.costs.heatingEur === 0 ||
+      listing.costs.utilityEur === 0
+    )
+
+		await runConcurrent(listingTargets, this.concurrency, async (listing) => {
+      try {
+        // extract path due to failed redirects when link doesn't contain subdomain "www"
+        const url = new URL(listing.fullUrl)
+        const details = await this.fetchDetails(`https://www.berlinovo.de/de${url.pathname}`)
+
+        listing.costs.coldRentEur = this.parseGermanFloat(details["Kaltmiete"])
+
+        // TODO: is this really always * 3?
+        listing.costs.depositEur = listing.costs.coldRentEur * 3
+
+        listing.costs.heatingEur = this.parseGermanFloat(details["Heizkosten"])
+        listing.costs.utilityEur = this.parseGermanFloat(details["Nebenkosten"])
+        listing.spaceQm = this.parseGermanFloat(details["Wohnfläche"])
 			} catch (err) {
 				log.warn(
-					` -> Failed to backfill area for property ${listing.propertyId}: ${err}`,
-				)
+					` -> Failed to backfill data for id ${listing.propertyId}: ${err}`,
+        )
 			}
 		})
 	}
