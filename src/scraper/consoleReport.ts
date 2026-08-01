@@ -1,20 +1,8 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
-import {
-	bgGreen,
-	bgGreenBright,
-	bgRed,
-	black,
-	blue,
-	blueBright,
-	bold,
-	cyanBright,
-	italic,
-	underline,
-	white,
-} from "colorette"
-import figlet from "figlet"
+import { bgGreen, bgGreenBright, bgRed, black, bold, underline, white } from "colorette"
 import { getBorderCharacters, type TableUserConfig, table } from "table"
+import { printBanner as renderBanner } from "../core/banner"
 import log from "../logger/logger"
 
 const ROW_COLUMN_WIDTHS = [18, 10, 9, 9]
@@ -97,9 +85,6 @@ export function logSummary(count: number, durationMs: number) {
 }
 
 export async function printBanner() {
-	const banner = await figlet.text("FLATBOT", {
-		font: "Tmplr",
-	})
 	const searchMessageList: string[] = JSON.parse(
 		readFileSync(
 			join(import.meta.dirname, "searchMessages.json"),
@@ -108,10 +93,5 @@ export async function printBanner() {
 	)
 	const randomMessage =
 		searchMessageList[Math.floor(Math.random() * searchMessageList.length)]
-	const output = [
-		`\n${blue(banner).trim().split("\n").slice(0, -1).join("\n")}`,
-		`${blueBright("Aggregator with ❤︎ by https://github.com/christopher-kd")}\n`,
-		`${italic(cyanBright(randomMessage))}\n`,
-	]
-	console.log(output.join("\n"))
+	await renderBanner(randomMessage)
 }
