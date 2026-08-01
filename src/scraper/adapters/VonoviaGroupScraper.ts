@@ -1,13 +1,13 @@
-import { HTMLElement } from "node-html-parser"
+import type { HTMLElement } from "node-html-parser"
 import log from "../../logger/logger"
 import type {
-	ApartmentListing,
-	ApartmentListingImage,
-	Organization,
+    ApartmentListing,
+    ApartmentListingImage,
+    Organization,
 } from "../../types"
 import Scraper from "../Scraper"
-import type VonoviaGroupResponse from "./VonoviaGroup.types"
 import { runConcurrent } from "../util/concurrency"
+import type VonoviaGroupResponse from "./VonoviaGroup.types"
 
 /**
  * Vonovia & Deutsche Wohnen run on the same listing API.
@@ -39,7 +39,6 @@ export default abstract class VonoviaGroupScraper extends Scraper {
     await runConcurrent(listingTargets, 3, async (listing) => {
       try {
         const tableData = await this.fetchTableData(listing.fullUrl)
-        log.debug(`${listing.fullUrl}\n${JSON.stringify(tableData)}`)
         listing.costs.depositEur = this.parseGermanFloat(tableData["Kaution"])
         listing.costs.heatingEur = this.parseGermanFloat(tableData["Heizkosten"])
         listing.costs.utilityEur = this.parseGermanFloat(tableData["Nebenkosten"])
