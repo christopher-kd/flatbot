@@ -1,3 +1,4 @@
+import { HTMLElement } from "node-html-parser"
 import log from "../../logger/logger"
 import type {
 	ApartmentListing,
@@ -6,6 +7,7 @@ import type {
 } from "../../types"
 import Scraper from "../Scraper"
 import type VonoviaGroupResponse from "./VonoviaGroup.types"
+import { runConcurrent } from "../util/concurrency"
 
 /**
  * Vonovia & Deutsche Wohnen run on the same listing API.
@@ -19,7 +21,52 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 		private readonly listingUrlBase: string,
 	) {
 		super(organization)
-	}
+  }
+
+
+  public async backfill(listings: ApartmentListing[]): Promise<void> {
+    this.runBackfillStep("costs", () => this.backfillCosts(listings))
+  }
+
+  private async backfillCosts(listings: ApartmentListing[]): Promise<void> {
+    const listingTargets = listings.filter(listing =>
+      listing.costs.depositEur === 0 ||!listing.costs.depositEur ||
+      listing.costs.heatingEur === 0 ||!listing.costs.heatingEur ||
+      listing.costs.utilityEur === 0 ||!listing.costs.utilityEur ||
+      listing.costs.totalRentEur === 0 || !listing.costs.totalRentEur
+    )
+
+    await runConcurrent(listingTargets, 3, async (listing) => {
+      try {
+        const tableData = await this.fetchTableData(listing.fullUrl)
+        log.debug(`${listing.fullUrl}\n${JSON.stringify(tableData)}`)
+        listing.costs.depositEur = this.parseGermanFloat(tableData["Kaution"])
+        listing.costs.heatingEur = this.parseGermanFloat(tableData["Heizkosten"])
+        listing.costs.utilityEur = this.parseGermanFloat(tableData["Nebenkosten"])
+        listing.costs.totalRentEur = this.parseGermanFloat(tableData["Warmmiete"])
+      } catch (err) {
+        log.warn(` -> Failed to backfill for id ${listing.propertyId}: ${err}`)
+      }
+    })
+  }
+
+  private async fetchTableData(url: string): Promise<Record<string, string>> {
+    const page = await this.fetchHtml(url)
+
+    const tables = page.querySelectorAll(".side-left .content-card ul")
+    const keys: HTMLElement[] = []
+    const values: HTMLElement[] = []
+    for (const table of tables) {
+      keys.push(...table.querySelectorAll(".name"))
+      values.push(...table.querySelectorAll(".description"))
+    }
+
+    const result: Record<string, string> = {}
+    for (let i = 0; i < keys.length; i++) {
+      result[keys[i].text.trim()] = values[i].text.trim()
+    }
+    return result
+  }
 
 	private buildUrl(offset?: number): string {
 		const params = {
