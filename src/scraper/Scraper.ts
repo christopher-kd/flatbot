@@ -4,6 +4,7 @@ import type { ApartmentListing, Organization } from "../types"
 import { buildListingId } from "./listingId"
 import { countDefinedFields } from "./merge"
 import { runConcurrent } from "./util/concurrency"
+import { parse as parse5Parse, serialize } from "parse5"
 
 abstract class Scraper {
 	#externalRequestsCount = 0
@@ -89,10 +90,17 @@ abstract class Scraper {
 	}
 
 	protected async fetchHtml(
-		url: string | URL,
-		init?: RequestInit,
-	): Promise<HTMLElement> {
-		return parse(await this.fetchText(url, init))
+    url: string | URL,
+		opts?: RequestInit & {sanitize?: boolean}
+  ): Promise<HTMLElement> {
+    const { sanitize, ...init } = opts ?? {}
+    if (!sanitize) {
+      return parse(await this.fetchText(url, init))
+    }
+
+    const rawHTML = await this.fetchText(url, init)
+    const sanitized = serialize(parse5Parse(rawHTML))
+    return parse(sanitized)
 	}
 
 	// For sites whose page 1 states the total page count up front, so the

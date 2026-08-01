@@ -1,5 +1,4 @@
-import { parse, type HTMLElement } from "node-html-parser"
-import { parse as parse5Parse, serialize } from "parse5"
+import type { HTMLElement } from "node-html-parser"
 import log from "../../logger/logger"
 import type { ApartmentListing, ApartmentListingImage } from "../../types"
 import Scraper from "../Scraper"
@@ -34,11 +33,7 @@ export default class Berlinovo extends Scraper {
 
 
   public async fetchDetails(url: string): Promise<Record<string, string>> {
-    const rawHtml = await this.fetchText(url)
-
-    // page sometimes is malformed which is why we sanitize before
-    const sanitized = parse5Parse(rawHtml)
-    const page = parse(serialize(sanitized))
+    const page = await this.fetchHtml(url, { sanitize: true })
 
     const details = required(
       page.querySelector(".details"),
