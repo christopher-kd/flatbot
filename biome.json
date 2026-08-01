@@ -16,24 +16,12 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "recommended"
-		}
-	},
-	"overrides": [
-		{
-			"includes": [
-			"src/scraper/adapters/Gesobau.ts",
-			"src/scraper/adapters/Howoge.ts"
-			],
-			"linter": {
-				"rules": {
-					"complexity": {
-						"useLiteralKeys": "off"
-					}
-				}
+			"preset": "recommended",
+			"complexity": {
+			  "useLiteralKeys":"off"
 			}
 		}
-	],
+	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double",
