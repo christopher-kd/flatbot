@@ -1,7 +1,7 @@
 import { createWriteStream, existsSync } from "node:fs"
 import { mkdir, rm } from "node:fs/promises"
 import { basename, dirname, join } from "node:path"
-import cliProgress, { SingleBar } from "cli-progress"
+import cliProgress, { type SingleBar } from "cli-progress"
 import { cyan } from "colorette"
 import { exit } from "node:process"
 import { printBanner } from "../core/banner"
@@ -148,7 +148,7 @@ async function main() {
 
   await Promise.all(downloads)
   await runPhotonImport(destPaths.jar, destPaths.dump, PHOTON_DATA_DIR)
-  await rm(dirname(destPaths.dump), { recursive: true, force: true })
+  // await rm(dirname(destPaths.dump), { recursive: true, force: true })
   await runBunInstall()
 }
 
