@@ -1,8 +1,8 @@
-import { createWriteStream, existsSync } from "node:fs"
-import { mkdir, rm } from "node:fs/promises"
-import { basename, dirname, join } from "node:path"
 import cliProgress, { type SingleBar } from "cli-progress"
 import { cyan } from "colorette"
+import { createWriteStream, existsSync } from "node:fs"
+import { mkdir } from "node:fs/promises"
+import { basename, dirname, join } from "node:path"
 import { exit } from "node:process"
 import { printBanner } from "../core/banner"
 
@@ -119,7 +119,7 @@ async function runPhotonImport(jarPath: string, dumpPath: string, dataDir: strin
 
 function createDownloadBars(count: number): SingleBar[] {
   const multibar = new cliProgress.MultiBar({
-    format: `{filename} |` + cyan('{bar}') + '| {percentage}% || Speed: {speed}',
+    format: `{filename} |${cyan('{bar}')}| {percentage}% || Speed: {speed}`,
     clearOnComplete: false,
     hideCursor: true
   }, cliProgress.Presets.shades_grey)

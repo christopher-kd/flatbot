@@ -1,4 +1,4 @@
-import { blue, blueBright, cyanBright, italic } from "colorette"
+import { blue, cyanBright, italic } from "colorette"
 import figlet from "figlet"
 
 export async function printBanner(message: string): Promise<void> {
