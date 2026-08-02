@@ -5,10 +5,9 @@ import type { ApartmentListing, Organization } from "../types"
 import {
 	fillMissingCoordinates,
 	hydrateKnownBackfillFields,
+	pruneDeadAggregatorOnlyListings,
 	runScraperBackfills,
 } from "./backfill"
-import type PhotonClient from "./PhotonClient"
-import type Scraper from "./Scraper"
 import {
 	logScraperError,
 	logScraperResult,
@@ -17,6 +16,8 @@ import {
 	printBanner,
 } from "./consoleReport"
 import { mergeAggregatorListings } from "./merge"
+import type PhotonClient from "./PhotonClient"
+import type Scraper from "./Scraper"
 
 const CITY = "Berlin"
 
@@ -124,9 +125,22 @@ class ScraperRunner {
 			.filter((r) => r.success)
 			.map((r) => r.organization)
 
-		const listings: ApartmentListing[] = mergeAggregatorListings(
-			directRunResults.flatMap((r) => r.listings),
+		const directListings = directRunResults.flatMap((r) => r.listings)
+		const merged: ApartmentListing[] = mergeAggregatorListings(
+			directListings,
 			aggregatorRunResult.listings,
+		)
+
+		const directListingIds = new Set(
+			directListings
+				.map((l) => l.listingId)
+				.filter((id): id is string => id !== undefined),
+    )
+
+		log.info("Checking for dead listings from secondary sources...")
+    const listings = await pruneDeadAggregatorOnlyListings(
+			merged,
+			directListingIds,
 		)
 
 		return { listings, scrapedOrganizations }
