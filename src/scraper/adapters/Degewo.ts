@@ -49,7 +49,9 @@ export default class Degewo extends Scraper {
     const listingTargets = listings.filter(listing =>
       listing.costs.depositEur === 0 ||
       listing.costs.coldRentEur === 0 ||
-      listing.costs.utilityEur === 0
+      listing.costs.utilityEur === 0 ||
+      listing.costs.heatingEur === 0 ||
+      !listing.newBuilding
     )
 
     await runConcurrent(listingTargets, this.concurrency, async listing => {
@@ -57,9 +59,17 @@ export default class Degewo extends Scraper {
         const data = await this.fetchDetailPageData(listing.fullUrl)
 
         const coldRentEur = this.parseGermanFloat(data.get("Nettokaltmiete") ?? "")
+        const utilityColdEur = this.parseGermanFloat(data.get("Betriebskosten (kalt)") ?? "")
+        const utilityWarmEur = this.parseGermanFloat(data.get("Betriebskosten (warm)") ?? "")
+        const yearBuilt = Number(data.get("Baujahr") ?? "")
+
         listing.costs.coldRentEur = coldRentEur
-        listing.costs.utilityEur = this.parseGermanFloat(data.get("Betriebskosten (warm)") ?? "")
+        listing.costs.utilityEur = utilityColdEur + utilityWarmEur
+        listing.costs.heatingEur = utilityWarmEur
         listing.costs.depositEur = coldRentEur * 3
+        listing.newBuilding = yearBuilt >= 2014
+
+        log.debug(data.get("Kaution") ?? "kein Kautionsfeld")
       } catch (err) {
         log.warn(` -> Failed to backfill data for id ${listing.propertyId}: ${err}`)
       }
