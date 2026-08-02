@@ -35,25 +35,29 @@ export default abstract class VonoviaGroupScraper extends Scraper {
       listing.costs.heatingEur === 0 ||!listing.costs.heatingEur ||
       listing.costs.utilityEur === 0 ||!listing.costs.utilityEur ||
       listing.costs.totalRentEur === 0 || !listing.costs.totalRentEur ||
-      !listing.newBuilding
+      !listing.newBuilding ||
+      !listing.features
     )
 
     await runConcurrent(listingTargets, 3, async (listing) => {
       try {
-        const tableData = await this.fetchTableData(listing.fullUrl)
+        const data = await this.fetchDetails(listing.fullUrl)
+        const tableData = data.tableData
+        const features = data.features
         const yearBuilt = Number(tableData.get("Baujahr") ?? "")
         listing.costs.depositEur = this.parseGermanFloat(tableData.get("Kaution") ?? "")
         listing.costs.heatingEur = this.parseGermanFloat(tableData.get("Heizkosten") ?? "")
         listing.costs.utilityEur = this.parseGermanFloat(tableData.get("Nebenkosten") ?? "")
         listing.costs.totalRentEur = this.parseGermanFloat(tableData.get("Warmmiete") ?? "")
         listing.newBuilding = yearBuilt >= 2014
+        listing.features = features
       } catch (err) {
         log.warn(` -> Failed to backfill for id ${listing.propertyId}: ${err}`)
       }
     })
   }
 
-  private async fetchTableData(url: string): Promise<Map<string, string>> {
+  private async fetchDetails(url: string): Promise<{tableData: Map<string, string>, features: string[]}> {
     const page = await this.fetchHtml(url)
 
     const tables = page.querySelectorAll(".side-left .content-card ul")
@@ -64,10 +68,14 @@ export default abstract class VonoviaGroupScraper extends Scraper {
       values.push(...table.querySelectorAll(".description"))
     }
 
-    return zipStrings(
+    const tableData = zipStrings(
       keys.map((key) => key.text.trim()),
       values.map((value) => value.text.trim()),
     )
+
+    const features = page.querySelectorAll(".equipment-list div").map(elem => elem.innerText.trim())
+
+    return {tableData, features}
   }
 
 	private buildUrl(offset?: number): string {

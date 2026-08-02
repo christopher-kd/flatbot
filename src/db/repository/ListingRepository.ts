@@ -12,7 +12,8 @@ export interface KnownBackfillFields {
 	costs?: Pick<
 		ApartmentListingCosts,
 		"depositEur" | "heatingEur" | "coldRentEur" | "utilityEur" | "totalRentEur"
-	>
+  >,
+	features?: string[]
 }
 
 // Single source of truth for which dot-paths are "backfillable" - drives both
@@ -28,7 +29,8 @@ export const BACKFILL_FIELD_PATHS = [
 	"costs.heatingEur",
 	"costs.coldRentEur",
 	"costs.utilityEur",
-	"costs.totalRentEur",
+  "costs.totalRentEur",
+	"features"
 ] as const
 
 export default interface ListingRepository {
