@@ -7,6 +7,7 @@ import type {
 } from "../../types"
 import Scraper from "../Scraper"
 import { runConcurrent } from "../util/concurrency"
+import { zipKeyValueText } from "../util/zip"
 import type VonoviaGroupResponse from "./VonoviaGroup.types"
 
 /**
@@ -39,17 +40,17 @@ export default abstract class VonoviaGroupScraper extends Scraper {
     await runConcurrent(listingTargets, 3, async (listing) => {
       try {
         const tableData = await this.fetchTableData(listing.fullUrl)
-        listing.costs.depositEur = this.parseGermanFloat(tableData["Kaution"])
-        listing.costs.heatingEur = this.parseGermanFloat(tableData["Heizkosten"])
-        listing.costs.utilityEur = this.parseGermanFloat(tableData["Nebenkosten"])
-        listing.costs.totalRentEur = this.parseGermanFloat(tableData["Warmmiete"])
+        listing.costs.depositEur = this.parseGermanFloat(tableData.get("Kaution") ?? "")
+        listing.costs.heatingEur = this.parseGermanFloat(tableData.get("Heizkosten") ?? "")
+        listing.costs.utilityEur = this.parseGermanFloat(tableData.get("Nebenkosten") ?? "")
+        listing.costs.totalRentEur = this.parseGermanFloat(tableData.get("Warmmiete") ?? "")
       } catch (err) {
         log.warn(` -> Failed to backfill for id ${listing.propertyId}: ${err}`)
       }
     })
   }
 
-  private async fetchTableData(url: string): Promise<Record<string, string>> {
+  private async fetchTableData(url: string): Promise<Map<string, string>> {
     const page = await this.fetchHtml(url)
 
     const tables = page.querySelectorAll(".side-left .content-card ul")
@@ -60,11 +61,10 @@ export default abstract class VonoviaGroupScraper extends Scraper {
       values.push(...table.querySelectorAll(".description"))
     }
 
-    const result: Record<string, string> = {}
-    for (let i = 0; i < keys.length; i++) {
-      result[keys[i].text.trim()] = values[i].text.trim()
-    }
-    return result
+    return zipKeyValueText(
+      keys.map((key) => key.text.trim()),
+      values.map((value) => value.text.trim()),
+    )
   }
 
 	private buildUrl(offset?: number): string {

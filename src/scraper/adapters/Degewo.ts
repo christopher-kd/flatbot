@@ -4,6 +4,7 @@ import type { ApartmentListing } from "../../types"
 import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { runConcurrent } from "../util/concurrency"
+import { zipKeyValueText } from "../util/zip"
 import { restrictionFromTitle } from "../wbs"
 import { required } from "../util/assert"
 
@@ -20,34 +21,28 @@ export default class Degewo extends Scraper {
     )
   }
 
-  private async fetchDetailPageData(url: string): Promise<Record<string, string>> {
+  private async fetchDetailPageData(url: string): Promise<Map<string, string>> {
     const html = await this.fetchHtml(url)
 
     const header = required(
       html.querySelector(".c-info-box"),
       "header with blue bg and two circles"
     )
-    const headerKeyItems = header.querySelectorAll("dt").map(item => item.innerText.trim())
-    const headerValueItems = header.querySelectorAll("dd").map(item => item.innerText.trim())
-
-    const headerDetailData: Record<string, string> = {}
-    headerKeyItems.forEach((key, index) => {
-      headerDetailData[key] = headerValueItems[index]
-    })
+    const headerDetailData = zipKeyValueText(
+      header.querySelectorAll("dt").map(item => item.innerText.trim()),
+      header.querySelectorAll("dd").map(item => item.innerText.trim()),
+    )
 
     const tables = required(
       html.querySelector("#section-def-list-rent-details"),
       "tables: kosten, objektdetails, energiedaten"
     )
-    const tableKeyItems = tables.querySelectorAll("dt").map(item => item.innerText.trim())
-    const tableValueItems = tables.querySelectorAll("dd").map(item => item.innerText.trim())
+    const tableDetailData = zipKeyValueText(
+      tables.querySelectorAll("dt").map(item => item.innerText.trim()),
+      tables.querySelectorAll("dd").map(item => item.innerText.trim()),
+    )
 
-    const tableDetailData: Record<string, string> = {}
-    tableKeyItems.forEach((key, index) => {
-      tableDetailData[key] = tableValueItems[index]
-    })
-
-    return { ...headerDetailData, ...tableDetailData }
+    return new Map([...headerDetailData, ...tableDetailData])
   }
 
   private async backfillCosts(listings: ApartmentListing[]): Promise<void> {
@@ -61,9 +56,9 @@ export default class Degewo extends Scraper {
       try {
         const data = await this.fetchDetailPageData(listing.fullUrl)
 
-        const coldRentEur = this.parseGermanFloat(data["Nettokaltmiete"])
+        const coldRentEur = this.parseGermanFloat(data.get("Nettokaltmiete") ?? "")
         listing.costs.coldRentEur = coldRentEur
-        listing.costs.utilityEur = this.parseGermanFloat(data["Betriebskosten (warm)"])
+        listing.costs.utilityEur = this.parseGermanFloat(data.get("Betriebskosten (warm)") ?? "")
         listing.costs.depositEur = coldRentEur * 3
       } catch (err) {
         log.warn(` -> Failed to backfill data for id ${listing.propertyId}: ${err}`)

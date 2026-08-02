@@ -9,6 +9,7 @@ import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
 import { runConcurrent } from "../util/concurrency"
+import { zipKeyValueText } from "../util/zip"
 import { getSpecialNeed, getWbsLevels, restrictionFromTitle } from "../wbs"
 import type HowogeResponse from "./Howoge.types"
 
@@ -42,7 +43,7 @@ class Howoge extends Scraper {
 		super("HOWOGE")
 	}
 
-	public async fetchDetailTable(propertyId: string): Promise<Record<string, string>> {
+	public async fetchDetailTable(propertyId: string): Promise<Map<string, string>> {
 		const html = await this.fetchHtml(
 			"https://www.howoge.de/immobiliensuche/wohnungssuche/detail/" +
 				`${propertyId}.html`,
@@ -59,11 +60,7 @@ class Howoge extends Scraper {
 				...table.querySelectorAll("td").map((td) => td.textContent.trim()),
 			)
 		}
-		const data: Record<string, string> = {}
-		for (let i = 0; i < keys.length; i++) {
-			data[keys[i]] = values[i]
-    }
-		return data
+		return zipKeyValueText(keys, values)
 	}
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
@@ -87,11 +84,11 @@ class Howoge extends Scraper {
 			try {
         const detailTable = await this.fetchDetailTable(listing.propertyId)
 
-        const yearBuilt = Number(detailTable["Baujahr"])
-        listing.costs.coldRentEur = this.parseGermanFloat(detailTable["Kaltmiete"])
-        listing.costs.utilityEur = this.parseGermanFloat(detailTable["Nebenkosten"])
-        listing.costs.totalRentEur = this.parseGermanFloat(detailTable["Warmmiete"])
-        listing.costs.depositEur = this.parseGermanFloat(detailTable["Kaution"])
+        const yearBuilt = Number(detailTable.get("Baujahr"))
+        listing.costs.coldRentEur = this.parseGermanFloat(detailTable.get("Kaltmiete") ?? "")
+        listing.costs.utilityEur = this.parseGermanFloat(detailTable.get("Nebenkosten") ?? "")
+        listing.costs.totalRentEur = this.parseGermanFloat(detailTable.get("Warmmiete") ?? "")
+        listing.costs.depositEur = this.parseGermanFloat(detailTable.get("Kaution") ?? "")
 
         listing.newBuilding = yearBuilt >= 2014
 			} catch (err) {
