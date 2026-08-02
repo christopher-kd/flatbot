@@ -3,11 +3,59 @@ import Scraper from "../Scraper"
 import type { HTMLElement } from "node-html-parser"
 import { parseAddress } from "../util/address"
 import { restrictionFromTitle } from "../wbs"
+import { runConcurrent } from "../util/concurrency"
+import log from "../../logger/logger"
 
 export default class Gewobag extends Scraper {
 	constructor() {
 		super("Gewobag")
-	}
+  }
+
+  public async backfill(listings: ApartmentListing[]): Promise<void> {
+    this.runBackfillStep("fill costs", () => this.backfillCosts(listings))
+  }
+
+  private async backfillCosts(listings: ApartmentListing[]) {
+    const listingTargets = listings.filter(listing =>
+      listing.costs.coldRentEur === 0 ||
+      listing.costs.depositEur === 0 ||
+      listing.costs.heatingEur === 0 ||
+      listing.costs.utilityEur === 0
+    )
+
+    runConcurrent(listingTargets, this.concurrency, async listing => {
+      try {
+        const detailTable = await this.fetchDetailTable(listing.fullUrl)
+
+        listing.costs.coldRentEur = this.parseGermanFloat(detailTable["Grundmiete"])
+        listing.costs.depositEur = this.parseGermanFloat(detailTable["Kaution"])
+
+        const utilityColdEur = this.parseGermanFloat(detailTable["VZ Betriebskosten kalt"])
+        const utilityWarmEur = this.parseGermanFloat(detailTable["VZ Betriebskosten warm"])
+        listing.costs.utilityEur = utilityColdEur + utilityWarmEur
+        listing.costs.heatingEur = utilityWarmEur
+      } catch (err) {
+        log.warn(` -> Failed to backfill data for id ${listing.propertyId}: ${err}`)
+      }
+    })
+
+  }
+
+  private async fetchDetailTable(url: string): Promise<Record<string, string>> {
+    const page = await this.fetchHtml(url)
+
+    const keyElements = page.querySelectorAll("table:not(.details-characteristics) th")
+      .map(elem => elem.innerText.trim())
+    const valueElements = page.querySelectorAll("table:not(.details-characteristics) td")
+      .map(elem => elem.innerText.trim())
+
+    const detailTable: Record<string, string> = {}
+    for (let i = 0; i < keyElements.length; i++) {
+      detailTable[keyElements[i]] = valueElements[i]
+    }
+
+    return detailTable
+  }
 
 	private async fetchBody(page: number) {
 		const searchParams = new URLSearchParams({
