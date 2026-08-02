@@ -26,24 +26,27 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 
 
   public async backfill(listings: ApartmentListing[]): Promise<void> {
-    this.runBackfillStep("costs", () => this.backfillCosts(listings))
+    this.runBackfillStep("costs", () => this.backfillData(listings))
   }
 
-  private async backfillCosts(listings: ApartmentListing[]): Promise<void> {
+  private async backfillData(listings: ApartmentListing[]): Promise<void> {
     const listingTargets = listings.filter(listing =>
       listing.costs.depositEur === 0 ||!listing.costs.depositEur ||
       listing.costs.heatingEur === 0 ||!listing.costs.heatingEur ||
       listing.costs.utilityEur === 0 ||!listing.costs.utilityEur ||
-      listing.costs.totalRentEur === 0 || !listing.costs.totalRentEur
+      listing.costs.totalRentEur === 0 || !listing.costs.totalRentEur ||
+      !listing.newBuilding
     )
 
     await runConcurrent(listingTargets, 3, async (listing) => {
       try {
         const tableData = await this.fetchTableData(listing.fullUrl)
+        const yearBuilt = Number(tableData.get("Baujahr") ?? "")
         listing.costs.depositEur = this.parseGermanFloat(tableData.get("Kaution") ?? "")
         listing.costs.heatingEur = this.parseGermanFloat(tableData.get("Heizkosten") ?? "")
         listing.costs.utilityEur = this.parseGermanFloat(tableData.get("Nebenkosten") ?? "")
         listing.costs.totalRentEur = this.parseGermanFloat(tableData.get("Warmmiete") ?? "")
+        listing.newBuilding = yearBuilt >= 2014
       } catch (err) {
         log.warn(` -> Failed to backfill for id ${listing.propertyId}: ${err}`)
       }

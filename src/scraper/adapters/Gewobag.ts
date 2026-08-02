@@ -13,20 +13,22 @@ export default class Gewobag extends Scraper {
   }
 
   public async backfill(listings: ApartmentListing[]): Promise<void> {
-    this.runBackfillStep("fill costs", () => this.backfillCosts(listings))
+    this.runBackfillStep("fill costs", () => this.backfillData(listings))
   }
 
-  private async backfillCosts(listings: ApartmentListing[]) {
+  private async backfillData(listings: ApartmentListing[]) {
     const listingTargets = listings.filter(listing =>
       listing.costs.coldRentEur === 0 ||
       listing.costs.depositEur === 0 ||
       listing.costs.heatingEur === 0 ||
-      listing.costs.utilityEur === 0
+      listing.costs.utilityEur === 0 ||
+      !listing.newBuilding
     )
 
     runConcurrent(listingTargets, this.concurrency, async listing => {
       try {
         const detailTable = await this.fetchDetailTable(listing.fullUrl)
+        const isNewBuilding = (detailTable.get("Beschreibung") ?? "") === "Neubau"
 
         listing.costs.coldRentEur = this.parseGermanFloat(detailTable.get("Grundmiete") ?? "")
         listing.costs.depositEur = this.parseGermanFloat(detailTable.get("Kaution") ?? "")
@@ -35,6 +37,8 @@ export default class Gewobag extends Scraper {
         const utilityWarmEur = this.parseGermanFloat(detailTable.get("VZ Betriebskosten warm") ?? "")
         listing.costs.utilityEur = utilityColdEur + utilityWarmEur
         listing.costs.heatingEur = utilityWarmEur
+        listing.newBuilding = isNewBuilding
+
       } catch (err) {
         log.warn(` -> Failed to backfill data for id ${listing.propertyId}: ${err}`)
       }

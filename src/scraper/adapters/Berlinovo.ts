@@ -56,7 +56,8 @@ export default class Berlinovo extends Scraper {
       listing.costs.coldRentEur === 0 ||
       listing.costs.depositEur === 0 ||
       listing.costs.heatingEur === 0 ||
-      listing.costs.utilityEur === 0
+      listing.costs.utilityEur === 0 ||
+      !listing.newBuilding
     )
 
 		await runConcurrent(listingTargets, this.concurrency, async (listing) => {
@@ -64,6 +65,9 @@ export default class Berlinovo extends Scraper {
         // extract path due to failed redirects when link doesn't contain subdomain "www"
         const url = new URL(listing.fullUrl)
         const details = await this.fetchDetails(`https://www.berlinovo.de/de${url.pathname}`)
+
+        const yearBuilt = Number(details.get("Baujahr") ?? "")
+        listing.newBuilding = yearBuilt >= 2014
 
         listing.costs.coldRentEur = this.parseGermanFloat(details.get("Kaltmiete") ?? "")
 
