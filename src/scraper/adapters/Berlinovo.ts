@@ -73,7 +73,8 @@ export default class Berlinovo extends Scraper {
         // TODO: is this really always * 3?
         listing.costs.depositEur = listing.costs.coldRentEur * 3
 
-        listing.costs.heatingEur = this.parseGermanFloat(details["Heizkosten"])
+        // Heizkosten uses period decimal separator for some reason
+        listing.costs.heatingEur = Number(details["Heizkosten"].slice(0, -2))
         listing.costs.utilityEur = this.parseGermanFloat(details["Nebenkosten"])
         listing.spaceQm = this.parseGermanFloat(details["Wohnfläche"])
 			} catch (err) {
