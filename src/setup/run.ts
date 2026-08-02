@@ -88,7 +88,7 @@ async function downloadFile(url: string, destPath: string, onProgress?: (progres
 	}
 }
 
-const REGION_STATES = ["Berlin", "Brandenburg"]
+const REGION_ISO_CODES = ["DE-BE", "DE-BB"] // Berlin, Brandenburg
 
 async function runBunInstall(): Promise<void> {
   const proc = Bun.spawn(["bun", "i"], {
@@ -103,8 +103,8 @@ async function runBunInstall(): Promise<void> {
 }
 
 async function runPhotonImport(jarPath: string, dumpPath: string, dataDir: string): Promise<void> {
-  const stateFilter = REGION_STATES.join("|")
-  const regionFilter = `awk '/"type":"Place"/{if($0~/"state":"(${stateFilter})"/)print;next}{print}'`
+  const isoFilter = REGION_ISO_CODES.join("|")
+  const regionFilter = `awk '/"type":"Place"/{if($0~/"(${isoFilter})"/)print;next}{print}'`
   const command = `zstd --stdout -d ${Bun.$.escape(dumpPath)} | ${regionFilter} | java -jar ${Bun.$.escape(jarPath)} import -import-file - -languages de -data-dir ${Bun.$.escape(dataDir)}`
   const proc = Bun.spawn(["sh", "-c", command], {
     stdout: "inherit",
