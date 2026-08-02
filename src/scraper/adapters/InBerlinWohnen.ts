@@ -3,6 +3,7 @@ import type { ApartmentListing, Organization } from "../../types"
 import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
+import { zipStrings } from "../util/zip"
 import type { FeatureArray } from "./InBerlinWohnen.types"
 
 const WOHNUNGSFINDER_URL = "https://www.inberlinwohnen.de/wohnungsfinder"
@@ -61,18 +62,14 @@ export default class InBerlinWohnenScraper extends Scraper {
 		return ""
 	}
 
-	private parseDtDdTable(apartment: HTMLElement): Record<string, string> {
+	private parseDtDdTable(apartment: HTMLElement): Map<string, string> {
 		const keys = apartment
 			.querySelectorAll(".list__details .table dt")
 			.map((sel) => sel.textContent.trim().slice(0, -1))
 		const values = apartment
 			.querySelectorAll(".list__details .table dd")
 			.map((sel) => sel.textContent.trim())
-		const table: Record<string, string> = {}
-		for (let i = 0; i < keys.length; i++) {
-			table[keys[i]] = values[i]
-		}
-		return table
+		return zipStrings(keys, values)
 	}
 
 	private extractListing(apartment: HTMLElement): ApartmentListing {
@@ -106,7 +103,7 @@ export default class InBerlinWohnenScraper extends Scraper {
 		const organization = (() => this.getOrganizationByURL(url))()
 		if (!organization) throw new Error("Couldn't determine organization")
 		const addr = parseAddress(
-			table.Adresse,
+			required(table.get("Adresse"), "Adresse"),
 			"{street} {houseNumber}, {postalCode}, {precinct}",
 		)
 
@@ -127,13 +124,13 @@ export default class InBerlinWohnenScraper extends Scraper {
 					lng: Number(coords.lon),
 				},
 			},
-			spaceQm: this.parseGermanFloat(table.Wohnfläche),
-			rooms: this.parseGermanFloat(table.Zimmeranzahl),
-			newBuilding: Number(table.Baujahr.trim()) >= 2014,
+			spaceQm: this.parseGermanFloat(table.get("Wohnfläche") ?? ""),
+			rooms: this.parseGermanFloat(table.get("Zimmeranzahl") ?? ""),
+			newBuilding: Number(required(table.get("Baujahr"), "Baujahr").trim()) >= 2014,
 			costs: {
-				coldRentEur: this.parseGermanFloat(table.Kaltmiete),
-				utilityEur: this.parseGermanFloat(table.Nebenkosten),
-				totalRentEur: this.parseGermanFloat(table.Gesamtmiete),
+				coldRentEur: this.parseGermanFloat(table.get("Kaltmiete") ?? ""),
+				utilityEur: this.parseGermanFloat(table.get("Nebenkosten") ?? ""),
+				totalRentEur: this.parseGermanFloat(table.get("Gesamtmiete") ?? ""),
 			},
 			accessibility: {
 				barrierFree: features.includes("Barrierefrei"),
@@ -141,7 +138,10 @@ export default class InBerlinWohnenScraper extends Scraper {
 				wheelchair: features.includes("Weitgehend rollstuhlgerecht"),
 			},
 			restrictions: {
-				kind: table.WBS.trim() === "erforderlich" ? "wbs-required" : "free",
+				kind:
+					required(table.get("WBS"), "WBS").trim() === "erforderlich"
+						? "wbs-required"
+						: "free",
 			},
 			features,
 			images: [],

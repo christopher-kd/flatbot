@@ -6,6 +6,7 @@ import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
 import { runConcurrent } from "../util/concurrency"
 import { delay } from "../util/delay"
+import { zipStrings } from "../util/zip"
 import { classifyRestriction, getSpecialNeed, getWbsLevels } from "../wbs"
 
 export default class Berlinovo extends Scraper {
@@ -32,21 +33,17 @@ export default class Berlinovo extends Scraper {
 	}
 
 
-  public async fetchDetails(url: string): Promise<Record<string, string>> {
+  public async fetchDetails(url: string): Promise<Map<string, string>> {
     const page = await this.fetchHtml(url, { sanitize: true })
 
     const details = required(
       page.querySelector(".details"),
       "details, right sidebar"
     )
-    const detailKeys = details.querySelectorAll(".content .field .field__label").map(e => e.textContent.trim())
-    const detailValues = details.querySelectorAll(".content .field .field__item").map(e => e.textContent.trim())
-    const detailsRecord: Record<string, string> = {}
-    for (let i = 0; i < detailKeys.length; i++) {
-      detailsRecord[detailKeys[i]] = detailValues[i]
-    }
-
-    return detailsRecord
+    return zipStrings(
+      details.querySelectorAll(".content .field .field__label").map(e => e.textContent.trim()),
+      details.querySelectorAll(".content .field .field__item").map(e => e.textContent.trim()),
+    )
   }
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
@@ -68,15 +65,17 @@ export default class Berlinovo extends Scraper {
         const url = new URL(listing.fullUrl)
         const details = await this.fetchDetails(`https://www.berlinovo.de/de${url.pathname}`)
 
-        listing.costs.coldRentEur = this.parseGermanFloat(details["Kaltmiete"])
+        listing.costs.coldRentEur = this.parseGermanFloat(details.get("Kaltmiete") ?? "")
 
         // TODO: is this really always * 3?
         listing.costs.depositEur = listing.costs.coldRentEur * 3
 
         // Heizkosten uses period decimal separator for some reason
-        listing.costs.heatingEur = Number(details["Heizkosten"].slice(0, -2))
-        listing.costs.utilityEur = this.parseGermanFloat(details["Nebenkosten"])
-        listing.spaceQm = this.parseGermanFloat(details["Wohnfläche"])
+        listing.costs.heatingEur = Number(
+          required(details.get("Heizkosten"), "Heizkosten").slice(0, -2),
+        )
+        listing.costs.utilityEur = this.parseGermanFloat(details.get("Nebenkosten") ?? "")
+        listing.spaceQm = this.parseGermanFloat(details.get("Wohnfläche") ?? "")
 			} catch (err) {
 				log.warn(
 					` -> Failed to backfill data for id ${listing.propertyId}: ${err}`,

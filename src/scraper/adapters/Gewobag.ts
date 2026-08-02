@@ -4,6 +4,7 @@ import type { HTMLElement } from "node-html-parser"
 import { parseAddress } from "../util/address"
 import { restrictionFromTitle } from "../wbs"
 import { runConcurrent } from "../util/concurrency"
+import { zipStrings } from "../util/zip"
 import log from "../../logger/logger"
 
 export default class Gewobag extends Scraper {
@@ -27,11 +28,11 @@ export default class Gewobag extends Scraper {
       try {
         const detailTable = await this.fetchDetailTable(listing.fullUrl)
 
-        listing.costs.coldRentEur = this.parseGermanFloat(detailTable["Grundmiete"])
-        listing.costs.depositEur = this.parseGermanFloat(detailTable["Kaution"])
+        listing.costs.coldRentEur = this.parseGermanFloat(detailTable.get("Grundmiete") ?? "")
+        listing.costs.depositEur = this.parseGermanFloat(detailTable.get("Kaution") ?? "")
 
-        const utilityColdEur = this.parseGermanFloat(detailTable["VZ Betriebskosten kalt"])
-        const utilityWarmEur = this.parseGermanFloat(detailTable["VZ Betriebskosten warm"])
+        const utilityColdEur = this.parseGermanFloat(detailTable.get("VZ Betriebskosten kalt") ?? "")
+        const utilityWarmEur = this.parseGermanFloat(detailTable.get("VZ Betriebskosten warm") ?? "")
         listing.costs.utilityEur = utilityColdEur + utilityWarmEur
         listing.costs.heatingEur = utilityWarmEur
       } catch (err) {
@@ -41,7 +42,7 @@ export default class Gewobag extends Scraper {
 
   }
 
-  private async fetchDetailTable(url: string): Promise<Record<string, string>> {
+  private async fetchDetailTable(url: string): Promise<Map<string, string>> {
     const page = await this.fetchHtml(url)
 
     const keyElements = page.querySelectorAll("table:not(.details-characteristics) th")
@@ -49,12 +50,7 @@ export default class Gewobag extends Scraper {
     const valueElements = page.querySelectorAll("table:not(.details-characteristics) td")
       .map(elem => elem.innerText.trim())
 
-    const detailTable: Record<string, string> = {}
-    for (let i = 0; i < keyElements.length; i++) {
-      detailTable[keyElements[i]] = valueElements[i]
-    }
-
-    return detailTable
+    return zipStrings(keyElements, valueElements)
   }
 
 	private async fetchBody(page: number) {
