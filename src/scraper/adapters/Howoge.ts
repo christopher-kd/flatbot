@@ -43,7 +43,7 @@ class Howoge extends Scraper {
 		super("HOWOGE")
 	}
 
-	public async fetchDetailTable(propertyId: string): Promise<Map<string, string>> {
+	public async fetchDetailTable(propertyId: string): Promise<{map: Map<string, string>, features: string[]}> {
 		const html = await this.fetchHtml(
 			"https://www.howoge.de/immobiliensuche/wohnungssuche/detail/" +
 				`${propertyId}.html`,
@@ -59,8 +59,14 @@ class Howoge extends Scraper {
 			values.push(
 				...table.querySelectorAll("td").map((td) => td.textContent.trim()),
 			)
+    }
+
+    const features = html.querySelectorAll(".features li")
+      .map(elem => elem.innerText.trim())
+    return {
+      map: zipStrings(keys, values),
+      features
 		}
-		return zipStrings(keys, values)
 	}
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
@@ -78,19 +84,23 @@ class Howoge extends Scraper {
         listing.costs.coldRentEur === 0 ||
         listing.costs.depositEur === 0 ||
         listing.costs.totalRentEur === 0 ||
-        listing.costs.utilityEur === 0,
+        listing.costs.utilityEur === 0 ||
+        !listing.features
 		)
 		await runConcurrent(targets, this.concurrency, async (listing) => {
 			try {
-        const detailTable = await this.fetchDetailTable(listing.propertyId)
+        const details = await this.fetchDetailTable(listing.propertyId)
+        const map = details.map
 
-        const yearBuilt = Number(detailTable.get("Baujahr"))
-        listing.costs.coldRentEur = this.parseGermanFloat(detailTable.get("Kaltmiete") ?? "")
-        listing.costs.utilityEur = this.parseGermanFloat(detailTable.get("Nebenkosten") ?? "")
-        listing.costs.totalRentEur = this.parseGermanFloat(detailTable.get("Warmmiete") ?? "")
-        listing.costs.depositEur = this.parseGermanFloat(detailTable.get("Kaution") ?? "")
+        const yearBuilt = Number(map.get("Baujahr"))
+        listing.costs.coldRentEur = this.parseGermanFloat(map.get("Kaltmiete") ?? "")
+        listing.costs.utilityEur = this.parseGermanFloat(map.get("Nebenkosten") ?? "")
+        listing.costs.totalRentEur = this.parseGermanFloat(map.get("Warmmiete") ?? "")
+        listing.costs.depositEur = this.parseGermanFloat(map.get("Kaution") ?? "")
 
         listing.newBuilding = yearBuilt >= 2014
+
+        listing.features = details.features
 			} catch (err) {
 				log.warn(
 					" -> Failed to backfill data from HOWOGE - " +
