@@ -53,6 +53,7 @@ export default class Berlinovo extends Scraper {
 	private async backfillData(listings: ApartmentListing[]): Promise<void> {
     const listingTargets = listings.filter((listing) =>
       !listing.spaceQm ||
+      listing.costs.totalRentEur <= 0 ||
       listing.costs.coldRentEur === 0 ||
       listing.costs.depositEur === 0 ||
       listing.costs.heatingEur === 0 ||
@@ -70,6 +71,8 @@ export default class Berlinovo extends Scraper {
         listing.newBuilding = yearBuilt >= 2014
 
         listing.costs.coldRentEur = this.parseGermanFloat(details.get("Kaltmiete") ?? "")
+
+        listing.costs.totalRentEur = this.parseGermanFloat(details.get("Bruttogesamtmiete") ?? "")
 
         // TODO: is this really always * 3?
         listing.costs.depositEur = listing.costs.coldRentEur * 3
