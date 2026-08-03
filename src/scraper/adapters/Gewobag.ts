@@ -22,22 +22,26 @@ export default class Gewobag extends Scraper {
       listing.costs.depositEur === 0 ||
       listing.costs.heatingEur === 0 ||
       listing.costs.utilityEur === 0 ||
-      !listing.newBuilding
+      !listing.newBuilding ||
+      !listing.features
     )
 
     runConcurrent(listingTargets, this.concurrency, async listing => {
       try {
-        const detailTable = await this.fetchDetailTable(listing.fullUrl)
-        const isNewBuilding = (detailTable.get("Beschreibung") ?? "") === "Neubau"
+        const details = await this.fetchDetailTable(listing.fullUrl)
+        const map = details.map
 
-        listing.costs.coldRentEur = this.parseGermanFloat(detailTable.get("Grundmiete") ?? "")
-        listing.costs.depositEur = this.parseGermanFloat(detailTable.get("Kaution") ?? "")
+        const isNewBuilding = (map.get("Beschreibung") ?? "") === "Neubau"
 
-        const utilityColdEur = this.parseGermanFloat(detailTable.get("VZ Betriebskosten kalt") ?? "")
-        const utilityWarmEur = this.parseGermanFloat(detailTable.get("VZ Betriebskosten warm") ?? "")
+        listing.costs.coldRentEur = this.parseGermanFloat(map.get("Grundmiete") ?? "")
+        listing.costs.depositEur = this.parseGermanFloat(map.get("Kaution") ?? "")
+
+        const utilityColdEur = this.parseGermanFloat(map.get("VZ Betriebskosten kalt") ?? "")
+        const utilityWarmEur = this.parseGermanFloat(map.get("VZ Betriebskosten warm") ?? "")
         listing.costs.utilityEur = utilityColdEur + utilityWarmEur
         listing.costs.heatingEur = utilityWarmEur
         listing.newBuilding = isNewBuilding
+        listing.features = details.features
 
       } catch (err) {
         log.warn(` -> Failed to backfill data for id ${listing.propertyId}: ${err}`)
@@ -46,7 +50,7 @@ export default class Gewobag extends Scraper {
 
   }
 
-  private async fetchDetailTable(url: string): Promise<Map<string, string>> {
+  private async fetchDetailTable(url: string): Promise<{map: Map<string, string>, features: string[]}> {
     const page = await this.fetchHtml(url)
 
     const keyElements = page.querySelectorAll("table:not(.details-characteristics) th")
@@ -54,7 +58,13 @@ export default class Gewobag extends Scraper {
     const valueElements = page.querySelectorAll("table:not(.details-characteristics) td")
       .map(elem => elem.innerText.trim())
 
-    return zipStrings(keyElements, valueElements)
+    const features = page.querySelectorAll(".details-characteristics li")
+      .map(elem => elem.innerText.trim())
+
+    return {
+      map: zipStrings(keyElements, valueElements),
+      features
+    }
   }
 
 	private async fetchBody(page: number) {
