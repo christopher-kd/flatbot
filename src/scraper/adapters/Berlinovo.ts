@@ -80,17 +80,23 @@ export default class Berlinovo extends Scraper {
 
         listing.costs.coldRentEur = this.parseGermanFloat(map.get("Kaltmiete") ?? "")
 
-        listing.costs.totalRentEur = this.parseGermanFloat(map.get("Bruttogesamtmiete") ?? "")
+        // This uses period decimal separator for some reason
+        listing.costs.totalRentEur = Number(
+          required(map.get("Bruttogesamtmiete"), "Bruttogesamtmiete").slice(0, -2)
+        )
 
         // TODO: is this really always * 3?
         listing.costs.depositEur = listing.costs.coldRentEur * 3
 
-        // Heizkosten uses period decimal separator for some reason
+        // This also uses period decimal separator for some reason
         listing.costs.heatingEur = Number(
           required(map.get("Heizkosten"), "Heizkosten").slice(0, -2),
         )
+
+        // These do not use the period decimal separator
         listing.costs.utilityEur = this.parseGermanFloat(map.get("Nebenkosten") ?? "")
         listing.spaceQm = this.parseGermanFloat(map.get("Wohnfläche") ?? "")
+
         listing.features = details.features
 			} catch (err) {
 				log.warn(
