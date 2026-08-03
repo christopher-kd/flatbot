@@ -33,17 +33,23 @@ export default class Berlinovo extends Scraper {
 	}
 
 
-  public async fetchDetails(url: string): Promise<Map<string, string>> {
+  public async fetchDetails(url: string): Promise<{map: Map<string, string>, features: string[]}> {
     const page = await this.fetchHtml(url, { sanitize: true })
 
     const details = required(
       page.querySelector(".details"),
       "details, right sidebar"
     )
-    return zipStrings(
-      details.querySelectorAll(".content .field .field__label").map(e => e.textContent.trim()),
-      details.querySelectorAll(".content .field .field__item").map(e => e.textContent.trim()),
-    )
+
+    const features = page.querySelectorAll(".details [class*='has'].block:not(.null-as-empty)")
+      .map(elem => elem.textContent.trim())
+
+    return {
+      map: zipStrings(
+        details.querySelectorAll(".content .field .field__label").map(e => e.textContent.trim()),
+        details.querySelectorAll(".content .field .field__item").map(e => e.textContent.trim()),
+      ), features
+    }
   }
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
@@ -58,7 +64,8 @@ export default class Berlinovo extends Scraper {
       listing.costs.depositEur === 0 ||
       listing.costs.heatingEur === 0 ||
       listing.costs.utilityEur === 0 ||
-      !listing.newBuilding
+      !listing.newBuilding ||
+      !listing.features
     )
 
 		await runConcurrent(listingTargets, this.concurrency, async (listing) => {
@@ -66,23 +73,25 @@ export default class Berlinovo extends Scraper {
         // extract path due to failed redirects when link doesn't contain subdomain "www"
         const url = new URL(listing.fullUrl)
         const details = await this.fetchDetails(`https://www.berlinovo.de/de${url.pathname}`)
+        const map = details.map
 
-        const yearBuilt = Number(details.get("Baujahr") ?? "")
+        const yearBuilt = Number(map.get("Baujahr") ?? "")
         listing.newBuilding = yearBuilt >= 2014
 
-        listing.costs.coldRentEur = this.parseGermanFloat(details.get("Kaltmiete") ?? "")
+        listing.costs.coldRentEur = this.parseGermanFloat(map.get("Kaltmiete") ?? "")
 
-        listing.costs.totalRentEur = this.parseGermanFloat(details.get("Bruttogesamtmiete") ?? "")
+        listing.costs.totalRentEur = this.parseGermanFloat(map.get("Bruttogesamtmiete") ?? "")
 
         // TODO: is this really always * 3?
         listing.costs.depositEur = listing.costs.coldRentEur * 3
 
         // Heizkosten uses period decimal separator for some reason
         listing.costs.heatingEur = Number(
-          required(details.get("Heizkosten"), "Heizkosten").slice(0, -2),
+          required(map.get("Heizkosten"), "Heizkosten").slice(0, -2),
         )
-        listing.costs.utilityEur = this.parseGermanFloat(details.get("Nebenkosten") ?? "")
-        listing.spaceQm = this.parseGermanFloat(details.get("Wohnfläche") ?? "")
+        listing.costs.utilityEur = this.parseGermanFloat(map.get("Nebenkosten") ?? "")
+        listing.spaceQm = this.parseGermanFloat(map.get("Wohnfläche") ?? "")
+        listing.features = details.features
 			} catch (err) {
 				log.warn(
 					` -> Failed to backfill data for id ${listing.propertyId}: ${err}`,
