@@ -1,5 +1,6 @@
 import parse from "node-html-parser"
 import type { ApartmentListing } from "../types"
+import log from "../logger/logger"
 
 type LivenessCheckTarget = Pick<
 	ApartmentListing,
@@ -54,8 +55,11 @@ export async function checkListingLiveness(
     case "Vonovia":
     case "GESOBAU":
     case "Deutsche Wohnen":
-    case "Berlinovo":
-			return checkStatusOnly(listing.fullUrl)
+      return checkStatusOnly(listing.fullUrl)
+    case "Berlinovo": {
+      const url = new URL(listing.fullUrl)
+      return checkStatusOnly(`https://www.berlinovo.de${url.pathname}`)
+    }
 		case "inberlinwohnen":
 			// TODO: implement liveness check for inberlinwohnen
 			return "not-implemented"
