@@ -1,5 +1,7 @@
 import type { ApartmentListing } from "../../types"
 import Scraper from "../Scraper"
+import { runConcurrent } from "../util/concurrency"
+import { zipStrings } from "../util/zip"
 import { restrictionFromTitle } from "../wbs"
 import type { DistrictData, StadtUndLandReponse } from "./StadtUndLand.types"
 
@@ -10,7 +12,33 @@ class StadtUndLand extends Scraper {
   constructor() {
     super("Stadt und Land")
 		this.concurrency = 12
-	}
+  }
+
+  public async backfill(listings: ApartmentListing[]): Promise<void> {
+    this.runBackfillStep("features", () => this.backfillFeatures(listings))
+  }
+
+  private async fetchDetails(url: string): Promise<Map<string, string>> {
+    const page = await this.fetchHtml(url)
+
+    const detailKeys = page.querySelectorAll("[class^='Table_desktopTable'] th")
+      .map(elem => elem.innerText.trim())
+    const detailValues = page.querySelectorAll("[class^='Table_desktopTable'] td")
+      .map(elem => elem.innerText.trim())
+
+    return zipStrings(detailKeys, detailValues)
+  }
+
+  private async backfillFeatures(listings: ApartmentListing[]) {
+    const targetedListings = listings.filter(listing => !listing.features)
+
+    await runConcurrent(targetedListings, this.concurrency, async (listing) => {
+      const details = await this.fetchDetails(listing.fullUrl)
+      const features = (details.get("Ausstattung") ?? "").split(", ")
+      listing.features = features
+    })
+  }
+
 
 	private fetchApartments(
 		offset: number,
