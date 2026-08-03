@@ -29,7 +29,8 @@ export default class Gesobau extends Scraper {
 				!costs.depositEur ||
 				!costs.heatingEur ||
 				!costs.utilityEur ||
-				!listing.newBuilding
+        !listing.newBuilding ||
+				!listing.features
 			)
 		})
 		await runConcurrent(targets, this.concurrency, async (listing) => {
@@ -47,6 +48,8 @@ export default class Gesobau extends Scraper {
 		listing: ApartmentListing,
 	): Promise<void> {
 		const page = await this.fetchHtml(listing.fullUrl)
+    const features = page.querySelectorAll(".immoSidebar__tags li")
+      .map(elem => elem.innerText.trim())
 
 		const costsTable = required(
 			page.querySelector(".immoDetailTable"),
@@ -92,7 +95,9 @@ export default class Gesobau extends Scraper {
 			{} as Record<string, string>,
 		)
 
-		listing.newBuilding = Number(factsMap["Baujahr"]) >= 2014
+    listing.newBuilding = Number(factsMap["Baujahr"]) >= 2014
+
+    listing.features = features
 	}
 
 	private async extractListing(
