@@ -17,11 +17,13 @@ export default class Degewo extends Scraper {
 
   public async backfill(listings: ApartmentListing[]): Promise<void> {
     await this.runBackfillStep("costs", () =>
-      this.backfillCosts(listings)
+      this.backfillData(listings)
     )
   }
 
-  private async fetchDetailPageData(url: string): Promise<Map<string, string>> {
+  private async fetchDetailPageData(url: string): Promise<{
+    detailData: Map<string, string>, features: string[]
+  }> {
     const html = await this.fetchHtml(url)
 
     const header = required(
@@ -42,34 +44,41 @@ export default class Degewo extends Scraper {
       tables.querySelectorAll("dd").map(item => item.innerText.trim()),
     )
 
-    return new Map([...headerDetailData, ...tableDetailData])
+    const features = html.querySelectorAll(".c-tag__label").map(elem => elem.innerText.trim())
+
+    return {
+      detailData: new Map([...headerDetailData, ...tableDetailData]),
+      features
+    }
   }
 
-  private async backfillCosts(listings: ApartmentListing[]): Promise<void> {
+  private async backfillData(listings: ApartmentListing[]): Promise<void> {
     const listingTargets = listings.filter(listing =>
       listing.costs.depositEur === 0 ||
       listing.costs.coldRentEur === 0 ||
       listing.costs.utilityEur === 0 ||
       listing.costs.heatingEur === 0 ||
-      !listing.newBuilding
+      !listing.newBuilding ||
+      !listing.features
     )
 
     await runConcurrent(listingTargets, this.concurrency, async listing => {
       try {
         const data = await this.fetchDetailPageData(listing.fullUrl)
-
-        const coldRentEur = this.parseGermanFloat(data.get("Nettokaltmiete") ?? "")
-        const utilityColdEur = this.parseGermanFloat(data.get("Betriebskosten (kalt)") ?? "")
-        const utilityWarmEur = this.parseGermanFloat(data.get("Betriebskosten (warm)") ?? "")
-        const yearBuilt = Number(data.get("Baujahr") ?? "")
+        const details = data.detailData
+        const coldRentEur = this.parseGermanFloat(details.get("Nettokaltmiete") ?? "")
+        const utilityColdEur = this.parseGermanFloat(details.get("Betriebskosten (kalt)") ?? "")
+        const utilityWarmEur = this.parseGermanFloat(details.get("Betriebskosten (warm)") ?? "")
+        const yearBuilt = Number(details.get("Baujahr") ?? "")
 
         listing.costs.coldRentEur = coldRentEur
         listing.costs.utilityEur = utilityColdEur + utilityWarmEur
         listing.costs.heatingEur = utilityWarmEur
         listing.costs.depositEur = coldRentEur * 3
         listing.newBuilding = yearBuilt >= 2014
+        listing.features = data.features
 
-        log.debug(data.get("Kaution") ?? "kein Kautionsfeld")
+        log.debug(details.get("Kaution") ?? "kein Kautionsfeld")
       } catch (err) {
         log.warn(` -> Failed to backfill data for id ${listing.propertyId}: ${err}`)
       }
