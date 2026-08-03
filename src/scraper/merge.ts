@@ -94,16 +94,32 @@ function mergeWbsLevels(
 	)
 }
 
+// Merge when both sides agree on `kind`, otherwise trust `preferred`
+// wholesale.
 function mergeRestrictions(
 	preferred: Restrictions,
 	fallback: Restrictions,
 ): Restrictions {
 	if (!preferred) return fallback
 	if (!fallback) return preferred
+	if (preferred.kind !== fallback.kind) return preferred
+	if (preferred.kind === "free") return preferred
+	// `fallback` provably shares `kind` with `preferred` per the check above,
+	// but TS can't correlate that across two separate variables - cast once.
+	const matchedFallback = fallback as Exclude<Restrictions, { kind: "free" }>
+	const wbsLevels =
+		mergeWbsLevels(preferred.wbsLevels, matchedFallback.wbsLevels) ?? []
+	if (preferred.kind === "income-checked")
+		return { kind: "income-checked", wbsLevels }
 	return {
-		kind: preferred.kind ?? fallback.kind,
-		wbsLevels: mergeWbsLevels(preferred.wbsLevels, fallback.wbsLevels),
-		wbsSpecialNeed: pick(preferred.wbsSpecialNeed, fallback.wbsSpecialNeed),
+		kind: "wbs-required",
+		wbsLevels,
+		wbsSpecialNeed:
+			pick(
+				preferred.wbsSpecialNeed,
+				(matchedFallback as Extract<Restrictions, { kind: "wbs-required" }>)
+					.wbsSpecialNeed,
+			) ?? null,
 	}
 }
 

@@ -253,9 +253,8 @@ export function isIncomeRestricted(title: string): boolean {
 /** Builds the `Restrictions` object every listing carries, from its title. */
 export function restrictionFromTitle(title: string): Restrictions {
 	const { restriction, levels, specialNeed } = classifyRestriction(title)
-	return {
-		kind: restriction,
-		wbsLevels: levels,
-		wbsSpecialNeed: specialNeed,
-	}
+	if (restriction === "free") return { kind: "free" }
+	if (restriction === "income-checked")
+		return { kind: "income-checked", wbsLevels: levels }
+	return { kind: "wbs-required", wbsLevels: levels, wbsSpecialNeed: specialNeed }
 }

@@ -160,11 +160,14 @@ class Howoge extends Scraper {
 				wheelchair: immo.features.includes("rollstuhlgerecht"),
 				barrierFree: immo.features.includes("barrierefrei"),
 			},
-			restrictions: {
-				kind: immo.wbs !== "ja" ? "free" : "wbs-required",
-				wbsLevels: getWbsLevels(immo.title),
-				wbsSpecialNeed: getSpecialNeed(immo.title),
-			},
+			restrictions:
+				immo.wbs !== "ja"
+					? { kind: "free" }
+					: {
+							kind: "wbs-required",
+							wbsLevels: getWbsLevels(immo.title),
+							wbsSpecialNeed: getSpecialNeed(immo.title),
+						},
 			features: immo.features,
 			images: [
 				{

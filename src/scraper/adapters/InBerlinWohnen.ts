@@ -137,12 +137,10 @@ export default class InBerlinWohnenScraper extends Scraper {
 				senior: features.includes("Seniorenwohnung"),
 				wheelchair: features.includes("Weitgehend rollstuhlgerecht"),
 			},
-			restrictions: {
-				kind:
-					required(table.get("WBS"), "WBS").trim() === "erforderlich"
-						? "wbs-required"
-						: "free",
-			},
+			restrictions:
+				required(table.get("WBS"), "WBS").trim() === "erforderlich"
+					? { kind: "wbs-required", wbsLevels: [], wbsSpecialNeed: null }
+					: { kind: "free" },
 			features,
 			images: [],
 		}

@@ -151,13 +151,18 @@ export default class Gesobau extends Scraper {
 				senior: elem.raw.fuerSenioren_boolS ?? false,
 				barrierFree: elem.raw.barrierefrei_boolS ?? false,
 			},
-			restrictions: {
-				kind: !elem.raw.noWbs_boolS
+			restrictions: (() => {
+				const restriction = !elem.raw.noWbs_boolS
 					? "wbs-required"
-					: classifyRestriction(elem.raw.title).restriction,
-				wbsLevels: getWbsLevels(elem.raw.title),
-				wbsSpecialNeed: getSpecialNeed(elem.raw.title),
-			},
+					: classifyRestriction(elem.raw.title).restriction
+				const wbsLevels = getWbsLevels(elem.raw.title)
+				const wbsSpecialNeed = getSpecialNeed(elem.raw.title)
+				return restriction === "free"
+					? { kind: "free" as const }
+					: restriction === "income-checked"
+						? { kind: "income-checked" as const, wbsLevels }
+						: { kind: "wbs-required" as const, wbsLevels, wbsSpecialNeed }
+			})(),
 			costs: {
 				totalRentEur: required(elem.raw.warmmiete_floatS, "total rent"),
 			},

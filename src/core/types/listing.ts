@@ -1,4 +1,4 @@
-import type { Restriction, SpecialNeed, WBSLevel } from "../../types/wbs"
+import type { SpecialNeed, WBSLevel } from "../../types/wbs"
 
 export type Organization =
 	| "Stadt und Land"
@@ -12,11 +12,12 @@ export type Organization =
 	| "Deutsche Wohnen"
 	| "inberlinwohnen"
 
-export interface Restrictions {
-	kind: Restriction
-	wbsLevels?: WBSLevel[]
-	wbsSpecialNeed?: SpecialNeed
-}
+type IncomeRestriction = { wbsLevels: WBSLevel[] }
+
+export type Restrictions =
+	| { kind: "free" }
+	| ({ kind: "income-checked" } & IncomeRestriction)
+	| ({ kind: "wbs-required"; wbsSpecialNeed: SpecialNeed } & IncomeRestriction)
 
 export interface ApartmentListingAccessibility {
 	senior?: boolean

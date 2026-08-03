@@ -136,6 +136,12 @@ export default class Berlinovo extends Scraper {
     const totalRentElem = listing.querySelector(".field--name-field-total-rent div[content]")
     const totalRentEur = totalRentElem ? this.parseGermanFloat(totalRentElem.textContent) : -1
 
+		const restriction = wbsRequired
+			? "wbs-required"
+			: classifyRestriction(title.textContent).restriction
+		const wbsLevels = getWbsLevels(title.textContent)
+		const wbsSpecialNeed = getSpecialNeed(title.textContent)
+
 		return {
 			propertyId: href.split("/")[2],
 			organization: this.organization,
@@ -163,13 +169,12 @@ export default class Berlinovo extends Scraper {
 					".block-field-blocknodeapartmentfield-rooms div[content]",
 				).textContent,
 			),
-			restrictions: {
-				kind: wbsRequired
-					? "wbs-required"
-					: classifyRestriction(title.textContent).restriction,
-				wbsLevels: getWbsLevels(title.textContent),
-				wbsSpecialNeed: getSpecialNeed(title.textContent),
-			},
+			restrictions:
+				restriction === "free"
+					? { kind: "free" }
+					: restriction === "income-checked"
+						? { kind: "income-checked", wbsLevels }
+						: { kind: "wbs-required", wbsLevels, wbsSpecialNeed },
 			costs: {
 				totalRentEur
 			},

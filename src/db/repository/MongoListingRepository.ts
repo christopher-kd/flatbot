@@ -19,10 +19,8 @@ function toDouble<T extends number | undefined>(value: T): T {
 	return (value === undefined ? undefined : new Double(value)) as T
 }
 
-// Ensures numeric fields are always written as BSON double (never int32) and
-// wbsLevels is always an array (never null/undefined), regardless of what
-// shape the scraper produced it in — so consumers in other languages (e.g. a
-// Kotlin client) see one consistent wire type instead of per-doc drift.
+// Ensures numeric fields are always written as BSON double (never int32),
+// regardless of what shape the scraper produced them in.
 function normalizeForStorage(listing: ApartmentListing): ApartmentListing {
 	return {
 		...listing,
@@ -36,29 +34,12 @@ function normalizeForStorage(listing: ApartmentListing): ApartmentListing {
 			totalRentEur: toDouble(listing.costs.totalRentEur),
 			depositEur: toDouble(listing.costs.depositEur),
 		},
-		// restrictions is typed as required, but Vonovia/Deutsche Wohnen ship
-		// `restrictions: null` at runtime (see VonoviaGroupScraper) — guard the
-		// whole object before touching its fields, same as merge.ts does.
-		restrictions: listing.restrictions && {
-			...listing.restrictions,
-			wbsLevels:
-				listing.restrictions.wbsLevels == null
-					? []
-					: Array.isArray(listing.restrictions.wbsLevels)
-						? listing.restrictions.wbsLevels
-						: [listing.restrictions.wbsLevels],
-		},
-		// accessibility itself must always be an object (never null/undefined)
-		// so consumers can rely on the key existing — individual flags inside
-		// stay null when unknown rather than being omitted.
+		restrictions: listing.restrictions,
 		accessibility: {
 			senior: listing.accessibility?.senior ?? null,
 			wheelchair: listing.accessibility?.wheelchair ?? null,
 			barrierFree: listing.accessibility?.barrierFree ?? null,
 		},
-		// images is typed as an array, but has been seen stored as a lone
-		// image document instead of a one-element array — normalize the same
-		// way wbsLevels is above.
 		images:
 			listing.images == null
 				? []
