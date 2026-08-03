@@ -114,6 +114,10 @@ export default class Berlinovo extends Scraper {
       return null
     })()
 
+    // could be missing from listing item
+    const totalRentElem = listing.querySelector(".field--name-field-total-rent div[content]")
+    const totalRentEur = totalRentElem ? this.parseGermanFloat(totalRentElem.textContent) : -1
+
 		return {
 			propertyId: href.split("/")[2],
 			organization: this.organization,
@@ -149,10 +153,7 @@ export default class Berlinovo extends Scraper {
 				wbsSpecialNeed: getSpecialNeed(title.textContent),
 			},
 			costs: {
-				totalRentEur: this.parseGermanFloat(
-					listing.querySelector(".field--name-field-total-rent div[content]")
-						.textContent,
-				),
+				totalRentEur
 			},
 			images: image ? [image] : []
 		}
