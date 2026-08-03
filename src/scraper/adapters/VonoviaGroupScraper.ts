@@ -36,7 +36,9 @@ export default abstract class VonoviaGroupScraper extends Scraper {
       listing.costs.utilityEur === 0 ||!listing.costs.utilityEur ||
       listing.costs.totalRentEur === 0 || !listing.costs.totalRentEur ||
       !listing.newBuilding ||
-      !listing.features
+      !listing.features ||
+      !listing.accessibility.barrierFree ||
+      !listing.accessibility.senior
     )
 
     await runConcurrent(listingTargets, 3, async (listing) => {
@@ -45,12 +47,27 @@ export default abstract class VonoviaGroupScraper extends Scraper {
         const tableData = data.tableData
         const features = data.features
         const yearBuilt = Number(tableData.get("Baujahr") ?? "")
+
+        const isX = (x: string, onFeatures: string[]): boolean => {
+          x = x.toLowerCase()
+          const items = onFeatures.map(feature => feature.toLowerCase())
+          for (const item of items) {
+            if (item.includes(x)) return true
+          }
+          return false
+        }
+
         listing.costs.depositEur = this.parseGermanFloat(tableData.get("Kaution") ?? "")
         listing.costs.heatingEur = this.parseGermanFloat(tableData.get("Heizkosten") ?? "")
         listing.costs.utilityEur = this.parseGermanFloat(tableData.get("Nebenkosten") ?? "")
         listing.costs.totalRentEur = this.parseGermanFloat(tableData.get("Warmmiete") ?? "")
         listing.newBuilding = yearBuilt >= 2014
         listing.features = features
+
+        // "Barrierearmes Gebäude" exists as well, but is not checked for
+        listing.accessibility.barrierFree = isX("barrierefrei", features)
+        listing.accessibility.senior = isX("seniorengerecht", features)
+
       } catch (err) {
         log.warn(` -> Failed to backfill for id ${listing.propertyId}: ${err}`)
       }
