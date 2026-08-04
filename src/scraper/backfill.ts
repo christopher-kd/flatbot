@@ -6,9 +6,10 @@ import type PhotonClient from "./PhotonClient"
 import type Scraper from "./Scraper"
 import { runConcurrent } from "./util/concurrency"
 import { fillMissing } from "./util/fillMissing"
+import { groupByOrganization } from "./util/groupByOrganization"
 
 const COORDINATE_FETCH_CONCURRENCY = 6
-const AGGREGATOR_LIVENESS_CONCURRENCY = 4
+const AGGREGATOR_LIVENESS_PER_ORG_CONCURRENCY = 4
 
 // Hydrates DB-known fields onto fresh listings so backfills below can skip
 // work they'd otherwise redo every run.
@@ -56,11 +57,14 @@ export async function backfillOneOrg(
 	}
 }
 
+// Runs each scraper's backfill() hook sequentially
 export async function runScraperBackfills(
 	directScrapers: Scraper[],
 	listings: ApartmentListing[],
 ): Promise<void> {
-  await Promise.all(directScrapers.map(scraper => backfillOneOrg(scraper, listings)))
+	for (const scraper of directScrapers) {
+		await backfillOneOrg(scraper, listings)
+	}
 }
 
 // Fills missing coordinates via Photon, bounded-concurrent and isolated
@@ -94,9 +98,30 @@ export async function fillMissingCoordinates(
 	)
 }
 
-// Any listing that only came from the secondary sources this
-// run (no primary source-scrape match) gets checked here before
-// being trusted as still live.
+async function checkAndTrackLiveness(
+	listing: ApartmentListing,
+	deadListingIds: Set<string>,
+	progress: { checked: number; total: number },
+	onProgress?: (checked: number, total: number) => void,
+): Promise<void> {
+	try {
+		const liveness = await checkListingLiveness(listing)
+		if (liveness === "inactive" && listing.listingId) {
+			deadListingIds.add(listing.listingId)
+    }
+	} catch (err) {
+		log.error(
+			`Failed to check liveness of aggregator-only listing ` +
+				`${listing.organization} ${listing.propertyId}: ${err}`,
+		)
+	} finally {
+		progress.checked++
+		onProgress?.(progress.checked, progress.total)
+	}
+}
+
+// Checks run bounded-concurrent per organization -> all orgs checked
+// in parallel.
 export async function pruneDeadAggregatorOnlyListings(
 	listings: ApartmentListing[],
 	directListingIds: Set<string>,
@@ -105,29 +130,20 @@ export async function pruneDeadAggregatorOnlyListings(
 	const aggregatorOnly = listings.filter(
 		(l) => l.listingId && !directListingIds.has(l.listingId),
 	)
+	const orgGroups = groupByOrganization(aggregatorOnly)
 
-	let checked = 0
-	const dead = new Set<string>()
-	await runConcurrent(
-		aggregatorOnly,
-		AGGREGATOR_LIVENESS_CONCURRENCY,
-		async (listing) => {
-			try {
-				const liveness = await checkListingLiveness(listing)
-				if (liveness === "inactive" && listing.listingId) {
-					dead.add(listing.listingId)
-				}
-			} catch (err) {
-				log.error(
-					`Failed to check liveness of aggregator-only listing ` +
-						`${listing.organization} ${listing.propertyId}: ${err}`,
-				)
-			} finally {
-				checked++
-				onProgress?.(checked, aggregatorOnly.length)
-			}
-		},
+	const deadListingIds = new Set<string>()
+	const progress = { checked: 0, total: aggregatorOnly.length }
+	await Promise.all(
+		Array.from(orgGroups.values()).map((group) =>
+			runConcurrent(
+				group,
+				AGGREGATOR_LIVENESS_PER_ORG_CONCURRENCY,
+				(listing) =>
+					checkAndTrackLiveness(listing, deadListingIds, progress, onProgress),
+			),
+		),
 	)
 
-	return listings.filter((l) => !l.listingId || !dead.has(l.listingId))
+	return listings.filter((l) => !l.listingId || !deadListingIds.has(l.listingId))
 }

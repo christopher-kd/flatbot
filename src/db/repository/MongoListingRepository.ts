@@ -3,6 +3,8 @@ import { type Collection, Double, type MongoClient } from "mongodb"
 import log from "../../logger/logger"
 import { checkListingLiveness } from "../../scraper/liveness"
 import { required } from "../../scraper/util/assert"
+import { runConcurrent } from "../../scraper/util/concurrency"
+import { groupByOrganization } from "../../scraper/util/groupByOrganization"
 import type {
 	ApartmentListing,
 	ArchivedApartmentListing,
@@ -11,6 +13,8 @@ import type {
 } from "../../types"
 import type ListingRepository from "./ListingRepository"
 import { BACKFILL_FIELD_PATHS, type KnownBackfillFields } from "./ListingRepository"
+
+const LIVENESS_CHECK_PER_ORG_CONCURRENCY = 4
 
 // Storage writes a BSON Double in place of `number`, but the field still
 // reads back as `number` everywhere else (Mongo/JS blur the two) - so a
@@ -163,18 +167,36 @@ export default class MongoListingRepository implements ListingRepository {
 		// checkListingLiveness. For orgs without a real check yet, that returns
 		// "not-implemented" and we fall back to archiving on presence alone, as
 		// before.
+		//
+		// Checks run bounded-concurrent per organization -> all orgs checked
+		// in parallel; a failure on one listing is isolated so it can't stall
+		// the rest or abort the run (see pruneDeadAggregatorOnlyListings for
+		// the same pattern).
 		const docsToArchive: StoredApartmentListing[] = []
 		let checked = 0
-		for (const doc of untouchedDocs) {
-			log.info(`Checking liveness of ${doc.propertyId} before archiving...`)
-			const liveness = await checkListingLiveness(doc)
-			if (liveness !== "active") {
-				log.info(" -> Yup, it's dead and can be archived.")
-				docsToArchive.push(doc)
-			}
-			checked++
-			onLivenessProgress?.(checked, untouchedDocs.length)
-		}
+		const orgGroups = groupByOrganization(untouchedDocs)
+		await Promise.all(
+			Array.from(orgGroups.values()).map((group) =>
+				runConcurrent(group, LIVENESS_CHECK_PER_ORG_CONCURRENCY, async (doc) => {
+					try {
+						log.info(`Checking liveness of ${doc.propertyId} before archiving...`)
+						const liveness = await checkListingLiveness(doc)
+						if (liveness !== "active") {
+							log.info(" -> Yup, it's dead and can be archived.")
+							docsToArchive.push(doc)
+						}
+					} catch (err) {
+						log.error(
+							`Failed to check liveness of ${doc.organization} ` +
+								`listing ${doc.propertyId}: ${err}`,
+						)
+					} finally {
+						checked++
+						onLivenessProgress?.(checked, untouchedDocs.length)
+					}
+				}),
+			),
+		)
 
 		const session = this.#mongoClient.startSession()
 
