@@ -6,6 +6,7 @@ import type {
 	Restrictions,
 	WBSLevel,
 } from "../types"
+import type { ScraperRunResult } from "./ScraperRunner.types"
 import { required } from "./util/assert"
 
 function isDefined<T>(value: T | null | undefined): value is T {
@@ -171,4 +172,21 @@ export function mergeAggregatorListings(
 		)
 	}
 	return [...byListingId.values()]
+}
+
+// Flatten direct scraper results into one listings array, merge in the
+// aggregator's listings, and derives the `directListingIds` set needed
+// afterward to tell aggregator-only listings apart for the liveness prune.
+export function mergeDirectAndAggregatorListings(
+	directResults: ScraperRunResult[],
+	aggregatorListings: ApartmentListing[],
+): { merged: ApartmentListing[]; directListingIds: Set<string> } {
+	const directListings = directResults.flatMap((r) => r.listings)
+	const merged = mergeAggregatorListings(directListings, aggregatorListings)
+	const directListingIds = new Set(
+		directListings
+			.map((l) => l.listingId)
+			.filter((id): id is string => id !== undefined),
+	)
+	return { merged, directListingIds }
 }

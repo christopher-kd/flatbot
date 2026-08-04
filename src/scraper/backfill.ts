@@ -38,21 +38,31 @@ export async function hydrateKnownBackfillFields(
 	}
 }
 
-// Runs each scraper's backfill() hook against its slice of listings,
-// isolated so one landlord failing doesn't affect the rest.
+// Runs one scraper's backfill() hook against its slice of listings.
+// Returns if success, doesn't throw
+export async function backfillOneOrg(
+	scraper: Scraper,
+	listings: ApartmentListing[],
+): Promise<boolean> {
+	const orgListings = listings.filter(
+		(l) => l.organization === scraper.organization,
+	)
+	try {
+		await scraper.backfill(orgListings)
+		return true
+	} catch (err) {
+		log.error(`${scraper.organization} backfill failed: ${err}`)
+		return false
+	}
+}
+
+// Runs each scraper's backfill() hook sequentially
 export async function runScraperBackfills(
 	directScrapers: Scraper[],
 	listings: ApartmentListing[],
 ): Promise<void> {
 	for (const scraper of directScrapers) {
-		const orgListings = listings.filter(
-			(l) => l.organization === scraper.organization,
-		)
-		try {
-			await scraper.backfill(orgListings)
-		} catch (err) {
-			log.error(`${scraper.organization} backfill failed: ${err}`)
-		}
+		await backfillOneOrg(scraper, listings)
 	}
 }
 
@@ -62,8 +72,10 @@ export async function fillMissingCoordinates(
 	photonClient: PhotonClient,
 	listings: ApartmentListing[],
 	addressFor: (location: ApartmentListingLocation) => string,
+	onProgress?: (checked: number, total: number) => void,
 ): Promise<void> {
 	const targets = listings.filter((l) => !l.location.coordinates)
+	let checked = 0
 	await runConcurrent(
 		targets,
 		COORDINATE_FETCH_CONCURRENCY,
@@ -77,6 +89,9 @@ export async function fillMissingCoordinates(
 					`Failed to fetch coordinates for ${listing.organization} ` +
 						`listing ${listing.propertyId}: ${err}`,
 				)
+			} finally {
+				checked++
+				onProgress?.(checked, targets.length)
 			}
 		},
 	)
@@ -88,11 +103,13 @@ export async function fillMissingCoordinates(
 export async function pruneDeadAggregatorOnlyListings(
 	listings: ApartmentListing[],
 	directListingIds: Set<string>,
+	onProgress?: (checked: number, total: number) => void,
 ): Promise<ApartmentListing[]> {
 	const aggregatorOnly = listings.filter(
 		(l) => l.listingId && !directListingIds.has(l.listingId),
 	)
 
+	let checked = 0
 	const dead = new Set<string>()
 	await runConcurrent(
 		aggregatorOnly,
@@ -108,6 +125,9 @@ export async function pruneDeadAggregatorOnlyListings(
 					`Failed to check liveness of aggregator-only listing ` +
 						`${listing.organization} ${listing.propertyId}: ${err}`,
 				)
+			} finally {
+				checked++
+				onProgress?.(checked, aggregatorOnly.length)
 			}
 		},
 	)

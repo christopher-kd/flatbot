@@ -1,23 +1,29 @@
 import type MongoDatabaseClient from "../db/MongoDatabaseClient"
 import type ListingRepository from "../db/repository/ListingRepository"
 import log from "../logger/logger"
-import type { ApartmentListing, Organization } from "../types"
+import type {
+	ApartmentListing,
+	ApartmentListingLocation,
+	Organization,
+} from "../types"
 import {
 	fillMissingCoordinates,
 	hydrateKnownBackfillFields,
 	pruneDeadAggregatorOnlyListings,
 	runScraperBackfills,
 } from "./backfill"
+import { logSummary, printBanner, runScrapersPlain } from "./consoleReport"
 import {
-	logScraperError,
-	logScraperResult,
-	logSummary,
-	logTableHeader,
-	printBanner,
-} from "./consoleReport"
-import { mergeAggregatorListings } from "./merge"
+	runCoordinateFillWithLiveBoard,
+	runFetchAndMergeWithLiveBoard,
+	runHydrateAndBackfillWithLiveBoard,
+	runPersistWithLiveBoard,
+} from "./liveBoard"
+import { mergeDirectAndAggregatorListings } from "./merge"
 import type PhotonClient from "./PhotonClient"
 import type Scraper from "./Scraper"
+import type { ScraperRunResult } from "./ScraperRunner.types"
+import { getLogStyle } from "./util/logStyle"
 
 const CITY = "Berlin"
 
@@ -27,12 +33,6 @@ interface ScraperRunnerParams {
 	listingRepository: ListingRepository
 	dbClient: MongoDatabaseClient
 	photonClient: PhotonClient
-}
-
-interface ScraperRunResult {
-	organization: Organization
-	listings: ApartmentListing[]
-	success: boolean
 }
 
 class ScraperRunner {
@@ -54,22 +54,34 @@ class ScraperRunner {
 		await printBanner()
 
 		const startingTime = Date.now()
+		const dynamic = getLogStyle() === "dynamic"
 
 		try {
-			await this.healthcheckPhase()
+			if (!dynamic) await this.healthcheckPhase()
 
 			log.info("Searching for new flats...")
-			const { listings, scrapedOrganizations } = await this.scrape()
+			const { listings, scrapedOrganizations } = dynamic
+				? await this.scrapeDynamic()
+				: await this.scrapePlain()
 
 			logSummary(listings.length, Date.now() - startingTime)
 
-			log.info("Hydrating already-known backfill fields from the database...")
-			await hydrateKnownBackfillFields(this.#listingRepository, listings)
+			if (dynamic) {
+				await runHydrateAndBackfillWithLiveBoard({
+					listingRepository: this.#listingRepository,
+					directScrapers: this.#directScrapers,
+					listings,
+				})
+			} else {
+				log.info(
+					"Hydrating already-known backfill fields from the database...",
+				)
+				await hydrateKnownBackfillFields(this.#listingRepository, listings)
 
-			log.info("Running per-scraper backfills...")
-			await runScraperBackfills(this.#directScrapers, listings)
+				log.info("Running per-scraper backfills...")
+				await runScraperBackfills(this.#directScrapers, listings)
+			}
 
-			log.info("Filling in missing coordinates with Photon...")
 			const coordsBatch1 = listings.filter(
 				(l) =>
 					l.organization === "Stadt und Land" ||
@@ -77,20 +89,40 @@ class ScraperRunner {
 					l.organization === "Gewobag",
 			)
 			const coordsBatch2 = listings.filter((l) => l.organization === "degewo")
-			await Promise.all([
-				fillMissingCoordinates(
-					this.#photonClient,
-					coordsBatch1,
-					(l) => `${l.street} ${l.houseNumber}, ${l.postalCode} ${CITY}`,
-				),
-				fillMissingCoordinates(
-					this.#photonClient,
-					coordsBatch2,
-					(l) => `${l.street} ${l.houseNumber}, ${CITY} ${l.neighborhood}`,
-				),
-			])
+			const addressFor1 = (l: ApartmentListingLocation) =>
+				`${l.street} ${l.houseNumber}, ${l.postalCode} ${CITY}`
+			const addressFor2 = (l: ApartmentListingLocation) =>
+				`${l.street} ${l.houseNumber}, ${CITY} ${l.neighborhood}`
 
-			await this.persist(listings, scrapedOrganizations)
+			if (dynamic) {
+				await runCoordinateFillWithLiveBoard({
+					photonClient: this.#photonClient,
+					batches: [
+						{
+							label: "Stadt und Land, Berlinovo, Gewobag",
+							listings: coordsBatch1,
+							addressFor: addressFor1,
+						},
+						{ label: "degewo", listings: coordsBatch2, addressFor: addressFor2 },
+					],
+				})
+			} else {
+				log.info("Filling in missing coordinates with Photon...")
+				await Promise.all([
+					fillMissingCoordinates(this.#photonClient, coordsBatch1, addressFor1),
+					fillMissingCoordinates(this.#photonClient, coordsBatch2, addressFor2),
+				])
+			}
+
+			if (dynamic) {
+				await runPersistWithLiveBoard({
+					listingRepository: this.#listingRepository,
+					listings,
+					scrapedOrganizations,
+				})
+			} else {
+				await this.persist(listings, scrapedOrganizations)
+			}
 		} finally {
 			await this.disconnect()
 		}
@@ -108,37 +140,41 @@ class ScraperRunner {
 			)
 	}
 
-	private async scrape(): Promise<{
+	private async scrapeDynamic(): Promise<{
 		listings: ApartmentListing[]
 		scrapedOrganizations: Organization[]
 	}> {
-		logTableHeader()
+		return runFetchAndMergeWithLiveBoard({
+			photonClient: this.#photonClient,
+			directScrapers: this.#directScrapers,
+			aggregatorScraper: this.#aggregatorScraper,
+			execute: (scraper) => this.executeScraper(scraper),
+		})
+	}
 
-		const [directRunResults, aggregatorRunResult] = await Promise.all([
-			Promise.all(
-				this.#directScrapers.map((scraper) => this.runScraper(scraper)),
-			),
-			this.runScraper(this.#aggregatorScraper),
-		])
+	private async scrapePlain(): Promise<{
+		listings: ApartmentListing[]
+		scrapedOrganizations: Organization[]
+	}> {
+		const allScrapers = [...this.#directScrapers, this.#aggregatorScraper]
+		const execute = (scraper: Scraper) => this.executeScraper(scraper)
+
+		const results = await runScrapersPlain(allScrapers, execute)
+
+		const aggregatorRunResult = results[results.length - 1]
+		const directRunResults = results.slice(0, -1)
 
 		const scrapedOrganizations: Organization[] = directRunResults
 			.filter((r) => r.success)
 			.map((r) => r.organization)
 
-		const directListings = directRunResults.flatMap((r) => r.listings)
-		const merged: ApartmentListing[] = mergeAggregatorListings(
-			directListings,
+		const { merged, directListingIds } = mergeDirectAndAggregatorListings(
+			directRunResults,
 			aggregatorRunResult.listings,
 		)
 
-		const directListingIds = new Set(
-			directListings
-				.map((l) => l.listingId)
-				.filter((id): id is string => id !== undefined),
-    )
-
 		log.info("Checking for dead listings from secondary sources...")
-    const listings = await pruneDeadAggregatorOnlyListings(
+		const listings = await pruneDeadAggregatorOnlyListings(
 			merged,
 			directListingIds,
 		)
@@ -146,28 +182,25 @@ class ScraperRunner {
 		return { listings, scrapedOrganizations }
 	}
 
-	private async runScraper(scraper: Scraper): Promise<ScraperRunResult> {
+	private async executeScraper(scraper: Scraper): Promise<ScraperRunResult> {
 		const scraperStart = Date.now()
 		try {
-			const result = await scraper.fetchListings()
-			logScraperResult(
-				scraper.organization,
-				result.length,
-				Date.now() - scraperStart,
-				scraper.getRequestCount(),
-			)
+			const listings = await scraper.fetchListings()
 			return {
 				organization: scraper.organization,
-				listings: result,
+				listings,
 				success: true,
+				durationMs: Date.now() - scraperStart,
+				requestsCount: scraper.getRequestCount(),
 			}
 		} catch (err) {
-			logScraperError(scraper.organization, Date.now() - scraperStart)
-			log.error(err)
+			log.error(`${scraper.organization}: scrape failed: ${err}`)
 			return {
 				organization: scraper.organization,
 				listings: [],
 				success: false,
+				durationMs: Date.now() - scraperStart,
+				requestsCount: scraper.getRequestCount(),
 			}
 		}
 	}

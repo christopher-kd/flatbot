@@ -140,6 +140,7 @@ export default class MongoListingRepository implements ListingRepository {
 	async updateListings(
 		listings: ApartmentListing[],
 		scrapedOrganizations: Organization[],
+		onLivenessProgress?: (checked: number, total: number) => void,
 	): Promise<void> {
 		const processedListingIds = listings.map((l) =>
 			required(l.listingId, "listing.listingId"),
@@ -163,6 +164,7 @@ export default class MongoListingRepository implements ListingRepository {
 		// "not-implemented" and we fall back to archiving on presence alone, as
 		// before.
 		const docsToArchive: StoredApartmentListing[] = []
+		let checked = 0
 		for (const doc of untouchedDocs) {
 			log.info(`Checking liveness of ${doc.propertyId} before archiving...`)
 			const liveness = await checkListingLiveness(doc)
@@ -170,6 +172,8 @@ export default class MongoListingRepository implements ListingRepository {
 				log.info(" -> Yup, it's dead and can be archived.")
 				docsToArchive.push(doc)
 			}
+			checked++
+			onLivenessProgress?.(checked, untouchedDocs.length)
 		}
 
 		const session = this.#mongoClient.startSession()

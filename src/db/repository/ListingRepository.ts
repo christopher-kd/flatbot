@@ -44,6 +44,7 @@ export default interface ListingRepository {
 	updateListings(
 		listings: ApartmentListing[],
 		scrapedOrganizations: Organization[],
+		onLivenessProgress?: (checked: number, total: number) => void,
 	): Promise<void>
 
 	findKnownBackfillFields(
