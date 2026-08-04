@@ -56,14 +56,11 @@ export async function backfillOneOrg(
 	}
 }
 
-// Runs each scraper's backfill() hook sequentially
 export async function runScraperBackfills(
 	directScrapers: Scraper[],
 	listings: ApartmentListing[],
 ): Promise<void> {
-	for (const scraper of directScrapers) {
-		await backfillOneOrg(scraper, listings)
-	}
+  await Promise.all(directScrapers.map(scraper => backfillOneOrg(scraper, listings)))
 }
 
 // Fills missing coordinates via Photon, bounded-concurrent and isolated

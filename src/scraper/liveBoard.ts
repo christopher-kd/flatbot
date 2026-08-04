@@ -194,7 +194,7 @@ export async function runHydrateAndBackfillWithLiveBoard(params: {
 							},
 						})),
 						{
-							concurrent: false,
+							concurrent: true,
 							exitOnError: false,
 							rendererOptions: RENDERER_OPTIONS,
 						},
