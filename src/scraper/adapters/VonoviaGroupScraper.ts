@@ -37,8 +37,8 @@ export default abstract class VonoviaGroupScraper extends Scraper {
       listing.costs.totalRentEur === 0 || !listing.costs.totalRentEur ||
       !listing.newBuilding ||
       !listing.features ||
-      !listing.accessibility.barrierFree ||
-      !listing.accessibility.senior
+      !listing.accessibility?.barrierFree ||
+      !listing.accessibility?.senior
     )
 
     await runConcurrent(listingTargets, 3, async (listing) => {
@@ -65,6 +65,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
         listing.features = features
 
         // "Barrierearmes Gebäude" exists as well, but is not checked for
+        listing.accessibility ??= {}
         listing.accessibility.barrierFree = isX("barrierefrei", features)
         listing.accessibility.senior = isX("seniorengerecht", features)
 

@@ -60,7 +60,7 @@ export default class Degewo extends Scraper {
       listing.costs.heatingEur === 0 ||
       !listing.newBuilding ||
       !listing.features ||
-      !listing.accessibility.barrierFree
+      !listing.accessibility?.barrierFree
     )
 
     await runConcurrent(listingTargets, this.concurrency, async listing => {
@@ -78,6 +78,7 @@ export default class Degewo extends Scraper {
         listing.costs.depositEur = coldRentEur * 3
         listing.newBuilding = yearBuilt >= 2014
         listing.features = data.features
+        listing.accessibility ??= {}
         listing.accessibility.barrierFree = data.features.findIndex(item => item === "Barrierefrei") >= 0
 
         log.debug(details.get("Kaution") ?? "kein Kautionsfeld")
