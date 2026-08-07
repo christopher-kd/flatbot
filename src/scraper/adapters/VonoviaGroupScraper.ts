@@ -7,8 +7,12 @@ import type {
 } from "../../types"
 import Scraper from "../Scraper"
 import { runConcurrent } from "../util/concurrency"
+import { delay } from "../util/delay"
 import { zipStrings } from "../util/zip"
 import type VonoviaGroupResponse from "./VonoviaGroup.types"
+
+const EMPTY_RESULT_RETRIES = 5
+const EMPTY_RESULT_RETRY_DELAY_MS = 4000
 
 /**
  * Vonovia & Deutsche Wohnen run on the same listing API.
@@ -113,10 +117,28 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 		return `${this.apiUrl}?${urlParams}${offset ? `&offset=${offset}` : ""}`
 	}
 
+	private fetchListingsPage(offset?: number): Promise<VonoviaGroupResponse> {
+		return this.fetchJson(this.buildUrl(offset))
+	}
+
+	// API sometimes returns empty result. Retries a few times.
+	private async fetchFirstPage(): Promise<VonoviaGroupResponse> {
+		let lastResult: VonoviaGroupResponse | undefined
+		for (let attempt = 1; attempt <= EMPTY_RESULT_RETRIES; attempt++) {
+			lastResult = await this.fetchListingsPage()
+			if (lastResult.paging.info.count > 0) return lastResult
+			if (attempt < EMPTY_RESULT_RETRIES) {
+				log.warn(
+					`${this.organization}: got 0 listings (attempt ${attempt}/${EMPTY_RESULT_RETRIES}), retrying`,
+				)
+				await delay(EMPTY_RESULT_RETRY_DELAY_MS)
+			}
+		}
+		return lastResult as VonoviaGroupResponse
+	}
+
 	private async fetchAllListings(): Promise<VonoviaGroupResponse["results"]> {
-		const fetchResults: VonoviaGroupResponse[] = [
-			await this.fetchJson(this.buildUrl()),
-		]
+		const fetchResults: VonoviaGroupResponse[] = [await this.fetchFirstPage()]
 		const listingsCount = fetchResults[0].paging.info.count
 		if (listingsCount <= 0)
 			throw new Error("Couldn't find any listing. Blocked?")
@@ -125,7 +147,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 			offset < listingsCount;
 			offset += this.LISTING_LIMIT_PER_REQUEST
 		) {
-			fetchResults.push(await this.fetchJson(this.buildUrl(offset)))
+			fetchResults.push(await this.fetchListingsPage(offset))
 		}
 		return fetchResults.flatMap((f) => f.results)
 	}
