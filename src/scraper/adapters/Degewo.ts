@@ -143,8 +143,9 @@ export default class Degewo extends Scraper {
 	}
 
 	private extractListing(teaser: HTMLElement): ApartmentListing | null {
-		const title = teaser.querySelector("h3").innerText.trim()
-		const imageSrc = teaser.querySelector("figure img").getAttribute("src")
+    const title = teaser.querySelector("h3").innerText.trim()
+		log.debug(`-> ${BASE_URL}${teaser.querySelector("h3 a").getAttribute("href")}`)
+		const imageSrc = teaser.querySelector("figure img")?.getAttribute("src")
 		const rawAddress = teaser
 			.querySelector("p")
 			.innerText.trim()
@@ -189,11 +190,13 @@ export default class Degewo extends Scraper {
 					teaser.querySelector("dl>div:nth-child(1)>dt").textContent,
 				),
 			},
-			images: [
-				{
-					fullUrl: `${BASE_URL}${imageSrc}`,
-				},
-			],
+			images: imageSrc
+				? [
+						{
+							fullUrl: `${BASE_URL}${imageSrc}`,
+						},
+					]
+				: [],
 		} as ApartmentListing
 	}
 
