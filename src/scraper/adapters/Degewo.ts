@@ -80,8 +80,6 @@ export default class Degewo extends Scraper {
         listing.features = data.features
         listing.accessibility ??= {}
         listing.accessibility.barrierFree = data.features.findIndex(item => item === "Barrierefrei") >= 0
-
-        log.debug(details.get("Kaution") ?? "kein Kautionsfeld")
       } catch (err) {
         log.warn(` -> Failed to backfill data for id ${listing.propertyId}: ${err}`)
       }
@@ -144,7 +142,6 @@ export default class Degewo extends Scraper {
 
 	private extractListing(teaser: HTMLElement): ApartmentListing | null {
     const title = teaser.querySelector("h3").innerText.trim()
-		log.debug(`-> ${BASE_URL}${teaser.querySelector("h3 a").getAttribute("href")}`)
 		const imageSrc = teaser.querySelector("figure img")?.getAttribute("src")
 		const rawAddress = teaser
 			.querySelector("p")
