@@ -1,3 +1,5 @@
+import dlv from "dlv"
+import { dset } from "dset"
 import type * as mongoDB from "mongodb"
 import { type Collection, Double, type MongoClient } from "mongodb"
 import log from "../../logger/logger"
@@ -65,38 +67,6 @@ function normalizeForStorage(
 	}
 }
 
-// Reads a dot-path (e.g. "costs.depositEur") off an untyped object graph -
-// paired with setPath below to generically pluck BACKFILL_FIELD_PATHS onto a
-// KnownBackfillFields result without hand-listing each field.
-function getPath(obj: Record<string, unknown>, path: string): unknown {
-	return path
-		.split(".")
-		.reduce<unknown>(
-			(value, key) =>
-				value && typeof value === "object"
-					? (value as Record<string, unknown>)[key]
-					: undefined,
-			obj,
-		)
-}
-
-// Writes `value` at a dot-path, creating intermediate objects as needed.
-function setPath(
-	obj: Record<string, unknown>,
-	path: string,
-	value: unknown,
-): void {
-	const keys = path.split(".")
-	let target = obj
-	for (const key of keys.slice(0, -1)) {
-		if (typeof target[key] !== "object" || target[key] === null) {
-			target[key] = {}
-		}
-		target = target[key] as Record<string, unknown>
-	}
-	target[keys[keys.length - 1]] = value
-}
-
 function toUpsertOps(
 	listings: ApartmentListing[],
 ): mongoDB.AnyBulkWriteOperation<StoredApartmentListing>[] {
@@ -147,9 +117,9 @@ export default class MongoListingRepository implements ListingRepository {
 		for (const doc of docs) {
 			const fields: KnownBackfillFields = {}
 			for (const path of BACKFILL_FIELD_PATHS) {
-				const value = getPath(doc as Record<string, unknown>, path)
+				const value = dlv(doc, path)
 				if (value !== undefined) {
-					setPath(fields as unknown as Record<string, unknown>, path, value)
+					dset(fields, path, value)
 				}
 			}
 			result.set(doc.listingId, fields)
