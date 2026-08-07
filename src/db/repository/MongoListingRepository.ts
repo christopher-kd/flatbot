@@ -10,9 +10,13 @@ import type {
 	ArchivedApartmentListing,
 	Organization,
 	StoredApartmentListing,
+	StoredApartmentListingAccessibility,
 } from "../../types"
 import type ListingRepository from "./ListingRepository"
-import { BACKFILL_FIELD_PATHS, type KnownBackfillFields } from "./ListingRepository"
+import {
+	BACKFILL_FIELD_PATHS,
+	type KnownBackfillFields,
+} from "./ListingRepository"
 
 const LIVENESS_CHECK_PER_ORG_CONCURRENCY = 4
 
@@ -23,9 +27,17 @@ function toDouble<T extends number | undefined>(value: T): T {
 	return (value === undefined ? undefined : new Double(value)) as T
 }
 
+// Storage shape diverges from in-memory scraper shape only here:
+// missing accessibility flags written as `null`
+type NormalizedApartmentListing = Omit<ApartmentListing, "accessibility"> & {
+	accessibility: StoredApartmentListingAccessibility
+}
+
 // Ensures numeric fields are always written as BSON double (never int32),
 // regardless of what shape the scraper produced them in.
-function normalizeForStorage(listing: ApartmentListing): ApartmentListing {
+function normalizeForStorage(
+	listing: ApartmentListing,
+): NormalizedApartmentListing {
 	return {
 		...listing,
 		spaceQm: toDouble(listing.spaceQm),
@@ -69,7 +81,11 @@ function getPath(obj: Record<string, unknown>, path: string): unknown {
 }
 
 // Writes `value` at a dot-path, creating intermediate objects as needed.
-function setPath(obj: Record<string, unknown>, path: string, value: unknown): void {
+function setPath(
+	obj: Record<string, unknown>,
+	path: string,
+	value: unknown,
+): void {
 	const keys = path.split(".")
 	let target = obj
 	for (const key of keys.slice(0, -1)) {
@@ -177,24 +193,30 @@ export default class MongoListingRepository implements ListingRepository {
 		const orgGroups = groupByOrganization(untouchedDocs)
 		await Promise.all(
 			Array.from(orgGroups.values()).map((group) =>
-				runConcurrent(group, LIVENESS_CHECK_PER_ORG_CONCURRENCY, async (doc) => {
-					try {
-						log.info(`Checking liveness of ${doc.propertyId} before archiving...`)
-						const liveness = await checkListingLiveness(doc)
-						if (liveness !== "active") {
-							log.info(" -> Yup, it's dead and can be archived.")
-							docsToArchive.push(doc)
+				runConcurrent(
+					group,
+					LIVENESS_CHECK_PER_ORG_CONCURRENCY,
+					async (doc) => {
+						try {
+							log.info(
+								`Checking liveness of ${doc.propertyId} before archiving...`,
+							)
+							const liveness = await checkListingLiveness(doc)
+							if (liveness !== "active") {
+								log.info(" -> Yup, it's dead and can be archived.")
+								docsToArchive.push(doc)
+							}
+						} catch (err) {
+							log.error(
+								`Failed to check liveness of ${doc.organization} ` +
+									`listing ${doc.propertyId}: ${err}`,
+							)
+						} finally {
+							checked++
+							onLivenessProgress?.(checked, untouchedDocs.length)
 						}
-					} catch (err) {
-						log.error(
-							`Failed to check liveness of ${doc.organization} ` +
-								`listing ${doc.propertyId}: ${err}`,
-						)
-					} finally {
-						checked++
-						onLivenessProgress?.(checked, untouchedDocs.length)
-					}
-				}),
+					},
+				),
 			),
 		)
 

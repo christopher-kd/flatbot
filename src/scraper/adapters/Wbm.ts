@@ -1,7 +1,9 @@
 import type { HTMLElement } from "node-html-parser"
+import log from "../../logger/logger"
 import type { ApartmentListing } from "../../types"
 import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
+import { required } from "../util/assert"
 import { restrictionFromTitle } from "../wbs"
 
 export default class WBM extends Scraper {
@@ -19,33 +21,68 @@ export default class WBM extends Scraper {
 	// .openimmo-search-list-item .imgWrap -> src in prop [data-img-src]
 	// .openimmo-search-list-item .area -> district / area
 	// .openimmo-search-list-item .immo-button-cta -> detail page href
-	private extractListing(listing: HTMLElement): ApartmentListing {
-		const title = listing.querySelector("h2").textContent
+	private extractListing(listing: HTMLElement): ApartmentListing | null {
+		const propertyId = listing.getAttribute("data-id")
+		if (!propertyId) {
+			log.warn("WBM: couldn't extract propertyId, skipping")
+			return null
+		}
+
+		const title = required(
+			listing.querySelector("h2"),
+			"WBM listing h2",
+		).textContent
 		const parsedAddress = parseAddress(
-			listing.querySelector(".address").textContent,
+			required(listing.querySelector(".address"), "WBM listing .address")
+				.textContent,
 			"{street} {houseNumber}, {postalCode} {city}",
 		)
-		const href = listing.querySelector(".immo-button-cta").getAttribute("href")
+		const street = required(parsedAddress.street, "WBM parsed street")
+		const postalCode = required(
+			parsedAddress.postalCode,
+			"WBM parsed postalCode",
+		)
+		const houseNumber = required(
+			parsedAddress.houseNumber,
+			"WBM parsed houseNumber",
+		)
+		const city = required(parsedAddress.city, "WBM parsed city")
+		const href = required(
+			listing.querySelector(".immo-button-cta"),
+			"WBM listing .immo-button-cta",
+		).getAttribute("href")
+		const imageSrc = listing
+			.querySelector(".imgWrap")
+			?.getAttribute("data-img-src")
 
 		return {
-			propertyId: listing.getAttribute("data-id"),
+			propertyId,
 			organization: this.organization,
 			lastSeenAt: Date.now(),
 			title,
 			fullUrl: `https://wbm.de${href}`,
 			location: {
-				street: parsedAddress.street,
-				postalCode: parsedAddress.postalCode,
-				houseNumber: parsedAddress.houseNumber,
-				city: parsedAddress.city,
-				neighborhood: listing.querySelector(".area").textContent,
+				street,
+				postalCode,
+				houseNumber,
+				city,
+				neighborhood: required(
+					listing.querySelector(".area"),
+					"WBM listing .area",
+				).textContent,
 			},
 			spaceQm: parseInt(
-				listing.querySelector(".main-property-size").textContent.split(" ")[0],
+				required(
+					listing.querySelector(".main-property-size"),
+					"WBM listing .main-property-size",
+				).textContent.split(" ")[0],
 				10,
 			),
 			rooms: parseInt(
-				listing.querySelector(".main-property-rooms").textContent,
+				required(
+					listing.querySelector(".main-property-rooms"),
+					"WBM listing .main-property-rooms",
+				).textContent,
 				10,
 			),
 			restrictions: {
@@ -53,16 +90,13 @@ export default class WBM extends Scraper {
 			},
 			costs: {
 				totalRentEur: this.parseGermanFloat(
-					listing.querySelector(".main-property-rent").textContent,
+					required(
+						listing.querySelector(".main-property-rent"),
+						"WBM listing .main-property-rent",
+					).textContent,
 				),
 			},
-			images: [
-				{
-					fullUrl: listing
-						.querySelector(".imgWrap")
-						.getAttribute("data-img-src"),
-				},
-			],
+			images: imageSrc ? [{ fullUrl: imageSrc }] : [],
 		}
 	}
 
@@ -73,7 +107,7 @@ export default class WBM extends Scraper {
 		)
 		const listings = page
 			.querySelectorAll(".openimmo-search-list-item")
-			.map((listing) => this.extractListing(listing))
+			.flatMap((listing) => this.extractListing(listing) ?? [])
 
 		return this.dedupeByPropertyId(listings)
 	}

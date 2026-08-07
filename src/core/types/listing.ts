@@ -34,7 +34,8 @@ export interface ApartmentListingCosts {
 }
 
 export interface ApartmentListingLocation {
-	postalCode: string
+	// Optional: degewo's site never exposes postal code
+	postalCode?: string
 	city: string
 	street: string
 	houseNumber: string
@@ -67,17 +68,28 @@ export interface ApartmentListing {
 	rooms: number
 	newBuilding?: boolean
 	accessibility?: ApartmentListingAccessibility
-	restrictions: Restrictions
+	// null for Vonovia/Deutsche Wohnen, which skip restrictionFromTitle() —
+	// genuinely unclassified
+	restrictions: Restrictions | null
 	costs: ApartmentListingCosts
 	images: ApartmentListingImage[]
 	features?: string[]
 }
 
+// Stored document always carries a full accessibility object
+export interface StoredApartmentListingAccessibility {
+	senior: boolean | null
+	wheelchair: boolean | null
+	barrierFree: boolean | null
+}
+
 // Storage-only bookkeeping fields no scraper ever produces — the repository
 // layer is solely responsible for stamping these on write.
-export interface StoredApartmentListing extends ApartmentListing {
+export interface StoredApartmentListing
+	extends Omit<ApartmentListing, "accessibility"> {
 	listingId: string
 	firstSeenAt: number
+	accessibility: StoredApartmentListingAccessibility
 }
 
 export interface ArchivedApartmentListing extends StoredApartmentListing {

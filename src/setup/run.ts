@@ -1,9 +1,9 @@
-import cliProgress, { type SingleBar } from "cli-progress"
-import { cyan } from "colorette"
 import { createWriteStream, existsSync } from "node:fs"
 import { mkdir } from "node:fs/promises"
 import { basename, dirname, join } from "node:path"
 import { exit } from "node:process"
+import cliProgress, { type SingleBar } from "cli-progress"
+import { cyan } from "colorette"
 import { printBanner } from "../core/banner"
 
 type DownloadProgress = {
@@ -24,34 +24,38 @@ function formatSpeed(bytesPerSecond: number): string {
 }
 
 type DownloadableType = {
-  id: "jar" | "dump",
-  name: string,
-  url: string,
-  dest: string
+	id: "jar" | "dump"
+	name: string
+	url: string
+	dest: string
 }
 
 const PHOTON_DATA_DIR = "./bin/photon"
 
 const downloadables: DownloadableType[] = [
-  {
-    id: "jar",
-    name: "Photon",
-    url: "https://github.com/komoot/photon/releases/download/1.2.1/photon-1.2.1.jar",
-    dest: `${PHOTON_DATA_DIR}/`
-  },
-  {
-    id: "dump",
-    name: "German OSM data dump",
-    url: "https://download1.graphhopper.com/public/europe/germany/photon-dump-germany-1.0-latest.jsonl.zst",
-    dest: `${PHOTON_DATA_DIR}/temp/`
-  },
+	{
+		id: "jar",
+		name: "Photon",
+		url: "https://github.com/komoot/photon/releases/download/1.2.1/photon-1.2.1.jar",
+		dest: `${PHOTON_DATA_DIR}/`,
+	},
+	{
+		id: "dump",
+		name: "German OSM data dump",
+		url: "https://download1.graphhopper.com/public/europe/germany/photon-dump-germany-1.0-latest.jsonl.zst",
+		dest: `${PHOTON_DATA_DIR}/temp/`,
+	},
 ]
 
 async function ensureDir(path: string): Promise<void> {
 	await mkdir(path, { recursive: true })
 }
 
-async function downloadFile(url: string, destPath: string, onProgress?: (progress: DownloadProgress) => void): Promise<void> {
+async function downloadFile(
+	url: string,
+	destPath: string,
+	onProgress?: (progress: DownloadProgress) => void,
+): Promise<void> {
 	if (existsSync(destPath)) {
 		onProgress?.({ downloadedBytes: 1, totalBytes: 1, bytesPerSecond: 0 })
 		return
@@ -59,7 +63,9 @@ async function downloadFile(url: string, destPath: string, onProgress?: (progres
 
 	const response = await fetch(url)
 	if (!response.ok || !response.body) {
-		throw new Error(`Download failed: ${response.status} ${response.statusText} (${url})`)
+		throw new Error(
+			`Download failed: ${response.status} ${response.statusText} (${url})`,
+		)
 	}
 
 	await ensureDir(dirname(destPath))
@@ -80,7 +86,8 @@ async function downloadFile(url: string, destPath: string, onProgress?: (progres
 			fileStream.write(value)
 
 			const elapsedSeconds = (Date.now() - startTime) / 1000
-			const bytesPerSecond = elapsedSeconds > 0 ? downloadedBytes / elapsedSeconds : 0
+			const bytesPerSecond =
+				elapsedSeconds > 0 ? downloadedBytes / elapsedSeconds : 0
 			onProgress?.({ downloadedBytes, totalBytes, bytesPerSecond })
 		}
 	} finally {
@@ -91,66 +98,84 @@ async function downloadFile(url: string, destPath: string, onProgress?: (progres
 const REGION_ISO_CODES = ["DE-BE", "DE-BB"] // Berlin, Brandenburg
 
 async function runBunInstall(): Promise<void> {
-  const proc = Bun.spawn(["bun", "i"], {
-    stdout: "inherit",
-    stderr: "inherit",
-  })
+	const proc = Bun.spawn(["bun", "i"], {
+		stdout: "inherit",
+		stderr: "inherit",
+	})
 
-  const exitCode = await proc.exited
-  if (exitCode !== 0) {
-    throw new Error(`bun i failed with exit code ${exitCode}`)
-  }
+	const exitCode = await proc.exited
+	if (exitCode !== 0) {
+		throw new Error(`bun i failed with exit code ${exitCode}`)
+	}
 }
 
-async function runPhotonImport(jarPath: string, dumpPath: string, dataDir: string): Promise<void> {
-  const isoFilter = REGION_ISO_CODES.join("|")
-  const regionFilter = `awk '/"type":"Place"/{if($0~/"(${isoFilter})"/)print;next}{print}'`
-  const command = `zstd --stdout -d ${Bun.$.escape(dumpPath)} | ${regionFilter} | java -jar ${Bun.$.escape(jarPath)} import -import-file - -languages de -data-dir ${Bun.$.escape(dataDir)}`
-  const proc = Bun.spawn(["sh", "-c", command], {
-    stdout: "inherit",
-    stderr: "inherit",
-  })
+async function runPhotonImport(
+	jarPath: string,
+	dumpPath: string,
+	dataDir: string,
+): Promise<void> {
+	const isoFilter = REGION_ISO_CODES.join("|")
+	const regionFilter = `awk '/"type":"Place"/{if($0~/"(${isoFilter})"/)print;next}{print}'`
+	const command = `zstd --stdout -d ${Bun.$.escape(dumpPath)} | ${regionFilter} | java -jar ${Bun.$.escape(jarPath)} import -import-file - -languages de -data-dir ${Bun.$.escape(dataDir)}`
+	const proc = Bun.spawn(["sh", "-c", command], {
+		stdout: "inherit",
+		stderr: "inherit",
+	})
 
-  const exitCode = await proc.exited
-  if (exitCode !== 0) {
-    throw new Error(`Photon import failed with exit code ${exitCode}`)
-  }
+	const exitCode = await proc.exited
+	if (exitCode !== 0) {
+		throw new Error(`Photon import failed with exit code ${exitCode}`)
+	}
 }
 
 function createDownloadBars(count: number): SingleBar[] {
-  const multibar = new cliProgress.MultiBar({
-    format: `{filename} |${cyan('{bar}')}| {percentage}% || Speed: {speed}`,
-    clearOnComplete: false,
-    hideCursor: true
-  }, cliProgress.Presets.shades_grey)
+	const multibar = new cliProgress.MultiBar(
+		{
+			format: `{filename} |${cyan("{bar}")}| {percentage}% || Speed: {speed}`,
+			clearOnComplete: false,
+			hideCursor: true,
+		},
+		cliProgress.Presets.shades_grey,
+	)
 
-  const bars = []
-  for (let i = 1; i <= count; i++) {
-    bars.push(multibar.create(1, 0))
-  }
-  return bars
+	const bars = []
+	for (let i = 1; i <= count; i++) {
+		bars.push(multibar.create(1, 0))
+	}
+	return bars
 }
 
 async function main() {
-  await printBanner("Setup project")
+	await printBanner("Setup project")
 
-  const bars = createDownloadBars(downloadables.length)
-  const downloads: Promise<void>[] = []
-  const destPaths: Record<DownloadableType["id"], string> = { jar: "", dump: "" }
+	const bars = createDownloadBars(downloadables.length)
+	const downloads: Promise<void>[] = []
+	const destPaths: Record<DownloadableType["id"], string> = {
+		jar: "",
+		dump: "",
+	}
 
-  for (const [i, downloadableType] of downloadables.entries()) {
-    const destPath = join(downloadableType.dest, basename(downloadableType.url))
-    destPaths[downloadableType.id] = destPath
-    downloads.push(downloadFile(downloadableType.url, destPath, progress => {
-      bars[i].update(progress.downloadedBytes / progress.totalBytes, { filename: downloadableType.name, speed: formatSpeed(progress.bytesPerSecond) })
-    }))
-  }
+	for (const [i, downloadableType] of downloadables.entries()) {
+		const destPath = join(downloadableType.dest, basename(downloadableType.url))
+		destPaths[downloadableType.id] = destPath
+		downloads.push(
+			downloadFile(downloadableType.url, destPath, (progress) => {
+				const fraction =
+					progress.totalBytes === null
+						? 0
+						: progress.downloadedBytes / progress.totalBytes
+				bars[i].update(fraction, {
+					filename: downloadableType.name,
+					speed: formatSpeed(progress.bytesPerSecond),
+				})
+			}),
+		)
+	}
 
-  await Promise.all(downloads)
-  await runPhotonImport(destPaths.jar, destPaths.dump, PHOTON_DATA_DIR)
-  // await rm(dirname(destPaths.dump), { recursive: true, force: true })
-  await runBunInstall()
+	await Promise.all(downloads)
+	await runPhotonImport(destPaths.jar, destPaths.dump, PHOTON_DATA_DIR)
+	// await rm(dirname(destPaths.dump), { recursive: true, force: true })
+	await runBunInstall()
 }
-
 
 main().then(() => exit(0))

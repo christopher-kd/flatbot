@@ -3,88 +3,99 @@ import log from "../../logger/logger"
 import type { ApartmentListing } from "../../types"
 import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
+import { required } from "../util/assert"
 import { runConcurrent } from "../util/concurrency"
 import { zipStrings } from "../util/zip"
 import { restrictionFromTitle } from "../wbs"
-import { required } from "../util/assert"
 
 const BASE_URL = "https://www.degewo.de"
 
 export default class Degewo extends Scraper {
 	constructor() {
 		super("degewo")
-  }
+	}
 
-  public async backfill(listings: ApartmentListing[]): Promise<void> {
-    await this.runBackfillStep("costs", () =>
-      this.backfillData(listings)
-    )
-  }
+	public async backfill(listings: ApartmentListing[]): Promise<void> {
+		await this.runBackfillStep("costs", () => this.backfillData(listings))
+	}
 
-  private async fetchDetailPageData(url: string): Promise<{
-    detailData: Map<string, string>, features: string[]
-  }> {
-    const html = await this.fetchHtml(url)
+	private async fetchDetailPageData(url: string): Promise<{
+		detailData: Map<string, string>
+		features: string[]
+	}> {
+		const html = await this.fetchHtml(url)
 
-    const header = required(
-      html.querySelector(".c-info-box"),
-      "header with blue bg and two circles"
-    )
-    const headerDetailData = zipStrings(
-      header.querySelectorAll("dt").map(item => item.innerText.trim()),
-      header.querySelectorAll("dd").map(item => item.innerText.trim()),
-    )
+		const header = required(
+			html.querySelector(".c-info-box"),
+			"header with blue bg and two circles",
+		)
+		const headerDetailData = zipStrings(
+			header.querySelectorAll("dt").map((item) => item.innerText.trim()),
+			header.querySelectorAll("dd").map((item) => item.innerText.trim()),
+		)
 
-    const tables = required(
-      html.querySelector("#section-def-list-rent-details"),
-      "tables: kosten, objektdetails, energiedaten"
-    )
-    const tableDetailData = zipStrings(
-      tables.querySelectorAll("dt").map(item => item.innerText.trim()),
-      tables.querySelectorAll("dd").map(item => item.innerText.trim()),
-    )
+		const tables = required(
+			html.querySelector("#section-def-list-rent-details"),
+			"tables: kosten, objektdetails, energiedaten",
+		)
+		const tableDetailData = zipStrings(
+			tables.querySelectorAll("dt").map((item) => item.innerText.trim()),
+			tables.querySelectorAll("dd").map((item) => item.innerText.trim()),
+		)
 
-    const features = html.querySelectorAll(".c-tag__label").map(elem => elem.innerText.trim())
+		const features = html
+			.querySelectorAll(".c-tag__label")
+			.map((elem) => elem.innerText.trim())
 
-    return {
-      detailData: new Map([...headerDetailData, ...tableDetailData]),
-      features
-    }
-  }
+		return {
+			detailData: new Map([...headerDetailData, ...tableDetailData]),
+			features,
+		}
+	}
 
-  private async backfillData(listings: ApartmentListing[]): Promise<void> {
-    const listingTargets = listings.filter(listing =>
-      listing.costs.depositEur === 0 ||
-      listing.costs.coldRentEur === 0 ||
-      listing.costs.utilityEur === 0 ||
-      listing.costs.heatingEur === 0 ||
-      !listing.newBuilding ||
-      !listing.features ||
-      !listing.accessibility?.barrierFree
-    )
+	private async backfillData(listings: ApartmentListing[]): Promise<void> {
+		const listingTargets = listings.filter(
+			(listing) =>
+				listing.costs.depositEur === 0 ||
+				listing.costs.coldRentEur === 0 ||
+				listing.costs.utilityEur === 0 ||
+				listing.costs.heatingEur === 0 ||
+				!listing.newBuilding ||
+				!listing.features ||
+				!listing.accessibility?.barrierFree,
+		)
 
-    await runConcurrent(listingTargets, this.concurrency, async listing => {
-      try {
-        const data = await this.fetchDetailPageData(listing.fullUrl)
-        const details = data.detailData
-        const coldRentEur = this.parseGermanFloat(details.get("Nettokaltmiete") ?? "")
-        const utilityColdEur = this.parseGermanFloat(details.get("Betriebskosten (kalt)") ?? "")
-        const utilityWarmEur = this.parseGermanFloat(details.get("Betriebskosten (warm)") ?? "")
-        const yearBuilt = Number(details.get("Baujahr") ?? "")
+		await runConcurrent(listingTargets, this.concurrency, async (listing) => {
+			try {
+				const data = await this.fetchDetailPageData(listing.fullUrl)
+				const details = data.detailData
+				const coldRentEur = this.parseGermanFloat(
+					details.get("Nettokaltmiete") ?? "",
+				)
+				const utilityColdEur = this.parseGermanFloat(
+					details.get("Betriebskosten (kalt)") ?? "",
+				)
+				const utilityWarmEur = this.parseGermanFloat(
+					details.get("Betriebskosten (warm)") ?? "",
+				)
+				const yearBuilt = Number(details.get("Baujahr") ?? "")
 
-        listing.costs.coldRentEur = coldRentEur
-        listing.costs.utilityEur = utilityColdEur + utilityWarmEur
-        listing.costs.heatingEur = utilityWarmEur
-        listing.costs.depositEur = coldRentEur * 3
-        listing.newBuilding = yearBuilt >= 2014
-        listing.features = data.features
-        listing.accessibility ??= {}
-        listing.accessibility.barrierFree = data.features.findIndex(item => item === "Barrierefrei") >= 0
-      } catch (err) {
-        log.warn(` -> Failed to backfill data for id ${listing.propertyId}: ${err}`)
-      }
-    })
-  }
+				listing.costs.coldRentEur = coldRentEur
+				listing.costs.utilityEur = utilityColdEur + utilityWarmEur
+				listing.costs.heatingEur = utilityWarmEur
+				listing.costs.depositEur = coldRentEur * 3
+				listing.newBuilding = yearBuilt >= 2014
+				listing.features = data.features
+				listing.accessibility ??= {}
+				listing.accessibility.barrierFree =
+					data.features.findIndex((item) => item === "Barrierefrei") >= 0
+			} catch (err) {
+				log.warn(
+					` -> Failed to backfill data for id ${listing.propertyId}: ${err}`,
+				)
+			}
+		})
+	}
 
 	private async fetchPage(page: number, cHash?: string) {
 		const url = new URL("https://www.degewo.de/immosuche")
@@ -141,13 +152,28 @@ export default class Degewo extends Scraper {
 	}
 
 	private extractListing(teaser: HTMLElement): ApartmentListing | null {
-    const title = teaser.querySelector("h3").innerText.trim()
+		const propertyId = teaser
+			.querySelector("[data-openimmo-bookmark-item-uid]")
+			?.getAttribute("data-openimmo-bookmark-item-uid")
+		if (!propertyId) {
+			log.warn("degewo: couldn't extract propertyId, skipping")
+			return null
+		}
+
+		const title = required(
+			teaser.querySelector("h3"),
+			"degewo teaser h3 title",
+		).innerText.trim()
 		const imageSrc = teaser.querySelector("figure img")?.getAttribute("src")
-		const rawAddress = teaser
-			.querySelector("p")
+		const rawAddress = required(
+			teaser.querySelector("p"),
+			"degewo teaser address paragraph",
+		)
 			.innerText.trim()
 			.replace(/ Aufgang \d+/, "")
-		let street: string, houseNumber: string, precinct: string
+		let street: string | undefined
+		let houseNumber: string | undefined
+		let precinct: string | undefined
 		try {
 			;({ street, houseNumber, precinct } = parseAddress(
 				rawAddress,
@@ -159,33 +185,50 @@ export default class Degewo extends Scraper {
 			)
 			return null
 		}
+		// The template above names all three fields, so a successful match
+		// always populates them with non-empty strings (each field's regex
+		// requires at least one char) - this just gives TS the narrowing it
+		// can't infer from parseAddress's general Partial<> return type.
+		if (!street || !houseNumber || !precinct) {
+			log.warn(
+				`degewo: address "${rawAddress}" missing expected fields, skipping`,
+			)
+			return null
+		}
+		const linkHref = required(
+			teaser.querySelector("h3 a"),
+			"degewo teaser h3 link",
+		).getAttribute("href")
+		const spaceQmText = required(
+			teaser.querySelector("dl>div:nth-child(3)>dt"),
+			"degewo teaser spaceQm cell",
+		).textContent
+		const roomsText = required(
+			teaser.querySelector("dl>div:nth-child(2)>dt"),
+			"degewo teaser rooms cell",
+		).textContent
+		const totalRentText = required(
+			teaser.querySelector("dl>div:nth-child(1)>dt"),
+			"degewo teaser totalRent cell",
+		).textContent
+
 		return {
-			propertyId: teaser
-				.querySelector("[data-openimmo-bookmark-item-uid]")
-				?.getAttribute("data-openimmo-bookmark-item-uid"),
+			propertyId,
 			organization: this.organization,
 			lastSeenAt: Date.now(),
 			title,
-			fullUrl: `${BASE_URL}${teaser.querySelector("h3 a").getAttribute("href")}`,
+			fullUrl: `${BASE_URL}${linkHref}`,
 			location: {
 				street,
 				houseNumber,
 				neighborhood: precinct,
 				city: "Berlin",
 			},
-			spaceQm: parseInt(
-				teaser.querySelector("dl>div:nth-child(3)>dt").textContent,
-				10,
-			),
-			rooms: parseInt(
-				teaser.querySelector("dl>div:nth-child(2)>dt").textContent,
-				10,
-			),
+			spaceQm: parseInt(spaceQmText, 10),
+			rooms: parseInt(roomsText, 10),
 			restrictions: restrictionFromTitle(title),
 			costs: {
-				totalRentEur: this.parseGermanFloat(
-					teaser.querySelector("dl>div:nth-child(1)>dt").textContent,
-				),
+				totalRentEur: this.parseGermanFloat(totalRentText),
 			},
 			images: imageSrc
 				? [
@@ -194,7 +237,7 @@ export default class Degewo extends Scraper {
 						},
 					]
 				: [],
-		} as ApartmentListing
+		}
 	}
 
 	private extractListings(root: HTMLElement): ApartmentListing[] {

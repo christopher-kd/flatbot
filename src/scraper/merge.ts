@@ -96,11 +96,11 @@ function mergeWbsLevels(
 }
 
 // Merge when both sides agree on `kind`, otherwise trust `preferred`
-// wholesale.
+// wholesale. Either side can be null.
 function mergeRestrictions(
-	preferred: Restrictions,
-	fallback: Restrictions,
-): Restrictions {
+	preferred: Restrictions | null,
+	fallback: Restrictions | null,
+): Restrictions | null {
 	if (!preferred) return fallback
 	if (!fallback) return preferred
 	if (preferred.kind !== fallback.kind) return preferred
@@ -138,7 +138,8 @@ function mergeApartmentListings(
 		fullUrl: direct.fullUrl,
 		location: mergeLocation(direct.location, aggregator.location),
 		spaceQm: pick(direct.spaceQm, aggregator.spaceQm),
-		rooms: pick(direct.rooms, aggregator.rooms),
+		// `rooms` required on every listing
+		rooms: direct.rooms,
 		newBuilding: pick(direct.newBuilding, aggregator.newBuilding),
 		accessibility: pick(direct.accessibility, aggregator.accessibility),
 		restrictions: mergeRestrictions(
