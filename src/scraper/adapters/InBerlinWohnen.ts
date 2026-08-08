@@ -54,7 +54,7 @@ export default class InBerlinWohnenScraper extends Scraper {
 		}
 		if (organization === "GESOBAU")
 			return required(
-				url.match(/\d{2}-\d+-\d+(?=-)/),
+				url.match(/\d{2}-\d{5}-\d{5}-\d{4}/),
 				"GESOBAU propertyId match",
 			)[0]
 		if (organization === "Berlinovo")
