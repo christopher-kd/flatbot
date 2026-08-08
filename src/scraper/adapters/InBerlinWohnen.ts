@@ -44,11 +44,14 @@ export default class InBerlinWohnenScraper extends Scraper {
 				url.match(/\d+-\d+-\d+\d-\d+/),
 				"Gewobag propertyId match",
 			)[0]
-		if (organization === "degewo")
-			return required(
+		if (organization === "degewo") {
+			const raw = required(
 				url.match(/W\d+-\d+-\d+\d-\d+/),
 				"degewo propertyId match",
 			)[0]
+			// degewo now uses dots, not dashes - normalize to match direct scraper's IDs
+			return raw.replace(/-/g, ".").replace(/\.(\d+)$/, "-$1")
+		}
 		if (organization === "GESOBAU")
 			return required(
 				url.match(/\d{2}-\d+-\d+(?=-)/),
@@ -126,7 +129,8 @@ export default class InBerlinWohnenScraper extends Scraper {
 			},
 			spaceQm: this.parseGermanFloat(table.get("Wohnfläche") ?? ""),
 			rooms: this.parseGermanFloat(table.get("Zimmeranzahl") ?? ""),
-			newBuilding: Number(required(table.get("Baujahr"), "Baujahr").trim()) >= 2014,
+			newBuilding:
+				Number(required(table.get("Baujahr"), "Baujahr").trim()) >= 2014,
 			costs: {
 				coldRentEur: this.parseGermanFloat(table.get("Kaltmiete") ?? ""),
 				utilityEur: this.parseGermanFloat(table.get("Nebenkosten") ?? ""),
