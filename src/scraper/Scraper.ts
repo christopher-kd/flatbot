@@ -60,7 +60,9 @@ abstract class Scraper {
 	}
 
 	protected parseGermanFloatOrNull(value: string | undefined): number | null {
-		return value === undefined ? null : this.parseGermanFloat(value)
+		if (value === undefined) return null
+		const parsed = this.parseGermanFloat(value)
+		return Number.isNaN(parsed) ? null : parsed
 	}
 
 	protected async fetchText(

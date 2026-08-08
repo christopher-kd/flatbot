@@ -20,6 +20,12 @@ export default class Berlinovo extends Scraper {
 		)
 	}
 
+	private parsePeriodFloatOrNull(value: string | undefined): number | null {
+		if (value === undefined) return null
+		const parsed = Number.parseFloat(value.replace(/[^\d.-]/g, ""))
+		return Number.isNaN(parsed) ? null : parsed
+	}
+
 	public async fetchArea(propertyId: string): Promise<number | null> {
 		const page = await this.fetchHtml(
 			`https://www.berlinovo.de/de/wohnung-id/${propertyId}`,
@@ -88,7 +94,8 @@ export default class Berlinovo extends Scraper {
 				const map = details.map
 
 				const baujahr = map.get("Baujahr")
-				listing.newBuilding = baujahr === undefined ? null : Number(baujahr) >= 2014
+				listing.newBuilding =
+					baujahr === undefined ? null : Number(baujahr) >= 2014
 
 				listing.costs.coldRentEur = this.parseGermanFloatOrNull(
 					map.get("Kaltmiete"),
@@ -97,9 +104,7 @@ export default class Berlinovo extends Scraper {
 				// This uses period decimal separator for some reason
 				const bruttogesamtmiete = map.get("Bruttogesamtmiete")
 				listing.costs.totalRentEur =
-					bruttogesamtmiete === undefined
-						? null
-						: Number(bruttogesamtmiete.slice(0, -2))
+					this.parsePeriodFloatOrNull(bruttogesamtmiete)
 
 				// TODO: is this really always * 3?
 				listing.costs.depositEur =
@@ -109,8 +114,7 @@ export default class Berlinovo extends Scraper {
 
 				// This also uses period decimal separator for some reason
 				const heizkosten = map.get("Heizkosten")
-				listing.costs.heatingEur =
-					heizkosten === undefined ? null : Number(heizkosten.slice(0, -2))
+				listing.costs.heatingEur = this.parsePeriodFloatOrNull(heizkosten)
 
 				// These do not use the period decimal separator
 				listing.costs.utilityEur = this.parseGermanFloatOrNull(

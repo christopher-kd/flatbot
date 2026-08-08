@@ -48,17 +48,16 @@ export default class Gesobau extends Scraper {
 		listing: ApartmentListing,
 	): Promise<void> {
 		const page = await this.fetchHtml(listing.fullUrl)
-    const features = page.querySelectorAll(".immoSidebar__tags li")
-      .map(elem => elem.innerText.trim())
+		const features = page
+			.querySelectorAll(".immoSidebar__tags li")
+			.map((elem) => elem.innerText.trim())
 
 		const costsTable = required(
 			page.querySelector(".immoDetailTable"),
 			`querySel costs table${listing.fullUrl}`,
 		)
 		const th = costsTable.querySelectorAll("th")
-		const td = costsTable
-			.querySelectorAll("td")
-			.flatMap((td) => this.parseGermanFloat(td.textContent))
+		const td = costsTable.querySelectorAll("td").map((td) => td.textContent)
 		const costsMap = th.reduce(
 			(acc, key, index) => {
 				const value = td[index]
@@ -70,15 +69,15 @@ export default class Gesobau extends Scraper {
 				}
 				return acc
 			},
-			{} as Record<string, number>,
+			{} as Record<string, string>,
 		)
 
 		listing.costs = {
 			...listing.costs,
-			coldRentEur: costsMap["Kaltmiete"] ?? null,
-			depositEur: costsMap["Kaution"] ?? null,
-			heatingEur: costsMap["Heizkosten"] ?? null,
-			utilityEur: costsMap["Betriebskosten"] ?? null,
+			coldRentEur: this.parseGermanFloatOrNull(costsMap["Kaltmiete"]),
+			depositEur: this.parseGermanFloatOrNull(costsMap["Kaution"]),
+			heatingEur: this.parseGermanFloatOrNull(costsMap["Heizkosten"]),
+			utilityEur: this.parseGermanFloatOrNull(costsMap["Betriebskosten"]),
 		}
 
 		const listItems = page
@@ -95,10 +94,12 @@ export default class Gesobau extends Scraper {
 			{} as Record<string, string>,
 		)
 
-    listing.newBuilding =
-      factsMap["Baujahr"] === undefined ? null : Number(factsMap["Baujahr"]) >= 2014
+		listing.newBuilding =
+			factsMap["Baujahr"] === undefined
+				? null
+				: Number(factsMap["Baujahr"]) >= 2014
 
-    listing.features = features
+		listing.features = features
 	}
 
 	private async extractListing(
