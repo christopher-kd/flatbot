@@ -76,11 +76,10 @@ export interface ApartmentListing {
 	features?: string[]
 }
 
-// Stored document always carries a full accessibility object
 export interface StoredApartmentListingAccessibility {
-	senior: boolean | null
+	senior?: boolean | null
 	wheelchair: boolean | null
-	barrierFree: boolean | null
+	barrierFree?: boolean | null
 }
 
 // Storage-only bookkeeping fields no scraper ever produces — the repository

@@ -54,9 +54,9 @@ function normalizeForStorage(
 		},
 		restrictions: listing.restrictions,
 		accessibility: {
-			senior: listing.accessibility?.senior ?? null,
+			senior: listing.accessibility?.senior,
 			wheelchair: listing.accessibility?.wheelchair ?? null,
-			barrierFree: listing.accessibility?.barrierFree ?? null,
+			barrierFree: listing.accessibility?.barrierFree,
 		},
 		images:
 			listing.images == null

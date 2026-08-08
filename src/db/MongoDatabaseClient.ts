@@ -9,7 +9,10 @@ export default class MongoDatabaseClient {
 		if (!connectionString) {
 			throw new Error("Missing DB_CONN_STRING in env")
 		}
-		this.#client = new MongoClient(connectionString)
+		// Without this, driver silently converts explicit `undefined`
+		// field values to BSON `null` on write - indistinguishable from a
+		// confirmed-absent tri-state field
+		this.#client = new MongoClient(connectionString, { ignoreUndefined: true })
 	}
 
 	async connect(): Promise<MongoClient> {
