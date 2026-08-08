@@ -1,3 +1,4 @@
+import log from "../../logger/logger"
 import type { ApartmentListing } from "../../types"
 import Scraper from "../Scraper"
 import { runConcurrent } from "../util/concurrency"
@@ -33,9 +34,15 @@ class StadtUndLand extends Scraper {
     const targetedListings = listings.filter(listing => !listing.features)
 
     await runConcurrent(targetedListings, this.concurrency, async (listing) => {
-      const details = await this.fetchDetails(listing.fullUrl)
-      const features = (details.get("Ausstattung") ?? "").split(", ")
-      listing.features = features
+      try {
+        const details = await this.fetchDetails(listing.fullUrl)
+        const features = (details.get("Ausstattung") ?? "").split(", ")
+        listing.features = features
+      } catch (err) {
+        log.warn(
+          ` -> Failed to backfill features for id ${listing.propertyId}: ${err}`,
+        )
+      }
     })
   }
 
