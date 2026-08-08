@@ -87,7 +87,8 @@ export default class Degewo extends Scraper {
 						: utilityColdEur + utilityWarmEur
 				listing.costs.heatingEur = utilityWarmEur
 				listing.costs.depositEur = coldRentEur === null ? null : coldRentEur * 3
-				listing.newBuilding = baujahr === undefined ? null : Number(baujahr) >= 2014
+				listing.newBuilding =
+					baujahr === undefined ? null : Number(baujahr) >= 2014
 				listing.features = data.features
 				listing.accessibility ??= {}
 				listing.accessibility.barrierFree =
@@ -100,64 +101,75 @@ export default class Degewo extends Scraper {
 		})
 	}
 
-	private async fetchPage(page: number, cHash?: string) {
-		const url = new URL("https://www.degewo.de/immosuche")
-		if (page !== 1) {
-			const searchParams = new URLSearchParams({
-				"tx_openimmo_immobilie[page]": page.toString(),
-				"tx_openimmo_immobilie[search]": "paginate",
-			})
-			if (cHash) {
-				searchParams.set("cHash", cHash)
-			}
-			url.search = searchParams.toString()
-		}
-		return this.fetchText(url.toString(), {
-			credentials: "omit",
-			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0",
-				Accept:
-					"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-				"Accept-Language": "en-US,en;q=0.9",
-				"Sec-GPC": "1",
-				"Upgrade-Insecure-Requests": "1",
-				"Sec-Fetch-Dest": "document",
-				"Sec-Fetch-Mode": "navigate",
-				"Sec-Fetch-Site": "same-origin",
-				"Sec-Fetch-User": "?1",
-				Priority: "u=0, i",
+	// Default order unstable, listing can land on two pages or none.
+	// Sort by rent to mostly fix it. POST also skips TYPO3's cHash.
+	private sessionCookie: string | undefined
+
+	private async fetchPage(pageNumber: number): Promise<HTMLElement> {
+		const sortParam =
+			"tx_openimmo_immobilie%5BsortBy%5D=immobilie_preise_warmmiete"
+		const body =
+			pageNumber === 1
+				? `tx_openimmo_immobilie%5Bsearch%5D=search&${sortParam}`
+				: "tx_openimmo_immobilie%5Bsearch%5D=paginate&" +
+					`tx_openimmo_immobilie%5Bpage%5D=${pageNumber}&${sortParam}`
+
+		const { text, headers } = await this.fetchTextWithHeaders(
+			`${BASE_URL}/immosuche`,
+			{
+				method: "POST",
+				credentials: "omit",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+					"User-Agent":
+						"Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0",
+					...(this.sessionCookie ? { Cookie: this.sessionCookie } : {}),
+				},
+				body,
 			},
-			method: "GET",
-			mode: "cors",
-		})
-	}
+		)
 
-	// TYPO3 only exposes a page's cHash on an already-fetched page, so the
-	// full page set is discovered wave by wave: fetch known pages, collect
-	// newly-linked page numbers, repeat until nothing new turns up.
-	private extractPaginationLinks(
-		root: HTMLElement,
-	): Map<number, string | undefined> {
-		const found = new Map<number, string | undefined>()
-		for (const link of root.querySelectorAll(".c-pagination__list a[href]")) {
-			const href = link.getAttribute("href")
-			if (!href) continue
-			const url = new URL(href, BASE_URL)
-			const pageNum = parseInt(
-				url.searchParams.get("tx_openimmo_immobilie[page]") ?? "",
-				10,
-			)
-			if (Number.isNaN(pageNum)) continue
-			found.set(pageNum, url.searchParams.get("cHash") ?? undefined)
+		const setCookies = headers.getSetCookie()
+		if (setCookies.length > 0) {
+			this.sessionCookie = setCookies.map((c) => c.split(";")[0]).join("; ")
 		}
-		return found
+		return parse(text)
 	}
 
-	private extractListing(teaser: HTMLElement): ApartmentListing | null {
-		const propertyId = teaser
+	// Senior-housing listings ("Wohnen mit Service") have no bookmark id on
+	// teaser - recover it from the detail page instead.
+	private async recoverPropertyIdFromDetailPage(
+		url: string,
+	): Promise<string | undefined> {
+		try {
+			const page = await this.fetchHtml(url)
+			return (
+				page
+					.querySelector("[data-openimmo-bookmark-item-uid]")
+					?.getAttribute("data-openimmo-bookmark-item-uid") ?? undefined
+			)
+		} catch (err) {
+			log.warn(`degewo: failed to recover propertyId from ${url}: ${err}`)
+			return undefined
+		}
+	}
+
+	private async extractListing(
+		teaser: HTMLElement,
+	): Promise<ApartmentListing | null> {
+		const linkHref = required(
+			teaser.querySelector("h3 a"),
+			"degewo teaser h3 link",
+		).getAttribute("href")
+
+		let propertyId = teaser
 			.querySelector("[data-openimmo-bookmark-item-uid]")
 			?.getAttribute("data-openimmo-bookmark-item-uid")
+		if (!propertyId && linkHref) {
+			propertyId = await this.recoverPropertyIdFromDetailPage(
+				`${BASE_URL}${linkHref}`,
+			)
+		}
 		if (!propertyId) {
 			log.warn("degewo: couldn't extract propertyId, skipping")
 			return null
@@ -188,20 +200,12 @@ export default class Degewo extends Scraper {
 			)
 			return null
 		}
-		// The template above names all three fields, so a successful match
-		// always populates them with non-empty strings (each field's regex
-		// requires at least one char) - this just gives TS the narrowing it
-		// can't infer from parseAddress's general Partial<> return type.
 		if (!street || !houseNumber || !precinct) {
 			log.warn(
 				`degewo: address "${rawAddress}" missing expected fields, skipping`,
 			)
 			return null
 		}
-		const linkHref = required(
-			teaser.querySelector("h3 a"),
-			"degewo teaser h3 link",
-		).getAttribute("href")
 		const spaceQmText = required(
 			teaser.querySelector("dl>div:nth-child(3)>dt"),
 			"degewo teaser spaceQm cell",
@@ -243,43 +247,50 @@ export default class Degewo extends Scraper {
 		}
 	}
 
-	private extractListings(root: HTMLElement): ApartmentListing[] {
-		return root
-			.querySelectorAll(".c-teaser--apartment")
-			.flatMap((teaser) => this.extractListing(teaser) ?? [])
+	private async extractListings(
+		root: HTMLElement,
+	): Promise<ApartmentListing[]> {
+		const teasers = root.querySelectorAll(".c-teaser--apartment")
+		const listings = await runConcurrent(teasers, this.concurrency, (teaser) =>
+			this.extractListing(teaser),
+		)
+		return listings.flatMap((listing) => listing ?? [])
+	}
+
+	private getDeclaredTotal(page1?: HTMLElement): number | undefined {
+		const text = page1?.querySelector(".results-count")?.textContent
+		const match = text?.match(/\d+/)
+		return match ? parseInt(match[0], 10) : undefined
 	}
 
 	protected async getListings(): Promise<ApartmentListing[]> {
-		const known = new Map<number, string | undefined>([[1, undefined]])
-		const visited = new Map<number, HTMLElement>()
-		let frontier = [1]
+		const MAX_RESULTS_PER_PAGE = 10
+		let declaredTotal: number | undefined
 
-		while (frontier.length > 0) {
-			const roots = await runConcurrent(
-				frontier,
-				this.concurrency,
-				async (pageNum) => {
-					return parse(await this.fetchPage(pageNum, known.get(pageNum)))
-				},
-			)
-
-			const newFrontier: number[] = []
-			frontier.forEach((pageNum, i) => {
-				const root = roots[i]
-				visited.set(pageNum, root)
-				for (const [linkedPage, cHash] of this.extractPaginationLinks(root)) {
-					if (!known.has(linkedPage)) {
-						known.set(linkedPage, cHash)
-						newFrontier.push(linkedPage)
-					}
-				}
-			})
-			frontier = newFrontier
-		}
-
-		const allListings = [...visited.values()].flatMap((root) =>
-			this.extractListings(root),
+		const pages = await this.paginateHtmlPages(
+			(pageNumber) => this.fetchPage(pageNumber),
+			(firstPage) => {
+				declaredTotal = this.getDeclaredTotal(firstPage)
+				return declaredTotal === undefined
+					? 1
+					: Math.ceil(declaredTotal / MAX_RESULTS_PER_PAGE)
+			},
+			// Page returned is session state, not a stateless signature -
+			// concurrent requests on one session race each other.
+			1,
 		)
-		return this.dedupeByPropertyId(allListings)
+
+		const listingsPerPage = await Promise.all(
+			pages.map((page) => this.extractListings(page)),
+		)
+		const deduped = this.dedupeByPropertyId(listingsPerPage.flat())
+
+		if (declaredTotal !== undefined && deduped.length < declaredTotal) {
+			log.warn(
+				`degewo: captured ${deduped.length}/${declaredTotal} listings - some ` +
+					"listings unreachable this run (site's own pagination has no full tiebreaker)",
+			)
+		}
+		return deduped
 	}
 }

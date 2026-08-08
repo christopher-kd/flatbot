@@ -1,10 +1,10 @@
 import parse, { type HTMLElement } from "node-html-parser"
+import { parse as parse5Parse, serialize } from "parse5"
 import log from "../logger/logger"
 import type { ApartmentListing, Organization } from "../types"
 import { buildListingId } from "./listingId"
 import { countDefinedFields } from "./merge"
 import { runConcurrent } from "./util/concurrency"
-import { parse as parse5Parse, serialize } from "parse5"
 
 abstract class Scraper {
 	#externalRequestsCount = 0
@@ -67,6 +67,13 @@ abstract class Scraper {
 		url: string | URL,
 		init?: RequestInit,
 	): Promise<string> {
+		return (await this.fetchTextWithHeaders(url, init)).text
+	}
+
+	protected async fetchTextWithHeaders(
+		url: string | URL,
+		init?: RequestInit,
+	): Promise<{ text: string; headers: Headers }> {
 		const res = await fetch(url, init)
 		this.#externalRequestsCount++
 		if (!res.ok) {
@@ -75,7 +82,7 @@ abstract class Scraper {
 					`${res.status} ${res.statusText}`,
 			)
 		}
-		return res.text()
+		return { text: await res.text(), headers: res.headers }
 	}
 
 	protected async fetchJson<T>(
@@ -94,17 +101,17 @@ abstract class Scraper {
 	}
 
 	protected async fetchHtml(
-    url: string | URL,
-		opts?: RequestInit & {sanitize?: boolean}
-  ): Promise<HTMLElement> {
-    const { sanitize, ...init } = opts ?? {}
-    if (!sanitize) {
-      return parse(await this.fetchText(url, init))
-    }
+		url: string | URL,
+		opts?: RequestInit & { sanitize?: boolean },
+	): Promise<HTMLElement> {
+		const { sanitize, ...init } = opts ?? {}
+		if (!sanitize) {
+			return parse(await this.fetchText(url, init))
+		}
 
-    const rawHTML = await this.fetchText(url, init)
-    const sanitized = serialize(parse5Parse(rawHTML))
-    return parse(sanitized)
+		const rawHTML = await this.fetchText(url, init)
+		const sanitized = serialize(parse5Parse(rawHTML))
+		return parse(sanitized)
 	}
 
 	// For sites whose page 1 states the total page count up front, so the
