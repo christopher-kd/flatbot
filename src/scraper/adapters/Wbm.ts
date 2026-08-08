@@ -96,7 +96,7 @@ export default class WBM extends Scraper {
 					).textContent,
 				),
 			},
-			images: imageSrc ? [{ fullUrl: imageSrc }] : [],
+			images: imageSrc ? [{ fullUrl: `https://wbm.de${imageSrc}` }] : [],
 		}
 	}
 
