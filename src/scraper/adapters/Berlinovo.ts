@@ -43,6 +43,7 @@ export default class Berlinovo extends Scraper {
 		features: string[]
 		descriptionText: string
 		unitFeaturesText: string
+		depositClauseText: string
 	}> {
 		const page = await this.fetchHtml(url, { sanitize: true })
 
@@ -74,6 +75,15 @@ export default class Berlinovo extends Scraper {
 			.map((elem) => elem.textContent)
 			.join(" ")
 
+		// "3 Nettokaltmieten Kaution" is standard-listing boilerplate here, not
+		// a site-wide constant - senior/service units routinely omit it
+		// entirely (checked live: 3/3 sampled had no deposit clause anywhere
+		// on the page), so *3 isn't a safe default for them.
+		const depositClauseText = page
+			.querySelectorAll(".field--name-field-otherinfo")
+			.map((elem) => elem.textContent)
+			.join(" ")
+
 		return {
 			map: zipStrings(
 				details
@@ -86,6 +96,7 @@ export default class Berlinovo extends Scraper {
 			features,
 			descriptionText,
 			unitFeaturesText,
+			depositClauseText,
 		}
 	}
 
@@ -131,9 +142,11 @@ export default class Berlinovo extends Scraper {
 				listing.costs.totalRentEur =
 					this.parsePeriodFloatOrNull(bruttogesamtmiete)
 
-				// TODO: is this really always * 3?
+				// Apply the *3 formula when page's own text confirms it -
+				// senior/service units don't state a deposit clause at all
 				listing.costs.depositEur =
-					listing.costs.coldRentEur === null
+					listing.costs.coldRentEur === null ||
+					!/kaution/i.test(details.depositClauseText)
 						? null
 						: listing.costs.coldRentEur * 3
 
