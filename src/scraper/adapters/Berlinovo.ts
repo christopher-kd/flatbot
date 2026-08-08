@@ -42,6 +42,7 @@ export default class Berlinovo extends Scraper {
 		map: Map<string, string>
 		features: string[]
 		descriptionText: string
+		unitFeaturesText: string
 	}> {
 		const page = await this.fetchHtml(url, { sanitize: true })
 
@@ -65,6 +66,14 @@ export default class Berlinovo extends Scraper {
 			.map((elem) => elem.textContent)
 			.join(" ")
 
+		// field-interior2 only, not field-description - that one's building-
+		// wide ("some units here are wheelchair-friendly" on every unit's
+		// page), too unreliable for a per-unit wheelchair claim.
+		const unitFeaturesText = page
+			.querySelectorAll(".field--name-field-interior2")
+			.map((elem) => elem.textContent)
+			.join(" ")
+
 		return {
 			map: zipStrings(
 				details
@@ -76,6 +85,7 @@ export default class Berlinovo extends Scraper {
 			),
 			features,
 			descriptionText,
+			unitFeaturesText,
 		}
 	}
 
@@ -151,6 +161,11 @@ export default class Berlinovo extends Scraper {
 					)
 						? true
 						: null,
+					// wheelchair isn't tri-state - no match leaves it as-is,
+					// doesn't assert false.
+					...(/rollstuhl/i.test(details.unitFeaturesText)
+						? { wheelchair: true }
+						: {}),
 				}
 			} catch (err) {
 				log.warn(
