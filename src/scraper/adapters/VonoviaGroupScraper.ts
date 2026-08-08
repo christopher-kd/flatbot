@@ -191,7 +191,9 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 				fullUrl: url,
 			}
 		})
-		images.push({ fullUrl: listing.preview_img_url })
+		if (!listing.imageUrls.includes(listing.preview_img_url)) {
+			images.push({ fullUrl: listing.preview_img_url })
+		}
 		return [
 			{
 				propertyId,
