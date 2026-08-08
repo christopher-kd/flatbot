@@ -1,5 +1,6 @@
 import type {
 	ApartmentListing,
+	ApartmentListingAccessibility,
 	ApartmentListingCosts,
 	ApartmentListingImage,
 	ApartmentListingLocation,
@@ -84,6 +85,19 @@ function mergeCosts(
 	}
 }
 
+function mergeAccessibility(
+	preferred: ApartmentListingAccessibility | undefined,
+	fallback: ApartmentListingAccessibility | undefined,
+): ApartmentListingAccessibility | undefined {
+	if (!preferred) return fallback
+	if (!fallback) return preferred
+	return {
+		senior: pick(preferred.senior, fallback.senior),
+		wheelchair: pick(preferred.wheelchair, fallback.wheelchair),
+		barrierFree: pick(preferred.barrierFree, fallback.barrierFree),
+	}
+}
+
 // Discrete facts, not conflicting values - union is strictly more complete.
 function mergeWbsLevels(
 	preferred?: WBSLevel[],
@@ -141,7 +155,10 @@ function mergeApartmentListings(
 		// `rooms` required on every listing
 		rooms: direct.rooms,
 		newBuilding: pick(direct.newBuilding, aggregator.newBuilding),
-		accessibility: pick(direct.accessibility, aggregator.accessibility),
+		accessibility: mergeAccessibility(
+			direct.accessibility,
+			aggregator.accessibility,
+		),
 		restrictions: mergeRestrictions(
 			direct.restrictions,
 			aggregator.restrictions,
