@@ -38,9 +38,11 @@ export default class Berlinovo extends Scraper {
 		return this.parseGermanFloat(areaElem.textContent.trim())
 	}
 
-	public async fetchDetails(
-		url: string,
-	): Promise<{ map: Map<string, string>; features: string[] }> {
+	public async fetchDetails(url: string): Promise<{
+		map: Map<string, string>
+		features: string[]
+		descriptionText: string
+	}> {
 		const page = await this.fetchHtml(url, { sanitize: true })
 
 		const details = required(
@@ -52,6 +54,17 @@ export default class Berlinovo extends Scraper {
 			.querySelectorAll(".details [class*='has'].block:not(.null-as-empty)")
 			.map((elem) => elem.textContent.trim())
 
+		// No structured accessibility field exists on this site - only prose
+		// mentions in these two blocks. Scoped to them (not the whole page) so
+		// the sitewide footer nav link "Barrierefreiheit" can't false-positive
+		// match on every single listing.
+		const descriptionText = page
+			.querySelectorAll(
+				".field--name-field-description, .field--name-field-interior2",
+			)
+			.map((elem) => elem.textContent)
+			.join(" ")
+
 		return {
 			map: zipStrings(
 				details
@@ -62,6 +75,7 @@ export default class Berlinovo extends Scraper {
 					.map((e) => e.textContent.trim()),
 			),
 			features,
+			descriptionText,
 		}
 	}
 
@@ -81,7 +95,8 @@ export default class Berlinovo extends Scraper {
 				listing.costs.heatingEur === undefined ||
 				listing.costs.utilityEur === undefined ||
 				listing.newBuilding === undefined ||
-				!listing.features,
+				!listing.features ||
+				listing.accessibility?.barrierFree === undefined,
 		)
 
 		await runConcurrent(listingTargets, this.concurrency, async (listing) => {
@@ -123,6 +138,20 @@ export default class Berlinovo extends Scraper {
 				listing.spaceQm = this.parseGermanFloatOrNull(map.get("Wohnfläche"))
 
 				listing.features = details.features
+
+				// No structured accessibility field on this site - only a
+				// positive-match heuristic is reliable (absence of the word
+				// doesn't mean the unit isn't barrier-free). "barrierearm"
+				// (reduced barriers) is NOT the same claim as "barrierefrei"
+				// (fully accessible) - don't match on it.
+				listing.accessibility = {
+					...listing.accessibility,
+					barrierFree: /barrierefrei/i.test(
+						`${listing.title} ${details.descriptionText}`,
+					)
+						? true
+						: null,
+				}
 			} catch (err) {
 				log.warn(
 					` -> Failed to backfill data for id ${listing.propertyId}: ${err}`,
