@@ -73,7 +73,8 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 				listing.costs.totalRentEur = this.parseGermanFloatOrNull(
 					tableData.get("Warmmiete"),
 				)
-				listing.newBuilding = baujahr === undefined ? null : Number(baujahr) >= 2014
+				listing.newBuilding =
+					baujahr === undefined ? null : Number(baujahr) >= 2014
 				listing.features = features
 
 				// "Barrierearmes Gebäude" exists as well, but is not checked for
@@ -132,15 +133,19 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 		return this.fetchJson(this.buildUrl(offset))
 	}
 
-	// API sometimes returns empty result. Retries a few times.
-	private async fetchFirstPage(): Promise<VonoviaGroupResponse> {
+	// API sometimes returns an empty page - not just on the first page, any
+	// of them. Retry each one, not just the first.
+	private async fetchPageWithRetry(
+		offset?: number,
+	): Promise<VonoviaGroupResponse> {
 		let lastResult: VonoviaGroupResponse | undefined
 		for (let attempt = 1; attempt <= EMPTY_RESULT_RETRIES; attempt++) {
-			lastResult = await this.fetchListingsPage()
-			if (lastResult.paging.info.count > 0) return lastResult
+			lastResult = await this.fetchListingsPage(offset)
+			if (lastResult.results.length > 0) return lastResult
 			if (attempt < EMPTY_RESULT_RETRIES) {
 				log.warn(
-					`${this.organization}: got 0 listings (attempt ${attempt}/${EMPTY_RESULT_RETRIES}), retrying`,
+					`${this.organization}: got 0 results at offset ${offset ?? 0} ` +
+						`(attempt ${attempt}/${EMPTY_RESULT_RETRIES}), retrying`,
 				)
 				await delay(EMPTY_RESULT_RETRY_DELAY_MS)
 			}
@@ -149,7 +154,9 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 	}
 
 	private async fetchAllListings(): Promise<VonoviaGroupResponse["results"]> {
-		const fetchResults: VonoviaGroupResponse[] = [await this.fetchFirstPage()]
+		const fetchResults: VonoviaGroupResponse[] = [
+			await this.fetchPageWithRetry(),
+		]
 		const listingsCount = fetchResults[0].paging.info.count
 		if (listingsCount <= 0)
 			throw new Error("Couldn't find any listing. Blocked?")
@@ -158,7 +165,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 			offset < listingsCount;
 			offset += this.LISTING_LIMIT_PER_REQUEST
 		) {
-			fetchResults.push(await this.fetchListingsPage(offset))
+			fetchResults.push(await this.fetchPageWithRetry(offset))
 		}
 		return fetchResults.flatMap((f) => f.results)
 	}
