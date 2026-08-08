@@ -302,9 +302,14 @@ export default class Berlinovo extends Scraper {
 		)
 
 		const listings = pages.flatMap((page) =>
-			page
-				.querySelectorAll(".view article")
-				.map((listing) => this.extractListing(listing)),
+			page.querySelectorAll(".view article").flatMap((listing) => {
+				try {
+					return [this.extractListing(listing)]
+				} catch (err) {
+					log.warn(`Berlinovo: failed to extract listing: ${err}`)
+					return []
+				}
+			}),
 		)
 
 		return this.dedupeByPropertyId(listings)

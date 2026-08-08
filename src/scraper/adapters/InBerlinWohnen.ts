@@ -1,4 +1,5 @@
 import type { HTMLElement } from "node-html-parser"
+import log from "../../logger/logger"
 import type { ApartmentListing, Organization } from "../../types"
 import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
@@ -169,9 +170,14 @@ export default class InBerlinWohnenScraper extends Scraper {
 		)
 
 		return pages.flatMap((page) =>
-			page
-				.querySelectorAll("[id^=apartment]")
-				.map((apartment) => this.extractListing(apartment)),
+			page.querySelectorAll("[id^=apartment]").flatMap((apartment) => {
+				try {
+					return [this.extractListing(apartment)]
+				} catch (err) {
+					log.warn(`inberlinwohnen: failed to extract listing: ${err}`)
+					return []
+				}
+			}),
 		)
 	}
 }

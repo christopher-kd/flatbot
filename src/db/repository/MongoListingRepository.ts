@@ -44,6 +44,15 @@ function normalizeForStorage(
 		...listing,
 		spaceQm: toDouble(listing.spaceQm),
 		rooms: toDouble(listing.rooms),
+		location: {
+			...listing.location,
+			coordinates: listing.location.coordinates
+				? {
+						lat: toDouble(listing.location.coordinates.lat),
+						lng: toDouble(listing.location.coordinates.lng),
+					}
+				: listing.location.coordinates,
+		},
 		costs: {
 			...listing.costs,
 			coldRentEur: toDouble(listing.costs.coldRentEur),

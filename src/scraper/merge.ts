@@ -52,14 +52,10 @@ function mergeImages(
 	return [...byUrl.values()]
 }
 
-// Typed as required, but adapters don't always deliver at runtime (e.g.
-// Berlinovo ships `location: null`) - guard before touching fields.
 function mergeLocation(
 	preferred: ApartmentListingLocation,
 	fallback: ApartmentListingLocation,
 ): ApartmentListingLocation {
-	if (!preferred) return fallback
-	if (!fallback) return preferred
 	return {
 		postalCode: preferred.postalCode ?? fallback.postalCode,
 		city: preferred.city ?? fallback.city,

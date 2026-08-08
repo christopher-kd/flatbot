@@ -118,21 +118,21 @@ export default class Gewobag extends Scraper {
 			listing.querySelector("address"),
 			"Gewobag listing address",
 		).innerText.split("/")
-    const district = address[1]
+		const district = address[1]
 		const parsedAddress = parseAddress(
 			address[0],
 			"{street} {houseNumber}, {postalCode} {city}",
-    )
+		)
 		const street = required(parsedAddress.street, "Gewobag parsed street")
 		const postalCode = required(
 			parsedAddress.postalCode,
 			"Gewobag parsed postalCode",
-    )
+		)
 		const houseNumber = required(
 			parsedAddress.houseNumber,
 			"Gewobag parsed houseNumber",
 		)
-    const city = required(parsedAddress.city, "Gewobag parsed city")
+		const city = required(parsedAddress.city, "Gewobag parsed city")
 
 		const roomAndQm = required(
 			listing.querySelector(".angebot-area td"),
@@ -202,9 +202,14 @@ export default class Gewobag extends Scraper {
 		)
 
 		return pages.flatMap((page) =>
-			page
-				.querySelectorAll(".filtered-elements article")
-				.map((listing) => this.extractListing(listing)),
+			page.querySelectorAll(".filtered-elements article").flatMap((listing) => {
+				try {
+					return [this.extractListing(listing)]
+				} catch (err) {
+					log.warn(`Gewobag: failed to extract listing: ${err}`)
+					return []
+				}
+			}),
 		)
 	}
 }

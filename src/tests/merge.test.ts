@@ -147,3 +147,81 @@ describe("mergeAggregatorListings - accessibility tri-state", () => {
 		expect(merged.accessibility?.senior).toBe(true)
 	})
 })
+
+describe("mergeAggregatorListings - location.coordinates tri-state", () => {
+	test("direct undefined, aggregator has value - aggregator fills the gap", () => {
+		const direct = makeListing({ location: { ...makeListing().location } })
+		const aggregator = makeListing({
+			location: {
+				...makeListing().location,
+				coordinates: { lat: 52.5, lng: 13.4 },
+			},
+		})
+
+		const [merged] = mergeAggregatorListings([direct], [aggregator])
+
+		expect(merged.location.coordinates).toEqual({ lat: 52.5, lng: 13.4 })
+	})
+
+	test("direct has a value, aggregator has a different value - direct wins", () => {
+		const direct = makeListing({
+			location: {
+				...makeListing().location,
+				coordinates: { lat: 52.1, lng: 13.1 },
+			},
+		})
+		const aggregator = makeListing({
+			location: {
+				...makeListing().location,
+				coordinates: { lat: 52.9, lng: 13.9 },
+			},
+		})
+
+		const [merged] = mergeAggregatorListings([direct], [aggregator])
+
+		expect(merged.location.coordinates).toEqual({ lat: 52.1, lng: 13.1 })
+	})
+
+	test("direct is null (confirmed unresolvable), aggregator has value - aggregator wins", () => {
+		const direct = makeListing({
+			location: { ...makeListing().location, coordinates: null },
+		})
+		const aggregator = makeListing({
+			location: {
+				...makeListing().location,
+				coordinates: { lat: 52.5, lng: 13.4 },
+			},
+		})
+
+		const [merged] = mergeAggregatorListings([direct], [aggregator])
+
+		expect(merged.location.coordinates).toEqual({ lat: 52.5, lng: 13.4 })
+	})
+
+	test("both undefined - stays undefined, not coerced to null", () => {
+		const direct = makeListing({ location: { ...makeListing().location } })
+		const aggregator = makeListing({ location: { ...makeListing().location } })
+
+		const [merged] = mergeAggregatorListings([direct], [aggregator])
+
+		expect(merged.location.coordinates).toBeUndefined()
+	})
+
+	test("direct's own street/postalCode survives even when aggregator fills coordinates", () => {
+		const direct = makeListing({
+			location: { ...makeListing().location, street: "Direktstr." },
+		})
+		const aggregator = makeListing({
+			location: {
+				...makeListing().location,
+				street: "Aggregatorstr.",
+				coordinates: { lat: 52.5, lng: 13.4 },
+			},
+		})
+
+		const [merged] = mergeAggregatorListings([direct], [aggregator])
+
+		expect(merged.location.street).toBe("Direktstr.")
+		expect(merged.location.coordinates).toEqual({ lat: 52.5, lng: 13.4 })
+	})
+})
