@@ -148,9 +148,9 @@ export default class Gesobau extends Scraper {
 			spaceQm: required(elem.raw.wohnflaeche_floatS, "space in m²"),
 			rooms: roomCount,
 			accessibility: {
-				wheelchair: elem.raw.rollstuhlgerecht_boolS ?? false,
-				senior: elem.raw.fuerSenioren_boolS ?? false,
-				barrierFree: elem.raw.barrierefrei_boolS ?? false,
+				wheelchair: elem.raw.rollstuhlgerecht_boolS,
+				senior: elem.raw.fuerSenioren_boolS ?? null,
+				barrierFree: elem.raw.barrierefrei_boolS ?? null,
 			},
 			restrictions: (() => {
 				const restriction = !elem.raw.noWbs_boolS
