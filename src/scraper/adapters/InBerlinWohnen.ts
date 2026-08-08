@@ -127,14 +127,14 @@ export default class InBerlinWohnenScraper extends Scraper {
 					lng: Number(coords.lon),
 				},
 			},
-			spaceQm: this.parseGermanFloat(table.get("Wohnfläche") ?? ""),
+			spaceQm: this.parseGermanFloatOrNull(table.get("Wohnfläche")),
 			rooms: this.parseGermanFloat(table.get("Zimmeranzahl") ?? ""),
 			newBuilding:
 				Number(required(table.get("Baujahr"), "Baujahr").trim()) >= 2014,
 			costs: {
-				coldRentEur: this.parseGermanFloat(table.get("Kaltmiete") ?? ""),
-				utilityEur: this.parseGermanFloat(table.get("Nebenkosten") ?? ""),
-				totalRentEur: this.parseGermanFloat(table.get("Gesamtmiete") ?? ""),
+				coldRentEur: this.parseGermanFloatOrNull(table.get("Kaltmiete")),
+				utilityEur: this.parseGermanFloatOrNull(table.get("Nebenkosten")),
+				totalRentEur: this.parseGermanFloatOrNull(table.get("Gesamtmiete")),
 			},
 			accessibility: {
 				barrierFree: features.includes("Barrierefrei"),
