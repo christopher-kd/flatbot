@@ -15,7 +15,7 @@ class StadtUndLand extends Scraper {
   }
 
   public async backfill(listings: ApartmentListing[]): Promise<void> {
-    this.runBackfillStep("features", () => this.backfillFeatures(listings))
+    await this.runBackfillStep("features", () => this.backfillFeatures(listings))
   }
 
   private async fetchDetails(url: string): Promise<Map<string, string>> {

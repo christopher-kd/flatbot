@@ -14,7 +14,7 @@ export default class Gewobag extends Scraper {
 	}
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
-		this.runBackfillStep("fill costs", () => this.backfillData(listings))
+		await this.runBackfillStep("fill costs", () => this.backfillData(listings))
 	}
 
 	private async backfillData(listings: ApartmentListing[]) {
@@ -28,7 +28,7 @@ export default class Gewobag extends Scraper {
 				!listing.features,
 		)
 
-		runConcurrent(listingTargets, this.concurrency, async (listing) => {
+		await runConcurrent(listingTargets, this.concurrency, async (listing) => {
 			try {
 				const details = await this.fetchDetailTable(listing.fullUrl)
 				const map = details.map

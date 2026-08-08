@@ -29,7 +29,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 	}
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
-		this.runBackfillStep("costs", () => this.backfillData(listings))
+		await this.runBackfillStep("costs", () => this.backfillData(listings))
 	}
 
 	private async backfillData(listings: ApartmentListing[]): Promise<void> {
