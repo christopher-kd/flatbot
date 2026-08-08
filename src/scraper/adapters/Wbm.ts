@@ -4,11 +4,58 @@ import type { ApartmentListing } from "../../types"
 import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
+import { runConcurrent } from "../util/concurrency"
+import { zipStrings } from "../util/zip"
 import { restrictionFromTitle } from "../wbs"
 
 export default class WBM extends Scraper {
 	constructor() {
 		super("WBM")
+	}
+
+	public async backfill(listings: ApartmentListing[]): Promise<void> {
+		await this.runBackfillStep("costs", () => this.backfillData(listings))
+	}
+
+	private async backfillData(listings: ApartmentListing[]): Promise<void> {
+		const targets = listings.filter(
+			(listing) =>
+				listing.costs.coldRentEur === undefined ||
+				listing.costs.utilityEur === undefined ||
+				listing.costs.totalRentEur === undefined ||
+				listing.costs.depositEur === undefined ||
+				listing.costs.heatingEur === undefined,
+		)
+		await runConcurrent(targets, this.concurrency, async (listing) => {
+			try {
+				const page = await this.fetchHtml(listing.fullUrl)
+				const map = zipStrings(
+					page
+						.querySelectorAll(".openimmo-detail__rental-costs-list-item-title")
+						.map((elem) => elem.textContent.trim()),
+					page
+						.querySelectorAll(".openimmo-detail__rental-costs-list-item-value")
+						.map((elem) => elem.textContent.trim()),
+				)
+
+				const coldRentEur = this.parseGermanFloatOrNull(
+					map.get("Nettokaltmiete"),
+				)
+				listing.costs.coldRentEur = coldRentEur
+				listing.costs.utilityEur = this.parseGermanFloatOrNull(
+					map.get("Nebenkosten"),
+				)
+				listing.costs.totalRentEur = this.parseGermanFloatOrNull(
+					map.get("Warmmiete"),
+				)
+				listing.costs.depositEur = coldRentEur === null ? null : coldRentEur * 3
+				listing.costs.heatingEur = null
+			} catch (err) {
+				log.warn(
+					` -> Failed to backfill costs for id ${listing.propertyId}: ${err}`,
+				)
+			}
+		})
 	}
 
 	// .openimmo-search-list-item -> listing
