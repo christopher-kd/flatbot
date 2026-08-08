@@ -43,7 +43,9 @@ class Howoge extends Scraper {
 		super("HOWOGE")
 	}
 
-	public async fetchDetailTable(propertyId: string): Promise<{map: Map<string, string>, features: string[]}> {
+	public async fetchDetailTable(
+		propertyId: string,
+	): Promise<{ map: Map<string, string>; features: string[] }> {
 		const html = await this.fetchHtml(
 			"https://www.howoge.de/immobiliensuche/wohnungssuche/detail/" +
 				`${propertyId}.html`,
@@ -59,48 +61,62 @@ class Howoge extends Scraper {
 			values.push(
 				...table.querySelectorAll("td").map((td) => td.textContent.trim()),
 			)
-    }
+		}
 
-    const features = html.querySelectorAll(".features li")
-      .map(elem => elem.innerText.trim())
-    return {
-      map: zipStrings(keys, values),
-      features
+		const features = html
+			.querySelectorAll(".features li")
+			.map((elem) => elem.innerText.trim())
+		return {
+			map: zipStrings(keys, values),
+			features,
 		}
 	}
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
 		await this.runBackfillStep("costs and is new building", () =>
 			this.backfillWithDetailTable(listings),
-    )
+		)
 	}
 
 	private async backfillWithDetailTable(
 		listings: ApartmentListing[],
 	): Promise<void> {
 		const targets = listings.filter(
-      (listing) =>
-        listing.newBuilding === undefined ||
-        listing.costs.coldRentEur === undefined ||
-        listing.costs.depositEur === undefined ||
-        listing.costs.totalRentEur === undefined ||
-        listing.costs.utilityEur === undefined ||
-        !listing.features
+			(listing) =>
+				listing.newBuilding === undefined ||
+				listing.costs.coldRentEur === undefined ||
+				listing.costs.depositEur === undefined ||
+				listing.costs.totalRentEur === undefined ||
+				listing.costs.utilityEur === undefined ||
+				listing.costs.heatingEur === undefined ||
+				!listing.features,
 		)
 		await runConcurrent(targets, this.concurrency, async (listing) => {
 			try {
-        const details = await this.fetchDetailTable(listing.propertyId)
-        const map = details.map
+				const details = await this.fetchDetailTable(listing.propertyId)
+				const map = details.map
 
-        const baujahr = map.get("Baujahr")
-        listing.costs.coldRentEur = this.parseGermanFloatOrNull(map.get("Kaltmiete"))
-        listing.costs.utilityEur = this.parseGermanFloatOrNull(map.get("Nebenkosten"))
-        listing.costs.totalRentEur = this.parseGermanFloatOrNull(map.get("Warmmiete"))
-        listing.costs.depositEur = this.parseGermanFloatOrNull(map.get("Kaution"))
+				const baujahr = map.get("Baujahr")
+				listing.costs.coldRentEur = this.parseGermanFloatOrNull(
+					map.get("Kaltmiete"),
+				)
+				listing.costs.utilityEur = this.parseGermanFloatOrNull(
+					map.get("Nebenkosten"),
+				)
+				listing.costs.totalRentEur = this.parseGermanFloatOrNull(
+					map.get("Warmmiete"),
+				)
+				listing.costs.depositEur = this.parseGermanFloatOrNull(
+					map.get("Kaution"),
+				)
+				listing.costs.heatingEur = this.parseGermanFloatOrNull(
+					map.get("Heizkosten"),
+				)
 
-        listing.newBuilding = baujahr === undefined ? null : Number(baujahr) >= 2014
+				listing.newBuilding =
+					baujahr === undefined ? null : Number(baujahr) >= 2014
 
-        listing.features = details.features
+				listing.features = details.features
 			} catch (err) {
 				log.warn(
 					" -> Failed to backfill data from HOWOGE - " +
@@ -134,7 +150,7 @@ class Howoge extends Scraper {
 		)
 		return this.toListing({
 			propertyId: immo.link.split("/")[4].slice(0, -5),
-			title: immo.notice,
+			title: immo.notice.trim(),
 			fullUrl: `https://howoge.de${immo.link}`,
 			spaceQm: immo.area,
 			rooms: immo.rooms,
@@ -188,7 +204,7 @@ class Howoge extends Scraper {
 		const title = required(
 			flat.querySelector(".notice"),
 			`.notice in ${teaserUrl}`,
-		).text
+		).text.trim()
 		const addressText = required(
 			flat.querySelector(".address"),
 			`.address in ${teaserUrl}`,
