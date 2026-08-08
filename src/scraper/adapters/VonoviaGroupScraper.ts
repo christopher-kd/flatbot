@@ -199,7 +199,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 				propertyId,
 				organization: this.organization,
 				lastSeenAt: Date.now(),
-				title: listing.titel,
+				title: listing.titel.trim(),
 				fullUrl: `${this.listingUrlBase}${listing.slug}`,
 				location: {
 					street: street_raw.join(" "),
@@ -207,10 +207,12 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 					city: city_raw[0],
 					neighborhood: district,
 					postalCode: listing.plz,
-					coordinates: {
-						lat: listing.lat,
-						lng: listing.lng,
-					},
+					// Not-yet-geocoded listings come back as 0,0 rather than
+					// omitted - that's "null island", not a real location.
+					coordinates:
+						listing.lat === 0 && listing.lng === 0
+							? null
+							: { lat: listing.lat, lng: listing.lng },
 				},
 				spaceQm: listing.groesse,
 				rooms: listing.anzahl_zimmer,
