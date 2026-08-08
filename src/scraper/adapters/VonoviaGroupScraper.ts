@@ -35,18 +35,14 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 	private async backfillData(listings: ApartmentListing[]): Promise<void> {
 		const listingTargets = listings.filter(
 			(listing) =>
-				listing.costs.depositEur === 0 ||
-				!listing.costs.depositEur ||
-				listing.costs.heatingEur === 0 ||
-				!listing.costs.heatingEur ||
-				listing.costs.utilityEur === 0 ||
-				!listing.costs.utilityEur ||
-				listing.costs.totalRentEur === 0 ||
-				!listing.costs.totalRentEur ||
-				!listing.newBuilding ||
+				listing.costs.depositEur === undefined ||
+				listing.costs.heatingEur === undefined ||
+				listing.costs.utilityEur === undefined ||
+				listing.costs.totalRentEur === undefined ||
+				listing.newBuilding === undefined ||
 				!listing.features ||
-				!listing.accessibility?.barrierFree ||
-				!listing.accessibility?.senior,
+				listing.accessibility?.barrierFree === undefined ||
+				listing.accessibility?.senior === undefined,
 		)
 
 		await runConcurrent(listingTargets, 3, async (listing) => {
@@ -54,7 +50,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 				const data = await this.fetchDetails(listing.fullUrl)
 				const tableData = data.tableData
 				const features = data.features
-				const yearBuilt = Number(tableData.get("Baujahr") ?? "")
+				const baujahr = tableData.get("Baujahr")
 
 				const isX = (x: string, onFeatures: string[]): boolean => {
 					x = x.toLowerCase()
@@ -65,19 +61,19 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 					return false
 				}
 
-				listing.costs.depositEur = this.parseGermanFloat(
-					tableData.get("Kaution") ?? "",
+				listing.costs.depositEur = this.parseGermanFloatOrNull(
+					tableData.get("Kaution"),
 				)
-				listing.costs.heatingEur = this.parseGermanFloat(
-					tableData.get("Heizkosten") ?? "",
+				listing.costs.heatingEur = this.parseGermanFloatOrNull(
+					tableData.get("Heizkosten"),
 				)
-				listing.costs.utilityEur = this.parseGermanFloat(
-					tableData.get("Nebenkosten") ?? "",
+				listing.costs.utilityEur = this.parseGermanFloatOrNull(
+					tableData.get("Nebenkosten"),
 				)
-				listing.costs.totalRentEur = this.parseGermanFloat(
-					tableData.get("Warmmiete") ?? "",
+				listing.costs.totalRentEur = this.parseGermanFloatOrNull(
+					tableData.get("Warmmiete"),
 				)
-				listing.newBuilding = yearBuilt >= 2014
+				listing.newBuilding = baujahr === undefined ? null : Number(baujahr) >= 2014
 				listing.features = features
 
 				// "Barrierearmes Gebäude" exists as well, but is not checked for

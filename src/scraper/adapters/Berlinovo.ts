@@ -68,13 +68,13 @@ export default class Berlinovo extends Scraper {
 	private async backfillData(listings: ApartmentListing[]): Promise<void> {
 		const listingTargets = listings.filter(
 			(listing) =>
-				!listing.spaceQm ||
-				(listing.costs.totalRentEur ?? -1) <= 0 ||
-				listing.costs.coldRentEur === 0 ||
-				listing.costs.depositEur === 0 ||
-				listing.costs.heatingEur === 0 ||
-				listing.costs.utilityEur === 0 ||
-				!listing.newBuilding ||
+				listing.spaceQm === undefined ||
+				listing.costs.totalRentEur === undefined ||
+				listing.costs.coldRentEur === undefined ||
+				listing.costs.depositEur === undefined ||
+				listing.costs.heatingEur === undefined ||
+				listing.costs.utilityEur === undefined ||
+				listing.newBuilding === undefined ||
 				!listing.features,
 		)
 
@@ -87,34 +87,36 @@ export default class Berlinovo extends Scraper {
 				)
 				const map = details.map
 
-				const yearBuilt = Number(map.get("Baujahr") ?? "")
-				listing.newBuilding = yearBuilt >= 2014
+				const baujahr = map.get("Baujahr")
+				listing.newBuilding = baujahr === undefined ? null : Number(baujahr) >= 2014
 
-				listing.costs.coldRentEur = this.parseGermanFloat(
-					map.get("Kaltmiete") ?? "",
+				listing.costs.coldRentEur = this.parseGermanFloatOrNull(
+					map.get("Kaltmiete"),
 				)
 
 				// This uses period decimal separator for some reason
-				listing.costs.totalRentEur = Number(
-					required(map.get("Bruttogesamtmiete"), "Bruttogesamtmiete").slice(
-						0,
-						-2,
-					),
-				)
+				const bruttogesamtmiete = map.get("Bruttogesamtmiete")
+				listing.costs.totalRentEur =
+					bruttogesamtmiete === undefined
+						? null
+						: Number(bruttogesamtmiete.slice(0, -2))
 
 				// TODO: is this really always * 3?
-				listing.costs.depositEur = listing.costs.coldRentEur * 3
+				listing.costs.depositEur =
+					listing.costs.coldRentEur === null
+						? null
+						: listing.costs.coldRentEur * 3
 
 				// This also uses period decimal separator for some reason
-				listing.costs.heatingEur = Number(
-					required(map.get("Heizkosten"), "Heizkosten").slice(0, -2),
-				)
+				const heizkosten = map.get("Heizkosten")
+				listing.costs.heatingEur =
+					heizkosten === undefined ? null : Number(heizkosten.slice(0, -2))
 
 				// These do not use the period decimal separator
-				listing.costs.utilityEur = this.parseGermanFloat(
-					map.get("Nebenkosten") ?? "",
+				listing.costs.utilityEur = this.parseGermanFloatOrNull(
+					map.get("Nebenkosten"),
 				)
-				listing.spaceQm = this.parseGermanFloat(map.get("Wohnfläche") ?? "")
+				listing.spaceQm = this.parseGermanFloatOrNull(map.get("Wohnfläche"))
 
 				listing.features = details.features
 			} catch (err) {
@@ -162,7 +164,7 @@ export default class Berlinovo extends Scraper {
 		)
 		const totalRentEur = totalRentElem
 			? this.parseGermanFloat(totalRentElem.textContent)
-			: -1
+			: undefined
 
 		const restriction = wbsRequired
 			? "wbs-required"

@@ -25,11 +25,11 @@ export default class Gesobau extends Scraper {
 		const targets = listings.filter((listing) => {
 			const costs = listing.costs
 			return (
-				!costs.coldRentEur ||
-				!costs.depositEur ||
-				!costs.heatingEur ||
-				!costs.utilityEur ||
-        !listing.newBuilding ||
+				costs.coldRentEur === undefined ||
+				costs.depositEur === undefined ||
+				costs.heatingEur === undefined ||
+				costs.utilityEur === undefined ||
+				listing.newBuilding === undefined ||
 				!listing.features
 			)
 		})
@@ -75,10 +75,10 @@ export default class Gesobau extends Scraper {
 
 		listing.costs = {
 			...listing.costs,
-			coldRentEur: costsMap["Kaltmiete"],
-			depositEur: costsMap["Kaution"],
-			heatingEur: costsMap["Heizkosten"],
-			utilityEur: costsMap["Betriebskosten"],
+			coldRentEur: costsMap["Kaltmiete"] ?? null,
+			depositEur: costsMap["Kaution"] ?? null,
+			heatingEur: costsMap["Heizkosten"] ?? null,
+			utilityEur: costsMap["Betriebskosten"] ?? null,
 		}
 
 		const listItems = page
@@ -95,7 +95,8 @@ export default class Gesobau extends Scraper {
 			{} as Record<string, string>,
 		)
 
-    listing.newBuilding = Number(factsMap["Baujahr"]) >= 2014
+    listing.newBuilding =
+      factsMap["Baujahr"] === undefined ? null : Number(factsMap["Baujahr"]) >= 2014
 
     listing.features = features
 	}

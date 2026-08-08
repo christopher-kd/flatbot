@@ -81,10 +81,10 @@ class Howoge extends Scraper {
 		const targets = listings.filter(
       (listing) =>
         listing.newBuilding === undefined ||
-        listing.costs.coldRentEur === 0 ||
-        listing.costs.depositEur === 0 ||
-        listing.costs.totalRentEur === 0 ||
-        listing.costs.utilityEur === 0 ||
+        listing.costs.coldRentEur === undefined ||
+        listing.costs.depositEur === undefined ||
+        listing.costs.totalRentEur === undefined ||
+        listing.costs.utilityEur === undefined ||
         !listing.features
 		)
 		await runConcurrent(targets, this.concurrency, async (listing) => {
@@ -92,13 +92,13 @@ class Howoge extends Scraper {
         const details = await this.fetchDetailTable(listing.propertyId)
         const map = details.map
 
-        const yearBuilt = Number(map.get("Baujahr"))
-        listing.costs.coldRentEur = this.parseGermanFloat(map.get("Kaltmiete") ?? "")
-        listing.costs.utilityEur = this.parseGermanFloat(map.get("Nebenkosten") ?? "")
-        listing.costs.totalRentEur = this.parseGermanFloat(map.get("Warmmiete") ?? "")
-        listing.costs.depositEur = this.parseGermanFloat(map.get("Kaution") ?? "")
+        const baujahr = map.get("Baujahr")
+        listing.costs.coldRentEur = this.parseGermanFloatOrNull(map.get("Kaltmiete"))
+        listing.costs.utilityEur = this.parseGermanFloatOrNull(map.get("Nebenkosten"))
+        listing.costs.totalRentEur = this.parseGermanFloatOrNull(map.get("Warmmiete"))
+        listing.costs.depositEur = this.parseGermanFloatOrNull(map.get("Kaution"))
 
-        listing.newBuilding = yearBuilt >= 2014
+        listing.newBuilding = baujahr === undefined ? null : Number(baujahr) >= 2014
 
         listing.features = details.features
 			} catch (err) {

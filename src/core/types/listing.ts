@@ -20,17 +20,17 @@ export type Restrictions =
 	| ({ kind: "wbs-required"; wbsSpecialNeed: SpecialNeed } & IncomeRestriction)
 
 export interface ApartmentListingAccessibility {
-	senior?: boolean
+	senior?: boolean | null
 	wheelchair?: boolean
-	barrierFree?: boolean
+	barrierFree?: boolean | null
 }
 
 export interface ApartmentListingCosts {
-	coldRentEur?: number
-	utilityEur?: number
-	heatingEur?: number
-	totalRentEur?: number
-	depositEur?: number
+	coldRentEur?: number | null
+	utilityEur?: number | null
+	heatingEur?: number | null
+	totalRentEur?: number | null
+	depositEur?: number | null
 }
 
 export interface ApartmentListingLocation {
@@ -40,7 +40,7 @@ export interface ApartmentListingLocation {
 	street: string
 	houseNumber: string
 	neighborhood?: string
-	coordinates?: ApartmentListingLocationCoordinates
+	coordinates?: ApartmentListingLocationCoordinates | null
 }
 
 export interface ApartmentListingLocationCoordinates {
@@ -64,9 +64,9 @@ export interface ApartmentListing {
 	title: string
 	fullUrl: string
 	location: ApartmentListingLocation
-	spaceQm?: number
+	spaceQm?: number | null
 	rooms: number
-	newBuilding?: boolean
+	newBuilding?: boolean | null
 	accessibility?: ApartmentListingAccessibility
 	// null for Vonovia/Deutsche Wohnen, which skip restrictionFromTitle() —
 	// genuinely unclassified

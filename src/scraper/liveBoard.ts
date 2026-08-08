@@ -226,7 +226,7 @@ export async function runCoordinateFillWithLiveBoard(params: {
 							title: `${label} — filling coordinates...`,
 							task: async (_ctx2, subtask) => {
 								const total = listings.filter(
-									(l) => !l.location.coordinates,
+									(l) => l.location.coordinates === undefined,
 								).length
 								if (total === 0) {
 									subtask.title = `${label} — no missing coordinates`

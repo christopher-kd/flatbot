@@ -25,8 +25,8 @@ const LIVENESS_CHECK_PER_ORG_CONCURRENCY = 4
 // Storage writes a BSON Double in place of `number`, but the field still
 // reads back as `number` everywhere else (Mongo/JS blur the two) - so a
 // single cast lives here, once, instead of at every call site below.
-function toDouble<T extends number | undefined>(value: T): T {
-	return (value === undefined ? undefined : new Double(value)) as T
+function toDouble<T extends number | null | undefined>(value: T): T {
+	return (value == null ? value : new Double(value)) as T
 }
 
 // Storage shape diverges from in-memory scraper shape only here:

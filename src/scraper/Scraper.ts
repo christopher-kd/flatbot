@@ -59,6 +59,10 @@ abstract class Scraper {
 		)
 	}
 
+	protected parseGermanFloatOrNull(value: string | undefined): number | null {
+		return value === undefined ? null : this.parseGermanFloat(value)
+	}
+
 	protected async fetchText(
 		url: string | URL,
 		init?: RequestInit,

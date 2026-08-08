@@ -22,12 +22,11 @@ export default class PhotonClient {
 
 	async fetchCoordinates(
 		address: string,
-	): Promise<{ lat: number; lng: number }> {
+	): Promise<{ lat: number; lng: number } | null> {
 		const r: GeoJsonResponse = await (
 			await fetch(`http://localhost:${this.#port}/api/?q=${address}`)
 		).json()
-		if (r.features.length <= 0)
-			throw new Error(`Tried to fetch coords for ${address} but no results`)
+		if (r.features.length <= 0) return null
 		return {
 			lat: r.features[0].geometry.coordinates[1],
 			lng: r.features[0].geometry.coordinates[0],

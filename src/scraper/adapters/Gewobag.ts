@@ -20,11 +20,11 @@ export default class Gewobag extends Scraper {
 	private async backfillData(listings: ApartmentListing[]) {
 		const listingTargets = listings.filter(
 			(listing) =>
-				listing.costs.coldRentEur === 0 ||
-				listing.costs.depositEur === 0 ||
-				listing.costs.heatingEur === 0 ||
-				listing.costs.utilityEur === 0 ||
-				!listing.newBuilding ||
+				listing.costs.coldRentEur === undefined ||
+				listing.costs.depositEur === undefined ||
+				listing.costs.heatingEur === undefined ||
+				listing.costs.utilityEur === undefined ||
+				listing.newBuilding === undefined ||
 				!listing.features,
 		)
 
@@ -33,24 +33,28 @@ export default class Gewobag extends Scraper {
 				const details = await this.fetchDetailTable(listing.fullUrl)
 				const map = details.map
 
-				const isNewBuilding = (map.get("Beschreibung") ?? "") === "Neubau"
+				const beschreibung = map.get("Beschreibung")
+				listing.newBuilding =
+					beschreibung === undefined ? null : beschreibung === "Neubau"
 
-				listing.costs.coldRentEur = this.parseGermanFloat(
-					map.get("Grundmiete") ?? "",
+				listing.costs.coldRentEur = this.parseGermanFloatOrNull(
+					map.get("Grundmiete"),
 				)
-				listing.costs.depositEur = this.parseGermanFloat(
-					map.get("Kaution") ?? "",
+				listing.costs.depositEur = this.parseGermanFloatOrNull(
+					map.get("Kaution"),
 				)
 
-				const utilityColdEur = this.parseGermanFloat(
-					map.get("VZ Betriebskosten kalt") ?? "",
+				const utilityColdEur = this.parseGermanFloatOrNull(
+					map.get("VZ Betriebskosten kalt"),
 				)
-				const utilityWarmEur = this.parseGermanFloat(
-					map.get("VZ Betriebskosten warm") ?? "",
+				const utilityWarmEur = this.parseGermanFloatOrNull(
+					map.get("VZ Betriebskosten warm"),
 				)
-				listing.costs.utilityEur = utilityColdEur + utilityWarmEur
+				listing.costs.utilityEur =
+					utilityColdEur === null || utilityWarmEur === null
+						? null
+						: utilityColdEur + utilityWarmEur
 				listing.costs.heatingEur = utilityWarmEur
-				listing.newBuilding = isNewBuilding
 				listing.features = details.features
 			} catch (err) {
 				log.warn(

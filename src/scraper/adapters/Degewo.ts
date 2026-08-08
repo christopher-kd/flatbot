@@ -56,35 +56,38 @@ export default class Degewo extends Scraper {
 	private async backfillData(listings: ApartmentListing[]): Promise<void> {
 		const listingTargets = listings.filter(
 			(listing) =>
-				listing.costs.depositEur === 0 ||
-				listing.costs.coldRentEur === 0 ||
-				listing.costs.utilityEur === 0 ||
-				listing.costs.heatingEur === 0 ||
-				!listing.newBuilding ||
+				listing.costs.depositEur === undefined ||
+				listing.costs.coldRentEur === undefined ||
+				listing.costs.utilityEur === undefined ||
+				listing.costs.heatingEur === undefined ||
+				listing.newBuilding === undefined ||
 				!listing.features ||
-				!listing.accessibility?.barrierFree,
+				listing.accessibility?.barrierFree === undefined,
 		)
 
 		await runConcurrent(listingTargets, this.concurrency, async (listing) => {
 			try {
 				const data = await this.fetchDetailPageData(listing.fullUrl)
 				const details = data.detailData
-				const coldRentEur = this.parseGermanFloat(
-					details.get("Nettokaltmiete") ?? "",
+				const coldRentEur = this.parseGermanFloatOrNull(
+					details.get("Nettokaltmiete"),
 				)
-				const utilityColdEur = this.parseGermanFloat(
-					details.get("Betriebskosten (kalt)") ?? "",
+				const utilityColdEur = this.parseGermanFloatOrNull(
+					details.get("Betriebskosten (kalt)"),
 				)
-				const utilityWarmEur = this.parseGermanFloat(
-					details.get("Betriebskosten (warm)") ?? "",
+				const utilityWarmEur = this.parseGermanFloatOrNull(
+					details.get("Betriebskosten (warm)"),
 				)
-				const yearBuilt = Number(details.get("Baujahr") ?? "")
+				const baujahr = details.get("Baujahr")
 
 				listing.costs.coldRentEur = coldRentEur
-				listing.costs.utilityEur = utilityColdEur + utilityWarmEur
+				listing.costs.utilityEur =
+					utilityColdEur === null || utilityWarmEur === null
+						? null
+						: utilityColdEur + utilityWarmEur
 				listing.costs.heatingEur = utilityWarmEur
-				listing.costs.depositEur = coldRentEur * 3
-				listing.newBuilding = yearBuilt >= 2014
+				listing.costs.depositEur = coldRentEur === null ? null : coldRentEur * 3
+				listing.newBuilding = baujahr === undefined ? null : Number(baujahr) >= 2014
 				listing.features = data.features
 				listing.accessibility ??= {}
 				listing.accessibility.barrierFree =

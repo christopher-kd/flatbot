@@ -75,7 +75,7 @@ export async function fillMissingCoordinates(
 	addressFor: (location: ApartmentListingLocation) => string,
 	onProgress?: (checked: number, total: number) => void,
 ): Promise<void> {
-	const targets = listings.filter((l) => !l.location.coordinates)
+	const targets = listings.filter((l) => l.location.coordinates === undefined)
 	let checked = 0
 	await runConcurrent(
 		targets,
