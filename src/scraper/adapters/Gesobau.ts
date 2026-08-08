@@ -108,12 +108,11 @@ export default class Gesobau extends Scraper {
 		const street = elem.raw.adresse_stringS.split(" ")
 		const houseNumber = street.pop() ?? ""
 		const imagesObj: ApartmentListingImage[] = (() => {
-			if (elem.image) {
-				return [
-					{
-						fullUrl: elem.image.figure.media.image.src,
-					},
-				]
+			const src = elem.image?.figure.media.image.src
+			// GESOBAU serves blank placeholder SVG in place of real photo
+			// when a listing has none
+			if (src && !src.startsWith("data:image/svg+xml")) {
+				return [{ fullUrl: src }]
 			}
 			return []
 		})()
