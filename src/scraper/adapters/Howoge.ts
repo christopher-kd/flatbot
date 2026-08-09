@@ -141,7 +141,7 @@ class Howoge extends Scraper {
 		}
 	}
 
-	private extractListing(
+	public extractListing(
 		immo: HowogeResponse["immoobjects"][number],
   ): ApartmentListing {
     // immo.title is the street address, not a description - immo.notice
@@ -195,7 +195,7 @@ class Howoge extends Scraper {
 		})
 	}
 
-	private extractTeaserListing(
+	public extractTeaserListing(
 		flat: HTMLElement,
 		teaserUrl: string,
 	): ApartmentListing {

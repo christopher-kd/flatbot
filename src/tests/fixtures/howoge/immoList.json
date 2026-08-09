@@ -1,0 +1,1051 @@
+{
+	"immocount": 126,
+	"teasercount": 90,
+	"immoobjects": [
+		{
+			"uid": 7094,
+			"title": "Streitstraße 5, 13587 Berlin",
+			"image": "/fileadmin/_processed_/6/d/csm_3de75f489497a4d71e748f9225a4b828_b8e4dc96f7.webp",
+			"district": "Hakenfelde",
+			"rent": 803,
+			"area": 73,
+			"rooms": 3,
+			"wbs": "ja",
+			"features": [
+				"WBS erforderlich",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5575599",
+				"lng": "13.209115"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14536-9997.html",
+			"favorite": false,
+			"notice": " 3-Zimmer-Wohnung (WBS 100-140)"
+		},
+		{
+			"uid": 7096,
+			"title": "Streitstraße 5, 13587 Berlin",
+			"image": "/fileadmin/_processed_/6/d/csm_3de75f489497a4d71e748f9225a4b828_b8e4dc96f7.webp",
+			"district": "Hakenfelde",
+			"rent": 880,
+			"area": 80,
+			"rooms": 4,
+			"wbs": "ja",
+			"features": [
+				"WBS erforderlich",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"barrierefrei",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.5575599",
+				"lng": "13.209115"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14536-9999.html",
+			"favorite": false,
+			"notice": "4-Zimmer-Wohnung (WBS 100-140)"
+		},
+		{
+			"uid": 7556,
+			"title": "Eichenring 48, 16341 Panketal",
+			"image": "/fileadmin/_processed_/9/5/csm_3665a975df23889cf0c2f52dae9430cd_112c880051.webp",
+			"district": "Brandenburg",
+			"rent": 1498.5,
+			"area": 81,
+			"rooms": 3,
+			"wbs": "nein",
+			"features": [
+				"Terrasse",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.6234418",
+				"lng": "13.5094893"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-27695-203.html",
+			"favorite": false,
+			"notice": "Wohnung in Panketal"
+		},
+		{
+			"uid": 8236,
+			"title": "Eichenring 47, 16341 Panketal",
+			"image": "/fileadmin/_processed_/8/7/csm_520bd57081b74faaa070b45c6a9238f1_fca3faff62.webp",
+			"district": "Brandenburg",
+			"rent": 1197.5,
+			"area": 63,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Terrasse",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.6234417",
+				"lng": "13.5094893"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-27695-200.html",
+			"favorite": false,
+			"notice": "Wohnung in Panketal"
+		},
+		{
+			"uid": 8405,
+			"title": "Pablo-Picasso-Straße 35A, 13057 Berlin",
+			"image": "/fileadmin/_processed_/5/c/csm_3653fbd2b5f092c8b03db93f1bd93ca7_a8f5879709.webp",
+			"district": "Neu-Hohenschönhausen",
+			"rent": 1213.47,
+			"area": 62,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.561189",
+				"lng": "13.5224861"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14591-320.html",
+			"favorite": false,
+			"notice": "Nachmietersuche"
+		},
+		{
+			"uid": 8483,
+			"title": "Franz-Schmidt-Straße 13, 13125 Berlin",
+			"image": "/fileadmin/_processed_/a/1/csm_d053a651580e44c21b846ec589434895_8480d2957c.webp",
+			"district": "Buch",
+			"rent": 1053,
+			"area": 55,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Terrasse",
+				"Bad mit Dusche",
+				"Bad mit Fenster",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"KabelTV-Anschluss",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.6328667",
+				"lng": "13.4965458"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-24035-55.html",
+			"favorite": false,
+			"notice": "Wohnung in Berlin"
+		},
+		{
+			"uid": 8484,
+			"title": "Eichenring 46, 16341 Panketal",
+			"image": "/fileadmin/_processed_/3/8/csm_3fb3cfa43c00d481df7766b1dc1325e0_ebd2b26210.webp",
+			"district": "Brandenburg",
+			"rent": 1577,
+			"area": 83,
+			"rooms": 3,
+			"wbs": "nein",
+			"features": [
+				"Terrasse",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.6234418",
+				"lng": "13.5094893"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-27695-132.html",
+			"favorite": false,
+			"notice": "Wohnung in Panketal"
+		},
+		{
+			"uid": 8560,
+			"title": "Pablo-Picasso-Straße 35A, 13057 Berlin",
+			"image": "/fileadmin/_processed_/6/1/csm_ec454d748f4aa2c8c906ffb352d17d6a_9e5e834459.webp",
+			"district": "Neu-Hohenschönhausen",
+			"rent": 1151.32,
+			"area": 62,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.561189",
+				"lng": "13.5224861"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14591-325.html",
+			"favorite": false,
+			"notice": "Wohnen am Rand von Berlin"
+		},
+		{
+			"uid": 8700,
+			"title": "Eichenring 44, 16341 Panketal",
+			"image": "/fileadmin/_processed_/8/6/csm_82a90d63605852745507cc35837d5a2a_9d5350f5d1.webp",
+			"district": "Brandenburg",
+			"rent": 912,
+			"area": 48,
+			"rooms": 1,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"KabelTV-Anschluss",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.6234418",
+				"lng": "13.5094893"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-27695-109.html",
+			"favorite": false,
+			"notice": "NACHMIETER AB SOFORT GESUCHT!"
+		},
+		{
+			"uid": 8754,
+			"title": "Zechliner Straße 10, 13055 Berlin",
+			"image": "/fileadmin/_processed_/4/8/csm_f89188761c0b2c44dc73f3ea996ba15c_cbc34cb3e3.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 619.13,
+			"area": 54.95,
+			"rooms": 2,
+			"wbs": "ja",
+			"features": [
+				"WBS erforderlich",
+				"Bad mit Fenster",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss"
+			],
+			"coordinates": {
+				"lat": "52.5361924",
+				"lng": "13.4923873"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-10421-69.html",
+			"favorite": false,
+			"notice": "2-Zimmer-Wohnung (mit WBS160/180/220 oder der Einkommensprüfung ab 140,01%)"
+		},
+		{
+			"uid": 8801,
+			"title": "Im Lindenhof 24, 10365 Berlin",
+			"image": "/fileadmin/_processed_/1/5/csm_7e713f2bd618aee9416a2b9dde1aff81_d927ca79ff.webp",
+			"district": "Lichtenberg",
+			"rent": 1145,
+			"area": 60,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.5175397",
+				"lng": "13.5090958"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14555-227.html",
+			"favorite": false,
+			"notice": "2-Zimmer-Wohnung ohne WBS ab 01.11.2026 frei"
+		},
+		{
+			"uid": 8804,
+			"title": "Zechliner Straße 8, 13055 Berlin",
+			"image": "/fileadmin/_processed_/8/4/csm_7067f427c19aab2d19c40e4931bbf948_23b2655dea.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 604.02,
+			"area": 54.95,
+			"rooms": 2,
+			"wbs": "ja",
+			"features": [
+				"WBS erforderlich",
+				"Bad mit Fenster",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss"
+			],
+			"coordinates": {
+				"lat": "52.5361725",
+				"lng": "13.4920522"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-10421-4.html",
+			"favorite": false,
+			"notice": "2-Zimmer-Wohnung (mit WBS160-220 oder Einkommensprüfung ab 140,01%)"
+		},
+		{
+			"uid": 8811,
+			"title": "Dolgenseestraße 33, 10319 Berlin",
+			"image": "/fileadmin/_processed_/a/9/csm_6b2ba030b890b5965940be5c8a6b00d1_65fe05f69a.webp",
+			"district": "Friedrichsfelde",
+			"rent": 1461,
+			"area": 77,
+			"rooms": 3,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"Bad mit Badewanne",
+				"offene Küche",
+				"Fußbodenheizung",
+				"KabelTV-Anschluss",
+				"Mieterkeller",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.4948459",
+				"lng": "13.5034421"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20571-87.html",
+			"favorite": false,
+			"notice": "Ideal für die junge Familie"
+		},
+		{
+			"uid": 8825,
+			"title": "Lugierring 21, 12524 Berlin",
+			"image": "/fileadmin/_processed_/d/e/csm_3aa3507c2bff951b6f56a2ac13633d53_9449cc8a5b.webp",
+			"district": "Altglienicke",
+			"rent": 936.73,
+			"area": 53,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Terrasse",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Etagenheizung",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"KabelTV-Anschluss",
+				"barrierefrei"
+			],
+			"coordinates": {
+				"lat": "52.4117666",
+				"lng": "13.5433177"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-27694-122.html",
+			"favorite": false,
+			"notice": "Nachmieter schnellstmöglich gesucht - Sind Ihre Koffer schon gepackt? "
+		},
+		{
+			"uid": 8839,
+			"title": "Seehausener Straße 33, 13057 Berlin",
+			"image": "/fileadmin/_processed_/7/6/csm_0007c418cf3cc7b0ec6ec03897c7bcf5_5f5ab919c8.webp",
+			"district": "Neu-Hohenschönhausen",
+			"rent": 1151.32,
+			"area": 62,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller",
+				"Abstellraum in der Wohnung"
+			],
+			"coordinates": {
+				"lat": "52.561636",
+				"lng": "13.52213"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14591-190.html",
+			"favorite": false,
+			"notice": "Nachmietersuche"
+		},
+		{
+			"uid": 8840,
+			"title": "Seehausener Straße 31, 13057 Berlin",
+			"image": "/fileadmin/_processed_/1/7/csm_c54d19d7209deb51f36534f4bf99b78e_1d4441606f.webp",
+			"district": "Neu-Hohenschönhausen",
+			"rent": 909.92,
+			"area": 49,
+			"rooms": 1,
+			"wbs": "nein",
+			"features": [
+				"Terrasse",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"barrierefrei",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5617546",
+				"lng": "13.5224364"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14591-79.html",
+			"favorite": false,
+			"notice": "Nachmietersuche"
+		},
+		{
+			"uid": 8844,
+			"title": "Gärtnerstraße 9, 13055 Berlin",
+			"image": "/fileadmin/_processed_/6/c/csm_ec6b65968d6d1032280429eb76a53b33_0b8abf487e.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 1038.15,
+			"area": 57,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"offene Küche",
+				"Zentralheizung",
+				"Aufzug",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5466691",
+				"lng": "13.5011234"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20600-80.html",
+			"favorite": false,
+			"notice": "2-Zimmer-Wohnung (ohne WBS)"
+		},
+		{
+			"uid": 8852,
+			"title": "Rudolf-Seiffert-Straße 84, 10369 Berlin",
+			"image": "/fileadmin/_processed_/6/f/csm_0ce5890703893d26122d7405688640af_af82c33de1.webp",
+			"district": "Fennpfuhl",
+			"rent": 1593.55,
+			"area": 74.08,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Zentralheizung",
+				"Aufzug",
+				"rollstuhlgerecht"
+			],
+			"coordinates": {
+				"lat": "52.5238896",
+				"lng": "13.4682674"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1950-33590-43.html",
+			"favorite": false,
+			"notice": "Rollstuhlfahrer gesucht - Einbauküche kann übernommen werden"
+		},
+		{
+			"uid": 8853,
+			"title": "Große-Leege-Straße 48, 13055 Berlin",
+			"image": "/fileadmin/_processed_/c/b/csm_b72bda2af0908f6d4e64bc8a6d3d27b9_825c49c14c.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 794.45,
+			"area": 58.89,
+			"rooms": 2,
+			"wbs": "ja",
+			"features": [
+				"WBS erforderlich",
+				"Balkon/Loggia",
+				"Bad mit Fenster",
+				"Zentralheizung",
+				"KabelTV-Anschluss"
+			],
+			"coordinates": {
+				"lat": "52.538711",
+				"lng": "13.489067"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-10373-124.html",
+			"favorite": false,
+			"notice": "Neue Mieter:innen ab sofort gesucht - einkommensorientierte Vermietung"
+		},
+		{
+			"uid": 8855,
+			"title": "Mercatorweg 11, 12207 Berlin",
+			"image": "/fileadmin/_processed_/3/3/csm_b3a2e0608c2e6020c08628e73b1441cd_63be0c7cd9.webp",
+			"district": "Lichterfelde",
+			"rent": 895.45,
+			"area": 76.29,
+			"rooms": 3,
+			"wbs": "ja",
+			"features": [
+				"WBS erforderlich",
+				"Bad mit Fenster",
+				"Zentralheizung",
+				"Aufzug"
+			],
+			"coordinates": {
+				"lat": "52.4116478",
+				"lng": "13.3175233"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-31130-153.html",
+			"favorite": false,
+			"notice": "Auch ohne WBS könnten Sie berechtigt sein (Für 3 Personen)"
+		},
+		{
+			"uid": 8894,
+			"title": "Goeckestraße 32 C, 13055 Berlin",
+			"image": "/fileadmin/_processed_/1/b/csm_5c8a9d43e6b46743c1dd5fc4915d7827_f7c8cfebcd.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 1399.88,
+			"area": 74,
+			"rooms": 3,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"Bad mit Badewanne",
+				"offene Küche",
+				"Zentralheizung",
+				"Aufzug",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5395283",
+				"lng": "13.4936318"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14578-56.html",
+			"favorite": false,
+			"notice": "3-Zimmer-Wohnung (ohne WBS)"
+		},
+		{
+			"uid": 8895,
+			"title": "Liebenwalder Straße 29, 13055 Berlin",
+			"image": "/fileadmin/_processed_/3/b/csm_a470c31fd36806e3fa917947bebcce9c_a473437f2e.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 1155.52,
+			"area": 75.33,
+			"rooms": 2,
+			"wbs": "ja",
+			"features": [
+				"WBS erforderlich",
+				"Balkon/Loggia",
+				"Bad mit Fenster",
+				"Zentralheizung",
+				"KabelTV-Anschluss"
+			],
+			"coordinates": {
+				"lat": "52.5374246",
+				"lng": "13.4992419"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14001-15.html",
+			"favorite": false,
+			"notice": "2-Zimmer-Wohnung (mit WBS160-220 oder einer Einkommensprüfung ab 140,01%)"
+		},
+		{
+			"uid": 8900,
+			"title": "Eichbuschallee 51, 12437 Berlin",
+			"image": "/fileadmin/_processed_/d/5/csm_df5a89181efb71d495e0a739fa3e9eee_2c677cb8e3.webp",
+			"district": "Plänterwald",
+			"rent": 600,
+			"area": 27,
+			"rooms": 1,
+			"wbs": "nein",
+			"features": [
+				"Terrasse",
+				"Studentisches Wohnen",
+				"Bad mit Dusche",
+				"Einbauküche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"Teilmöbliert",
+				"barrierefrei"
+			],
+			"coordinates": {
+				"lat": "52.4725036",
+				"lng": "13.4809965"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14608-17.html",
+			"favorite": false,
+			"notice": "All inclusive Studenten Apartments"
+		},
+		{
+			"uid": 8901,
+			"title": "Eichbuschallee 53, 12437 Berlin",
+			"image": "/fileadmin/_processed_/7/c/csm_60c4bfed311463d7013d0609285c9d4a_5b042b313e.webp",
+			"district": "Plänterwald",
+			"rent": 580,
+			"area": 25,
+			"rooms": 1,
+			"wbs": "nein",
+			"features": [
+				"Studentisches Wohnen",
+				"Bad mit Dusche",
+				"Einbauküche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"Teilmöbliert",
+				"barrierefrei"
+			],
+			"coordinates": {
+				"lat": "52.4723018",
+				"lng": "13.4806411"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14608-184.html",
+			"favorite": false,
+			"notice": "Wohnung in Berlin"
+		},
+		{
+			"uid": 8902,
+			"title": "Eichbuschallee 51, 12437 Berlin",
+			"image": "/fileadmin/_processed_/d/5/csm_df5a89181efb71d495e0a739fa3e9eee_2c677cb8e3.webp",
+			"district": "Plänterwald",
+			"rent": 580,
+			"area": 25,
+			"rooms": 1,
+			"wbs": "nein",
+			"features": [
+				"Studentisches Wohnen",
+				"Bad mit Dusche",
+				"Einbauküche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"Teilmöbliert"
+			],
+			"coordinates": {
+				"lat": "52.4725036",
+				"lng": "13.4809965"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14608-82.html",
+			"favorite": false,
+			"notice": "All inclusive Studenten Apartments"
+		},
+		{
+			"uid": 8903,
+			"title": "Eichbuschallee 53, 12437 Berlin",
+			"image": "/fileadmin/_processed_/7/c/csm_60c4bfed311463d7013d0609285c9d4a_5b042b313e.webp",
+			"district": "Plänterwald",
+			"rent": 580,
+			"area": 25,
+			"rooms": 1,
+			"wbs": "nein",
+			"features": [
+				"Studentisches Wohnen",
+				"Bad mit Dusche",
+				"Einbauküche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"Teilmöbliert",
+				"barrierefrei"
+			],
+			"coordinates": {
+				"lat": "52.4723018",
+				"lng": "13.4806411"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1771-14608-185.html",
+			"favorite": false,
+			"notice": "All inclusive Studenten Apartments"
+		},
+		{
+			"uid": 8912,
+			"title": "Eitelstraße 61, 10317 Berlin",
+			"image": "/fileadmin/_processed_/7/f/csm_7d2e37d4d4c3ea499e6392ffd63c052b_e9cfc6a07f.webp",
+			"district": "Rummelsburg",
+			"rent": 1984.08,
+			"area": 89,
+			"rooms": 4,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller",
+				"Gäste-WC"
+			],
+			"coordinates": {
+				"lat": "52.5045515",
+				"lng": "13.4938834"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-23142-21.html",
+			"favorite": false,
+			"notice": "Attraktiver Neubau- Nachmieter zum 01.10.2026 gesucht"
+		},
+		{
+			"uid": 8934,
+			"title": "Aristotelessteig 21, 10318 Berlin",
+			"image": "/fileadmin/_processed_/9/8/csm_01a75d2ce431df121ea91a66dd84acd5_33def2fd9e.webp",
+			"district": "Karlshorst",
+			"rent": 838,
+			"area": 51.46,
+			"rooms": 2,
+			"wbs": "ja",
+			"features": [
+				"WBS erforderlich",
+				"Balkon/Loggia",
+				"Bad mit Fenster",
+				"Zentralheizung",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.4908389",
+				"lng": "13.5253365"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-26758-10.html",
+			"favorite": false,
+			"notice": "2-Zimmer-Wohnung"
+		},
+		{
+			"uid": 8962,
+			"title": "Flämingstraße 70, 12689 Berlin",
+			"image": "/fileadmin/_processed_/8/c/csm_edc5117b07c0b3e6e55da62d850ab823_81a1900c1e.webp",
+			"district": "Marzahn",
+			"rent": 1028.31,
+			"area": 56,
+			"rooms": 1,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"Bad mit Dusche",
+				"offene Küche",
+				"Fußbodenheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"barrierefrei"
+			],
+			"coordinates": {
+				"lat": "52.5667194",
+				"lng": "13.5667742"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20605-35.html",
+			"favorite": false,
+			"notice": "1-Raum-Wohnung"
+		},
+		{
+			"uid": 8967,
+			"title": "Treskowstraße 26, 13089 Berlin",
+			"image": "/fileadmin/_processed_/a/2/csm_38d9c2e68e98f4a96e039b3c53930336_b375874f9b.webp",
+			"district": "Heinersdorf",
+			"rent": 1419,
+			"area": 67,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Terrasse",
+				"offene Küche",
+				"Fliesen-Fußboden",
+				"Fußbodenheizung",
+				"Zentralheizung",
+				"Aufzug",
+				"KabelTV-Anschluss",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5615092",
+				"lng": "13.4300646"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20601-31.html",
+			"favorite": false,
+			"notice": "Wohnung in Berlin"
+		},
+		{
+			"uid": 8970,
+			"title": "Große-Leege-Straße 108, 13055 Berlin",
+			"image": "/fileadmin/_processed_/2/f/csm_f990d4db9545f2e59c19c09fe4b10f85_6521a53759.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 1784.32,
+			"area": 98,
+			"rooms": 4,
+			"wbs": "nein",
+			"features": [
+				"Terrasse",
+				"offene Küche",
+				"Zentralheizung",
+				"Aufzug",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5465691",
+				"lng": "13.5006111"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20600-50.html",
+			"favorite": false,
+			"notice": "4-Zimmer-Wohnung (ohne WBS)"
+		},
+		{
+			"uid": 8971,
+			"title": "Große-Leege-Straße 108, 13055 Berlin",
+			"image": "/fileadmin/_processed_/0/9/csm_067714e6f15cd5a118a2db1a55adcad9_441b069fd8.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 1056.19,
+			"area": 58,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"offene Küche",
+				"Zentralheizung",
+				"Aufzug",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5465691",
+				"lng": "13.5006111"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20600-39.html",
+			"favorite": false,
+			"notice": "2-Zimmer-Wohnung (ohne WBS)"
+		},
+		{
+			"uid": 8974,
+			"title": "Große-Leege-Straße 107, 13055 Berlin",
+			"image": "/fileadmin/_processed_/4/a/csm_b0a279acc23468915f26c9b837a4aa68_e27e5debd8.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 1001.55,
+			"area": 55,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"offene Küche",
+				"Zentralheizung",
+				"Aufzug",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5463609",
+				"lng": "13.5005199"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20600-12.html",
+			"favorite": false,
+			"notice": "3-Zimmer-Wohnung (ohne WBS)"
+		},
+		{
+			"uid": 8975,
+			"title": "Gärtnerstraße 11, 13055 Berlin",
+			"image": "/fileadmin/_processed_/0/5/csm_f0c0da5926cd139f85472f4e463fabba_29cb9fe01d.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 1056.19,
+			"area": 58,
+			"rooms": 2,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"offene Küche",
+				"Zentralheizung",
+				"Aufzug",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5463948",
+				"lng": "13.5014655"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20600-136.html",
+			"favorite": false,
+			"notice": "2-Zimmer-Wohnung (ohne WBS)"
+		},
+		{
+			"uid": 8976,
+			"title": "Gärtnerstraße 10, 13055 Berlin",
+			"image": "/fileadmin/_processed_/9/1/csm_3443082994b7400f9b4c0bfb4b94fdf8_809e2bb096.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 1566.07,
+			"area": 86,
+			"rooms": 3,
+			"wbs": "nein",
+			"features": [
+				"Balkon/Loggia",
+				"offene Küche",
+				"Zentralheizung",
+				"Aufzug",
+				"Mieterkeller",
+				"Abstellraum in der Wohnung",
+				"Gäste-WC"
+			],
+			"coordinates": {
+				"lat": "52.5466213",
+				"lng": "13.50147"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20600-110.html",
+			"favorite": false,
+			"notice": "3-Zimmer-Wohnung (ohne WBS)"
+		},
+		{
+			"uid": 8977,
+			"title": "Gärtnerstraße 10, 13055 Berlin",
+			"image": "/fileadmin/_processed_/9/1/csm_3443082994b7400f9b4c0bfb4b94fdf8_809e2bb096.webp",
+			"district": "Alt-Hohenschönhausen",
+			"rent": 1183.65,
+			"area": 65,
+			"rooms": 3,
+			"wbs": "nein",
+			"features": [
+				"Bad mit Fenster",
+				"offene Küche",
+				"Zentralheizung",
+				"Aufzug",
+				"Mieterkeller"
+			],
+			"coordinates": {
+				"lat": "52.5466213",
+				"lng": "13.50147"
+			},
+			"icon": "icon-Figures-haus_full",
+			"link": "/immobiliensuche/wohnungssuche/detail/1770-20600-116.html",
+			"favorite": false,
+			"notice": "3-Zimmer-Wohnung (ohne WBS)"
+		}
+	],
+	"projectteaser": [
+		{
+			"title": "Alle Wohneinheiten in der Sewanstraße 256 A-C",
+			"address": "Sewanstraße 256 A–C, 10319 Berlin Friedrichsfelde-Süd",
+			"indate": "März 2026",
+			"rooms": "1-5",
+			"coordinates": {
+				"lat": "52.493243690756294",
+				"lng": "13.51588781173944"
+			},
+			"link": "https://www.howoge.de/immobiliensuche/neubauprojekte/sewanstrasse-256-a-c.html",
+			"image": "/fileadmin/_processed_/a/1/csm_HOW-Teaser-Sewanstrasse256_4318ae6425.webp"
+		},
+		{
+			"title": "Alle Wohneinheiten in der Anne-Frank-Straße",
+			"address": "Anne-Frank-Straße 2-26; Mohnweg 3-23, 12524 Berlin, OT Altglienicke",
+			"indate": "Mai 2025",
+			"rooms": "1-5",
+			"coordinates": {
+				"lat": "52.40885822109291",
+				"lng": "13.537122635299378"
+			},
+			"link": "https://www.howoge.de/immobiliensuche/neubauprojekte/anne-frank-strasse.html",
+			"image": "/fileadmin/_processed_/4/d/csm_HOW_Anne_Frank_Teaser1_14798a4af1.webp"
+		},
+		{
+			"title": "Alle Wohneinheiten im Havelufer Quartier",
+			"address": "Marius-Carpentier-Str. 14 und 16,  Streitstr. 5  13587 Spandau / Hakenfelde",
+			"indate": "Feb 2026",
+			"rooms": "1-4",
+			"coordinates": {
+				"lat": "52.556283053548626",
+				"lng": "13.208095625211033"
+			},
+			"link": "https://www.howoge.de/immobiliensuche/neubauprojekte/havelufer-quartier.html",
+			"image": "/fileadmin/_processed_/0/9/csm_HOW_Havelufer-Quartier_Teaser_2560e1ab0f.webp"
+		},
+		{
+			"title": "Alle Wohneinheiten in der Huronseestraße",
+			"address": "Huronseestraße; Mohnweg 28-34, 10319 Berlin, IN VERMIETUNG",
+			"indate": "Mai 2025",
+			"rooms": "1-5",
+			"coordinates": {
+				"lat": "52.497855277202675",
+				"lng": "13.497018897526198"
+			},
+			"link": "https://www.howoge.de/immobiliensuche/neubauprojekte/huronseestrasse-28-34.html",
+			"image": "/fileadmin/_processed_/b/7/csm_HOW_Huronseestra%C3%9Fe_Teaser_c745742b93.webp"
+		},
+		{
+			"title": "Alle Wohneinheiten im Kirchsteig 101",
+			"address": "Kirchsteig 101 12524, Berlin OT Bohnsdorf",
+			"indate": "Oktober 2026",
+			"rooms": "2-4",
+			"coordinates": {
+				"lat": "52.40939088494062",
+				"lng": "13.568962173392098"
+			},
+			"link": "https://www.howoge.de/immobiliensuche/neubauprojekte/kirchsteig.html",
+			"image": "/fileadmin/_processed_/4/0/csm_HOW_Kirchsteig_Teaser_556cbf658a.webp"
+		},
+		{
+			"title": "Alle Wohneinheiten in der Gartenstadt Karlshorst",
+			"address": "Arnbrucker Straße 1-4, 10318 Berlin OT Karlshorst",
+			"indate": "Mai 26",
+			"rooms": "1-4",
+			"coordinates": {
+				"lat": "52.48513409736468",
+				"lng": "13.542476083085317"
+			},
+			"link": "https://www.howoge.de/immobiliensuche/neubauprojekte/gartenstadt-karlshorst.html",
+			"image": "/fileadmin/_processed_/f/8/csm_HOW_Gartenstadt_Teaser_fc727e1e7e.webp"
+		}
+	],
+	"badges": []
+}
