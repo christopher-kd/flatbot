@@ -118,19 +118,17 @@ export default class WBM extends Scraper {
 					"WBM listing .area",
 				).textContent,
 			},
-			spaceQm: parseInt(
+			spaceQm: this.parseGermanFloat(
 				required(
 					listing.querySelector(".main-property-size"),
 					"WBM listing .main-property-size",
-				).textContent.split(" ")[0],
-				10,
+				).textContent,
 			),
-			rooms: parseInt(
+			rooms: this.parseGermanFloat(
 				required(
 					listing.querySelector(".main-property-rooms"),
 					"WBM listing .main-property-rooms",
 				).textContent,
-				10,
 			),
 			restrictions: {
 				...restrictionFromTitle(title),

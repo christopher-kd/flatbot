@@ -140,7 +140,7 @@ export default class Gewobag extends Scraper {
 		)
 			.innerText.trim()
 			.split(" | ")
-		const rooms = parseInt(roomAndQm[0].split(" ")[0], 10)
+		const rooms = this.parseGermanFloat(roomAndQm[0].split(" ")[0])
 		const qm = this.parseGermanFloat(roomAndQm[1].split(" ")[0])
 		const imgSrcs: ApartmentListingImage[] = listing
 			.querySelectorAll("img")

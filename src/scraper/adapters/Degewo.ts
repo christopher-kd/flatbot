@@ -231,8 +231,8 @@ export default class Degewo extends Scraper {
 				neighborhood: precinct,
 				city: "Berlin",
 			},
-			spaceQm: parseInt(spaceQmText, 10),
-			rooms: parseInt(roomsText, 10),
+			spaceQm: this.parseGermanFloat(spaceQmText),
+			rooms: this.parseGermanFloat(roomsText),
 			restrictions: restrictionFromTitle(title),
 			costs: {
 				totalRentEur: this.parseGermanFloat(totalRentText),

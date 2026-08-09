@@ -233,8 +233,8 @@ class Howoge extends Scraper {
 			propertyId: href.split("/")[4].slice(0, -5),
 			title,
 			fullUrl: `https://howoge.de${href}`,
-			spaceQm: Number(spaceEl.text.trim().split(" ")[0]),
-			rooms: Number(roomsEl.text),
+			spaceQm: this.parseGermanFloat(spaceEl.text),
+			rooms: this.parseGermanFloat(roomsEl.text),
 			totalRentEur: this.parseGermanFloat(rentEl.text.trim().split("\n")[0]),
 			location: {
 				postalCode: required(
