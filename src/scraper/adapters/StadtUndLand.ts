@@ -91,7 +91,7 @@ class StadtUndLand extends Scraper {
 		return items
 	}
 
-	private extractListing(
+	public extractListing(
 		apartment: StadtUndLandApartment,
     newBuildingIds: Set<string>,
 		subdistrictToDistrict: Map<string, string>
@@ -117,7 +117,7 @@ class StadtUndLand extends Scraper {
 			newBuilding: newBuildingIds.has(apartment.details.immoNumber),
 			accessibility: {
 				wheelchair: apartment.details.wheelchairFriendly,
-				senior: apartment.details.seniorsFriendly,
+				senior: apartment.details.seniorsFriendly ?? null,
 				barrierFree: apartment.details.barrierFree,
 			},
 			costs: {

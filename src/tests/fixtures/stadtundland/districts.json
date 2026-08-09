@@ -1,0 +1,25 @@
+[
+	{
+		"district": "Hellersdorf",
+		"subdistrict": [
+			"Kaulsdorf-Nord II"
+		]
+	},
+	{
+		"district": "Neukölln",
+		"subdistrict": [
+			"Buckower Felder"
+		]
+	},
+	{
+		"district": "Treptow",
+		"subdistrict": [
+			"Adlershof West",
+			"Altglienicke",
+			"Johannisthal Süd",
+			"Kosmosviertel Betrauungsakt",
+			"Oberspree",
+			"Plänterwald"
+		]
+	}
+]

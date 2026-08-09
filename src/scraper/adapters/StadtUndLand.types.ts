@@ -19,8 +19,8 @@ export interface StadtUndLandReponse {
 			immoSubType: string
 			livingSpace: string
 			rooms: string
-			wheelchairFriendly: boolean
-			seniorsFriendly: boolean
+			wheelchairFriendly?: boolean
+			seniorsFriendly?: boolean
 			barrierFree: boolean
 		}
 		costs: {

@@ -1,0 +1,311 @@
+{
+	"data": [
+		{
+			"headline": "Erstbezug: Neubau mit großzügigen Räumen und Licht",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "An den Buckower Feldern",
+				"house_number": "13",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00229",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "70.04",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.119,24",
+				"warmRent": "1.399,4",
+				"additionalCosts": "157,59",
+				"heatingCosts": "122,57",
+				"totalRent": "1.399,4",
+				"deposit": "3.357,72",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_5bf07755-d64e-49aa-85ca-0ec1343db105.jpg",
+				"alt": "Balkon",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Exklusiv Wohnen: Neubau mit 4 Zimmern, Gäste-WC und Blick ins Grüne",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "An den Buckower Feldern",
+				"house_number": "19",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00180",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "84.39",
+				"rooms": "4.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.351,93",
+				"warmRent": "1.689,49",
+				"additionalCosts": "189,88",
+				"heatingCosts": "147,68",
+				"totalRent": "1.689,49",
+				"deposit": "4.055,79",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_68f7b8c7-5d7c-4db7-8822-1e570478f3cb.jpg",
+				"alt": "Balkon",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Erstbezug im Neubau -  3 Zimmer mit Fußbodenheizung und Tageslichtbad",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "An den Buckower Feldern",
+				"house_number": "17",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00188",
+				"immoType": "wohnung",
+				"immoSubType": "ERDGESCHOSS",
+				"livingSpace": "79.16",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": true
+			},
+			"costs": {
+				"coldRent": "1.212,73",
+				"warmRent": "1.529,37",
+				"additionalCosts": "178,11",
+				"heatingCosts": "138,53",
+				"totalRent": "1.529,37",
+				"deposit": "3.638,19",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_76558737-2845-48d8-af37-cf1d177c1b13.png",
+				"alt": "Terasse",
+				"format": "image/png"
+			}
+		},
+		{
+			"headline": "Charmante 3‑Zimmer‑Wohnung mit Balkon",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "8",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00244",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "70.44",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.117,88",
+				"warmRent": "1.399,64",
+				"additionalCosts": "158,49",
+				"heatingCosts": "123,27",
+				"totalRent": "1.399,64",
+				"deposit": "3.353,64",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_1c178e9c-aaa9-4c83-b97a-d03fd70a07b3.jpg",
+				"alt": "Musterfoto (6)",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "3 Zimmer  · Aufzug · Balkon · Badewanne",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "8",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00243",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "70.36",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.118,02",
+				"warmRent": "1.399,46",
+				"additionalCosts": "158,31",
+				"heatingCosts": "123,13",
+				"totalRent": "1.399,46",
+				"deposit": "3.354,06",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_8cb0edc2-bff0-4818-b3b1-09720588cb94.jpg",
+				"alt": "Musterfoto (29)",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Helle 3-Zimmerwohnung in ruhiger Lage!",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "12",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00262",
+				"immoType": "wohnung",
+				"immoSubType": "ERDGESCHOSS",
+				"livingSpace": "71.01",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": true
+			},
+			"costs": {
+				"coldRent": "1.115,57",
+				"warmRent": "1.399,61",
+				"additionalCosts": "159,77",
+				"heatingCosts": "124,27",
+				"totalRent": "1.399,61",
+				"deposit": "3.346,71",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_c448de50-7b61-46cf-80c5-4c1c823cfede.jpg",
+				"alt": "Musterfoto_Zimmer 1",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Ihr neues Zuhause mit Terrasse wartet auf Sie!",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "12",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00260",
+				"immoType": "wohnung",
+				"immoSubType": "ERDGESCHOSS",
+				"livingSpace": "59.67",
+				"rooms": "2.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": true
+			},
+			"costs": {
+				"coldRent": "911,16",
+				"warmRent": "1.149,84",
+				"additionalCosts": "134,26",
+				"heatingCosts": "104,42",
+				"totalRent": "1.149,84",
+				"deposit": "2.733,48",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_f0622a76-387d-41a7-badb-c4ecc15b2273.jpg",
+				"alt": "Musterfoto_Außenansicht",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Attraktive, moderne 2-Zimmer-Neubauwohnung",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "12",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00271",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "59.50",
+				"rooms": "2.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "911,54",
+				"warmRent": "1.149,55",
+				"additionalCosts": "133,88",
+				"heatingCosts": "104,13",
+				"totalRent": "1.149,55",
+				"deposit": "2.734,62",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_bd178269-78a5-4057-ad39-28963fff862b.jpg",
+				"alt": "Musterfoto_Zimmer 1",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Wohnung in Kaulsdorf, Erstbezug im Neubau!",
+			"address": {
+				"postal_code": "12619",
+				"city": "Berlin",
+				"street": "Lily-Braun-Str.",
+				"house_number": "15",
+				"precinct": "Kaulsdorf-Nord II"
+			},
+			"details": {
+				"immoNumber": "1050/8222/00145",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "84.68",
+				"rooms": "4.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.328,63",
+				"warmRent": "1.599,61",
+				"additionalCosts": "186,3",
+				"heatingCosts": "84,68",
+				"totalRent": "1.599,61",
+				"deposit": "3.985,89",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_797285f3-7f18-4310-92a0-2a2b4a4bad70.jpg",
+				"alt": "Muster",
+				"format": "image/jpeg"
+			}
+		}
+	],
+	"count": 9
+}

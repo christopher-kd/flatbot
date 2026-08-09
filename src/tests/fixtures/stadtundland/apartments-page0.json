@@ -1,0 +1,343 @@
+{
+	"data": [
+		{
+			"headline": "Erstbezug: Neubau mit großzügigen Räumen und Licht",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "An den Buckower Feldern",
+				"house_number": "13",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00229",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "70.04",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.119,24",
+				"warmRent": "1.399,4",
+				"additionalCosts": "157,59",
+				"heatingCosts": "122,57",
+				"totalRent": "1.399,4",
+				"deposit": "3.357,72",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_5bf07755-d64e-49aa-85ca-0ec1343db105.jpg",
+				"alt": "Balkon",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Exklusiv Wohnen: Neubau mit 4 Zimmern, Gäste-WC und Blick ins Grüne",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "An den Buckower Feldern",
+				"house_number": "19",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00180",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "84.39",
+				"rooms": "4.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.351,93",
+				"warmRent": "1.689,49",
+				"additionalCosts": "189,88",
+				"heatingCosts": "147,68",
+				"totalRent": "1.689,49",
+				"deposit": "4.055,79",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_68f7b8c7-5d7c-4db7-8822-1e570478f3cb.jpg",
+				"alt": "Balkon",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Erstbezug im Neubau -  3 Zimmer mit Fußbodenheizung und Tageslichtbad",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "An den Buckower Feldern",
+				"house_number": "17",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00188",
+				"immoType": "wohnung",
+				"immoSubType": "ERDGESCHOSS",
+				"livingSpace": "79.16",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": true
+			},
+			"costs": {
+				"coldRent": "1.212,73",
+				"warmRent": "1.529,37",
+				"additionalCosts": "178,11",
+				"heatingCosts": "138,53",
+				"totalRent": "1.529,37",
+				"deposit": "3.638,19",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_76558737-2845-48d8-af37-cf1d177c1b13.png",
+				"alt": "Terasse",
+				"format": "image/png"
+			}
+		},
+		{
+			"headline": "Lily-Braun-Straße 15, 3. OG LI Nr. 1",
+			"address": {
+				"postal_code": "12619",
+				"city": "Berlin",
+				"street": "Lily-Braun-Str.",
+				"house_number": "15",
+				"precinct": "Kaulsdorf-Nord II"
+			},
+			"details": {
+				"immoNumber": "1050/8222/00113",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "63.49",
+				"rooms": "2.00",
+				"barrierFree": true
+			},
+			"costs": {
+				"coldRent": "856,48",
+				"warmRent": "1.059,65",
+				"additionalCosts": "139,68",
+				"heatingCosts": "63,49",
+				"totalRent": "1.059,65",
+				"deposit": "2.569,44",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_67642d88-1efe-4363-98e1-a6378724b3aa.png",
+				"alt": "Wohnzimmer_Muster_1",
+				"format": "image/png"
+			}
+		},
+		{
+			"headline": "2-Zimmer Einkommensorientierte Miete – 1 Personenhaushalt mit max. 1.161€ Nettoeinkommen mtl.",
+			"address": {
+				"postal_code": "12435",
+				"city": "Berlin",
+				"street": "Galileistr.",
+				"house_number": "50",
+				"precinct": "Plänterwald"
+			},
+			"details": {
+				"immoNumber": "1001/6119/00344",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "35.80",
+				"rooms": "2.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "313,61",
+				"warmRent": "451,61",
+				"additionalCosts": "85",
+				"heatingCosts": "53",
+				"totalRent": "451,61",
+				"deposit": "940,83",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_Bildimport1-2024-06-07_STADTUNDLAND_1001_WE_6119_AA02_1001_6119.jpg.jpg",
+				"alt": "STADTUNDLAND/1001/WE_6119/AA02_1001_6119.jpg",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "2-Zimmer Einkommensorientierte Miete – 1 Personenhaushalt mit max. 1.080 € Nettoeinkommen mtl.",
+			"address": {
+				"postal_code": "12435",
+				"city": "Berlin",
+				"street": "Orionstr.",
+				"house_number": "15",
+				"precinct": "Plänterwald"
+			},
+			"details": {
+				"immoNumber": "1001/6122/00164",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "36.50",
+				"rooms": "2.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "292",
+				"warmRent": "441",
+				"additionalCosts": "92",
+				"heatingCosts": "57",
+				"totalRent": "441",
+				"deposit": "876",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_Bildimport1-2024-06-07_STADTUNDLAND_1001_WE_6122_AA02_1001_6122.jpg.jpg",
+				"alt": "STADTUNDLAND/1001/WE_6122/AA02_1001_6122.jpg",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Ruhiges Wohnen mit großer Terrasse, Büchnerweg 71, EG RE",
+			"address": {
+				"postal_code": "12489",
+				"city": "Berlin",
+				"street": "Büchnerweg",
+				"house_number": "71",
+				"precinct": "Adlershof West"
+			},
+			"details": {
+				"immoNumber": "1001/5161/00003",
+				"immoType": "wohnung",
+				"immoSubType": "ERDGESCHOSS",
+				"livingSpace": "82.94",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.434,03",
+				"warmRent": "1.696,03",
+				"additionalCosts": "196",
+				"heatingCosts": "66",
+				"totalRent": "1.696,03",
+				"deposit": "4.302,09",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_Bildimport1-2024-06-07_STADTUNDLAND_1001_WE_5161_003.-wp-Musterwohnung_Bchnerweg_71-73.17.jpg.jpg",
+				"alt": "STADTUNDLAND/1001/WE_5161/003.-wp-Musterwohnung_Bchnerweg_71-73.17.jpg",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Charmante 3‑Zimmer‑Wohnung mit Balkon",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "8",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00244",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "70.44",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.117,88",
+				"warmRent": "1.399,64",
+				"additionalCosts": "158,49",
+				"heatingCosts": "123,27",
+				"totalRent": "1.399,64",
+				"deposit": "3.353,64",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_1c178e9c-aaa9-4c83-b97a-d03fd70a07b3.jpg",
+				"alt": "Musterfoto (6)",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "3 Zimmer  · Aufzug · Balkon · Badewanne",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "8",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00243",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "70.36",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.118,02",
+				"warmRent": "1.399,46",
+				"additionalCosts": "158,31",
+				"heatingCosts": "123,13",
+				"totalRent": "1.399,46",
+				"deposit": "3.354,06",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_8cb0edc2-bff0-4818-b3b1-09720588cb94.jpg",
+				"alt": "Musterfoto (29)",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Helle 3-Zimmerwohnung in ruhiger Lage!",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "12",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00262",
+				"immoType": "wohnung",
+				"immoSubType": "ERDGESCHOSS",
+				"livingSpace": "71.01",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": true
+			},
+			"costs": {
+				"coldRent": "1.115,57",
+				"warmRent": "1.399,61",
+				"additionalCosts": "159,77",
+				"heatingCosts": "124,27",
+				"totalRent": "1.399,61",
+				"deposit": "3.346,71",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_c448de50-7b61-46cf-80c5-4c1c823cfede.jpg",
+				"alt": "Musterfoto_Zimmer 1",
+				"format": "image/jpeg"
+			}
+		}
+	],
+	"count": 24
+}

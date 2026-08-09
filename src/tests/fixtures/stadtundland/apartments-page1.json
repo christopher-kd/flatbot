@@ -1,0 +1,345 @@
+{
+	"data": [
+		{
+			"headline": "Ihr neues Zuhause mit Terrasse wartet auf Sie!",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "12",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00260",
+				"immoType": "wohnung",
+				"immoSubType": "ERDGESCHOSS",
+				"livingSpace": "59.67",
+				"rooms": "2.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": true
+			},
+			"costs": {
+				"coldRent": "911,16",
+				"warmRent": "1.149,84",
+				"additionalCosts": "134,26",
+				"heatingCosts": "104,42",
+				"totalRent": "1.149,84",
+				"deposit": "2.733,48",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_f0622a76-387d-41a7-badb-c4ecc15b2273.jpg",
+				"alt": "Musterfoto_Außenansicht",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Attraktive, moderne 2-Zimmer-Neubauwohnung",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "In den Bauerngärten",
+				"house_number": "12",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5248/00271",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "59.50",
+				"rooms": "2.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "911,54",
+				"warmRent": "1.149,55",
+				"additionalCosts": "133,88",
+				"heatingCosts": "104,13",
+				"totalRent": "1.149,55",
+				"deposit": "2.734,62",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_bd178269-78a5-4057-ad39-28963fff862b.jpg",
+				"alt": "Musterfoto_Zimmer 1",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Wohnung in Kaulsdorf, Erstbezug im Neubau!",
+			"address": {
+				"postal_code": "12619",
+				"city": "Berlin",
+				"street": "Lily-Braun-Str.",
+				"house_number": "15",
+				"precinct": "Kaulsdorf-Nord II"
+			},
+			"details": {
+				"immoNumber": "1050/8222/00145",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "84.68",
+				"rooms": "4.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.328,63",
+				"warmRent": "1.599,61",
+				"additionalCosts": "186,3",
+				"heatingCosts": "84,68",
+				"totalRent": "1.599,61",
+				"deposit": "3.985,89",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_797285f3-7f18-4310-92a0-2a2b4a4bad70.jpg",
+				"alt": "Muster",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Schöne 2 Zimmer Wohnung",
+			"address": {
+				"postal_code": "12524",
+				"city": "Berlin",
+				"street": "Betulaweg",
+				"house_number": "1",
+				"precinct": "Altglienicke"
+			},
+			"details": {
+				"immoNumber": "1001/0471/00089",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "59.78",
+				"rooms": "2.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "896,7",
+				"warmRent": "1.105,7",
+				"additionalCosts": "130",
+				"heatingCosts": "79",
+				"totalRent": "1.105,7",
+				"deposit": "2.690,1",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_8d2ce79c-48ca-4797-afb5-28fb8dc3f77c.jpg",
+				"alt": "Außenansicht",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Große 3 Zimmer Wohnung",
+			"address": {
+				"postal_code": "12524",
+				"city": "Berlin",
+				"street": "Betulaweg",
+				"house_number": "11",
+				"precinct": "Altglienicke"
+			},
+			"details": {
+				"immoNumber": "1001/0471/00131",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "73.19",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.134,45",
+				"warmRent": "1.391,45",
+				"additionalCosts": "160",
+				"heatingCosts": "97",
+				"totalRent": "1.391,45",
+				"deposit": "3.403,35",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_105c056d-4697-475d-98d4-1a87b81c7874.jpg",
+				"alt": "Wohnzimmer",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "1-Zimmer Einkommensorientierte Miete – 1 Personenhaushalt mit max. 1.013 € Nettoeinkommen mtl.",
+			"address": {
+				"postal_code": "12524",
+				"city": "Berlin",
+				"street": "Schönefelder Chaussee",
+				"house_number": "185",
+				"precinct": "Kosmosviertel Betrauungsakt"
+			},
+			"details": {
+				"immoNumber": "1050/5231/00293",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "36.45",
+				"rooms": "1.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "273,74",
+				"warmRent": "429,74",
+				"additionalCosts": "101",
+				"heatingCosts": "55",
+				"totalRent": "429,74",
+				"deposit": "821,22",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_5c65a454-f30b-4ab6-84dd-bd8afa173aad.jpg",
+				"alt": "IMG_0860",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Erdgeschosswohnung mit Terrasse und kleinem Garten",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "An den Buckower Feldern",
+				"house_number": "6",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5246/00132",
+				"immoType": "wohnung",
+				"immoSubType": "ERDGESCHOSS",
+				"livingSpace": "72.10",
+				"rooms": "3.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.253,82",
+				"warmRent": "1.541,82",
+				"additionalCosts": "162",
+				"heatingCosts": "126",
+				"totalRent": "1.541,82",
+				"deposit": "3.761,46",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_b8566a6c-7e24-473f-903c-edd099d51cf5.png",
+				"alt": "Terrasse/Garten",
+				"format": "image/png"
+			}
+		},
+		{
+			"headline": "Gemütliche 4 Zimmer Wohnung im grünen Buckow",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "Knyphausenweg",
+				"house_number": "4",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5246/00203",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "84.61",
+				"rooms": "4.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.438,88",
+				"warmRent": "1.776,88",
+				"additionalCosts": "190",
+				"heatingCosts": "148",
+				"totalRent": "1.776,88",
+				"deposit": "4.316,64",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_a676640e-69cf-441c-a34b-1b4a139e19a0.jpg",
+				"alt": "Wohnzimmer (Ansicht1)",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Gemütliche 2-Zimmer Wohnung mit großzügigem Balkon und Badewanne",
+			"address": {
+				"postal_code": "12349",
+				"city": "Berlin",
+				"street": "Gensweg",
+				"house_number": "3",
+				"precinct": "Buckower Felder"
+			},
+			"details": {
+				"immoNumber": "1001/5246/00016",
+				"immoType": "wohnung",
+				"immoSubType": "ETAGE",
+				"livingSpace": "57.49",
+				"rooms": "2.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": false
+			},
+			"costs": {
+				"coldRent": "1.021,6",
+				"warmRent": "1.251,6",
+				"additionalCosts": "129",
+				"heatingCosts": "101",
+				"totalRent": "1.251,6",
+				"deposit": "3.064,8",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_be938b8d-dab4-4371-8b9d-7bab77a4b6bc.jpg",
+				"alt": "Zimmer 1",
+				"format": "image/jpeg"
+			}
+		},
+		{
+			"headline": "Große 2 Zimmer Wohnung",
+			"address": {
+				"postal_code": "12524",
+				"city": "Berlin",
+				"street": "Betulaweg",
+				"house_number": "21",
+				"precinct": "Altglienicke"
+			},
+			"details": {
+				"immoNumber": "1001/0471/00173",
+				"immoType": "wohnung",
+				"immoSubType": "ERDGESCHOSS",
+				"livingSpace": "62.20",
+				"rooms": "2.00",
+				"wheelchairFriendly": false,
+				"seniorsFriendly": false,
+				"barrierFree": true
+			},
+			"costs": {
+				"coldRent": "964,1",
+				"warmRent": "1.182,1",
+				"additionalCosts": "136",
+				"heatingCosts": "82",
+				"totalRent": "1.182,1",
+				"deposit": "2.892,3",
+				"discount": "0.00"
+			},
+			"image": {
+				"filename": "wohnungshelden/stadt_und_land_Bildimport1-2024-06-07_STADTUNDLAND_1001_WE_0471_GE_020_Haus_19.JPG.jpg",
+				"alt": "Aussenansicht",
+				"format": "image/jpeg"
+			}
+		}
+	],
+	"count": 24
+}
