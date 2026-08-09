@@ -179,11 +179,13 @@ export default class Gesobau extends Scraper {
 			resultAsJSON: "1",
 			// residential listings only
 			"befilter[0]": "nutzungsart_stringS:WOHNEN",
-			// "Service"/"Senioren Kachel"/"Bestand"/"Studierende"/
-			// "Neubau Kachel" channels
+			// "Service"/"Senioren Kachel"/"Bestand"/"Studierende"/"Neubau" channels.
+			// Site's real tag is "Neubau", not "Neubau Kachel" - the old value
+			// never matched, silently dropping most new-build listings (proven
+			// live: 8 of 10 currently-live GESOBAU listings tagged only "Neubau").
 			"befilter[1]":
 				'kanal_stringM:("Service" OR "Senioren Kachel" OR ' +
-				'"Bestand" OR "Studierende" OR "Neubau Kachel")',
+				'"Bestand" OR "Studierende" OR "Neubau")',
 		}).toString()
 		const json = await this.fetchJson<GesobauResponse>(searchUrl)
 
