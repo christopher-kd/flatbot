@@ -5,6 +5,7 @@ import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
 import { zipStrings } from "../util/zip"
+import { classifyRestriction } from "../wbs"
 import type { FeatureArray } from "./InBerlinWohnen.types"
 
 const WOHNUNGSFINDER_URL = "https://www.inberlinwohnen.de/wohnungsfinder"
@@ -153,10 +154,20 @@ export default class InBerlinWohnenScraper extends Scraper {
 				senior: features.includes("Seniorenwohnung"),
 				wheelchair: features.includes("Weitgehend rollstuhlgerecht"),
 			},
-			restrictions:
-				required(table.get("WBS"), "WBS").trim() === "erforderlich"
-					? { kind: "wbs-required", wbsLevels: [], wbsSpecialNeed: null }
-					: { kind: "free" },
+			restrictions: ((wbsField: string) => {
+				const fromTitle = classifyRestriction(title)
+				if (wbsField === "unbekannt") return null
+				if (wbsField === "erforderlich") {
+					return {
+						kind: "wbs-required" as const,
+						wbsLevels: fromTitle.levels,
+						wbsSpecialNeed: fromTitle.specialNeed,
+					}
+				}
+				return fromTitle.restriction === "income-checked"
+					? { kind: "income-checked" as const, wbsLevels: fromTitle.levels }
+					: { kind: "free" as const }
+			})(required(table.get("WBS"), "WBS").trim()),
 			features,
 			images: [],
 		}
