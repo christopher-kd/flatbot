@@ -5,7 +5,7 @@ import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
 import { zipStrings } from "../util/zip"
-import { classifyRestriction } from "../wbs"
+import { classifyRestriction, restrictionFromTitle } from "../wbs"
 import type { FeatureArray } from "./InBerlinWohnen.types"
 
 const WOHNUNGSFINDER_URL = "https://www.inberlinwohnen.de/wohnungsfinder"
@@ -154,9 +154,11 @@ export default class InBerlinWohnenScraper extends Scraper {
 				senior: features.includes("Seniorenwohnung"),
 				wheelchair: features.includes("Weitgehend rollstuhlgerecht"),
 			},
+			// "unbekannt" is a real third state, seen live. Site has no
+			// opinion, so use title only - same as adapters with no WBS field.
 			restrictions: ((wbsField: string) => {
+				if (wbsField === "unbekannt") return restrictionFromTitle(title)
 				const fromTitle = classifyRestriction(title)
-				if (wbsField === "unbekannt") return null
 				if (wbsField === "erforderlich") {
 					return {
 						kind: "wbs-required" as const,

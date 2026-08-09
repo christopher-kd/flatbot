@@ -64,9 +64,13 @@ const AMTLICH = /amtlich\w*\s+wbs|wbs[^.]{0,40}amtlich/
 // The token "WBS" (incl. "WBS220" with no space).
 const WBS_TOKEN = /\bwbs(?:\b|\d)/
 
-// Landlord-side income check, no formal certificate implied.
+// Landlord-side income check, no formal certificate needed. The
+// "einkommensgrenze(n) ... beachten" branch only matches that exact
+// phrase ("mind the income limit"), seen live on real Gewobag listings.
+// A bare "Einkommensgrenze" alone is too generic - also shows up in
+// unrelated WBS explainer text.
 const INCOME_CHECK =
-	/einkommensorientiert|einkommenspr[üu]fung|income[\s-]?check/
+	/einkommensorientiert|einkommenspr[üu]fung|income[\s-]?check|einkommensgrenzen?\b[^.!]{0,30}\bbeachten/
 
 // Spelled-out "Wohnberechtigungsschein(e/s)" — collapse to "wbs" up front so
 // every regex below (all keyed on the "wbs" token) picks it up for free.
