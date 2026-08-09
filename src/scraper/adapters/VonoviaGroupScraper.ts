@@ -5,6 +5,7 @@ import type {
 	ApartmentListingImage,
 	Organization,
 } from "../../types"
+import ProxyClient from "../ProxyClient"
 import Scraper from "../Scraper"
 import { runConcurrent } from "../util/concurrency"
 import { delay } from "../util/delay"
@@ -13,12 +14,22 @@ import type VonoviaGroupResponse from "./VonoviaGroup.types"
 
 const EMPTY_RESULT_RETRIES = 5
 const EMPTY_RESULT_RETRY_DELAY_MS = 4000
+// "Alive" (passes ProxyClient's generic check) doesn't mean "not blocked by
+// this specific target" - some exit IPs are themselves flagged datacenter/
+// proxy ranges. Keep a small pool of candidates to try, not just one.
+const PROXY_CANDIDATES = 5
 
 /**
  * Vonovia & Deutsche Wohnen run on the same listing API.
  */
 export default abstract class VonoviaGroupScraper extends Scraper {
 	private readonly LISTING_LIMIT_PER_REQUEST = 15
+	private readonly proxyClient = new ProxyClient()
+	private proxyCandidatesPromise: Promise<string[]> | undefined
+	// Index into the candidate pool. Only ever mutated in fetchAllListings'
+	// first-page loop, and only before any real (non-empty) page has come
+	// back
+	private proxyIndex = 0
 
 	constructor(
 		organization: Organization,
@@ -26,6 +37,32 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 		private readonly listingUrlBase: string,
 	) {
 		super(organization)
+	}
+
+	private async getProxyCandidates(): Promise<string[]> {
+		this.proxyCandidatesPromise ??=
+			this.proxyClient.getWorkingProxies(PROXY_CANDIDATES)
+		return this.proxyCandidatesPromise
+	}
+
+	private async currentProxy(): Promise<string | null> {
+		const candidates = await this.getProxyCandidates()
+		return candidates[this.proxyIndex] ?? null
+	}
+
+	private async withProxyFallback<T>(
+		attempt: (init?: BunFetchRequestInit) => Promise<T>,
+	): Promise<T> {
+		try {
+			return await attempt()
+		} catch (err) {
+			const proxy = await this.currentProxy()
+			if (!proxy) throw err
+			log.warn(
+				`${this.organization}: direct request failed (${err}), retrying via proxy`,
+			)
+			return await attempt({ proxy })
+		}
 	}
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
@@ -90,7 +127,9 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 	private async fetchDetails(
 		url: string,
 	): Promise<{ tableData: Map<string, string>; features: string[] }> {
-		const page = await this.fetchHtml(url)
+		const page = await this.withProxyFallback((init) =>
+			this.fetchHtml(url, init),
+		)
 
 		const tables = page.querySelectorAll(".side-left .content-card ul")
 		const keys: HTMLElement[] = []
@@ -130,7 +169,9 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 	}
 
 	private fetchListingsPage(offset?: number): Promise<VonoviaGroupResponse> {
-		return this.fetchJson(this.buildUrl(offset))
+		return this.withProxyFallback((init) =>
+			this.fetchJson(this.buildUrl(offset), init),
+		)
 	}
 
 	// API sometimes returns an empty page - not just on the first page, any
@@ -154,9 +195,35 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 	}
 
 	private async fetchAllListings(): Promise<VonoviaGroupResponse["results"]> {
-		const fetchResults: VonoviaGroupResponse[] = [
-			await this.fetchPageWithRetry(),
-		]
+		const candidates = await this.getProxyCandidates()
+		const maxProxyAttempts = Math.max(candidates.length, 1)
+
+		let firstPage: VonoviaGroupResponse | undefined
+		let lastError: unknown
+		for (
+			let proxyAttempt = 0;
+			proxyAttempt < maxProxyAttempts;
+			proxyAttempt++
+		) {
+			try {
+				firstPage = await this.fetchPageWithRetry()
+				if (firstPage.paging.info.count > 0) break
+			} catch (err) {
+				lastError = err
+				firstPage = undefined
+			}
+			if (proxyAttempt < maxProxyAttempts - 1) {
+				log.warn(
+					`${this.organization}: proxy ${this.proxyIndex} failed or ` +
+						"returned no listings, trying next proxy",
+				)
+				this.proxyIndex++
+			}
+		}
+		if (!firstPage)
+			throw lastError ?? new Error("Couldn't find any listing. Blocked?")
+
+		const fetchResults: VonoviaGroupResponse[] = [firstPage]
 		const listingsCount = fetchResults[0].paging.info.count
 		if (listingsCount <= 0)
 			throw new Error("Couldn't find any listing. Blocked?")
