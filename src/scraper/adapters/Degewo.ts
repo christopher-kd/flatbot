@@ -157,7 +157,7 @@ export default class Degewo extends Scraper {
 		}
 	}
 
-	private async extractListing(
+	public async extractListing(
 		teaser: HTMLElement,
 	): Promise<ApartmentListing | null> {
 		const linkHref = required(
@@ -266,7 +266,7 @@ export default class Degewo extends Scraper {
 		return match ? parseInt(match[0], 10) : undefined
 	}
 
-	protected async getListings(): Promise<ApartmentListing[]> {
+	public async getListings(): Promise<ApartmentListing[]> {
 		const MAX_RESULTS_PER_PAGE = 10
 		let declaredTotal: number | undefined
 
