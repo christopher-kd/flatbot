@@ -52,7 +52,14 @@ export default class WBM extends Scraper {
 				listing.costs.totalRentEur = this.parseGermanFloatOrNull(
 					map.get("Warmmiete"),
 				)
-				listing.costs.depositEur = coldRentEur === null ? null : coldRentEur * 3
+				const depositText = page
+					.querySelector(".openimmo-detail__rental-costs-deposit")
+					?.textContent.trim()
+				const depositMultiplier = depositText?.match(/(\d+(?:[.,]\d+)?)/)?.[1]
+				listing.costs.depositEur =
+					coldRentEur === null || depositMultiplier === undefined
+						? null
+						: coldRentEur * this.parseGermanFloat(depositMultiplier)
 				listing.costs.heatingEur = null
 
 				const baujahr = page

@@ -86,7 +86,10 @@ export default class Degewo extends Scraper {
 						? null
 						: utilityColdEur + utilityWarmEur
 				listing.costs.heatingEur = utilityWarmEur
-				listing.costs.depositEur = coldRentEur === null ? null : coldRentEur * 3
+				listing.costs.depositEur =
+					coldRentEur === null || !details.has("Kaution")
+						? null
+						: coldRentEur * 3
 				listing.newBuilding =
 					baujahr === undefined ? null : Number(baujahr) >= 2014
 				listing.features = data.features
