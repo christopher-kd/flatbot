@@ -143,7 +143,9 @@ class Howoge extends Scraper {
 
 	private extractListing(
 		immo: HowogeResponse["immoobjects"][number],
-	): ApartmentListing {
+  ): ApartmentListing {
+    // immo.title is the street address, not a description - immo.notice
+		// holds the actual listing text
 		const parsedAddress = parseAddress(
 			immo.title,
 			"{street} {houseNumber}, {postalCode} {city}",
@@ -177,13 +179,13 @@ class Howoge extends Scraper {
 				barrierFree: immo.features.includes("barrierefrei"),
 			},
 			restrictions:
-				immo.wbs !== "ja"
-					? { kind: "free" }
-					: {
+				immo.wbs === "ja"
+					? {
 							kind: "wbs-required",
-							wbsLevels: getWbsLevels(immo.title),
-							wbsSpecialNeed: getSpecialNeed(immo.title),
-						},
+							wbsLevels: getWbsLevels(immo.notice),
+							wbsSpecialNeed: getSpecialNeed(immo.notice),
+						}
+					: restrictionFromTitle(immo.notice),
 			features: immo.features,
 			images: [
 				{
