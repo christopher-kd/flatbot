@@ -9,6 +9,22 @@ import type { FeatureArray } from "./InBerlinWohnen.types"
 
 const WOHNUNGSFINDER_URL = "https://www.inberlinwohnen.de/wohnungsfinder"
 
+// inberlinwohnen.de sometimes serves a map pin where lat and lng are
+// identical - not a real coordinate pair, so drop it rather than have
+// a bad-but-defined value
+export function parseMapPinCoordinates(
+	wireClick: string,
+): { lat: number; lng: number } | undefined {
+	const coordsMatch = required(
+		wireClick.match(/{.*}/),
+		"coords JSON in raw attribute",
+	)
+	const coords: { lat: string; lon: string } = JSON.parse(coordsMatch[0])
+	const lat = Number(coords.lat)
+	const lng = Number(coords.lon)
+	return lat === lng ? undefined : { lat, lng }
+}
+
 export default class InBerlinWohnenScraper extends Scraper {
 	constructor() {
 		super("inberlinwohnen")
@@ -85,15 +101,13 @@ export default class InBerlinWohnenScraper extends Scraper {
 		const table = this.parseDtDdTable(apartment)
 
 		const coordsRaw = required(
-			apartment.querySelector("button.text-right"),
-			"map button",
-		).getAttribute("wire:click")
-
-		const coordsMatch = required(
-			required(coordsRaw, "attribute of raw coords").match(/{.*}/),
-			"coords JSON in raw attribute",
+			required(
+				apartment.querySelector("button.text-right"),
+				"map button",
+			).getAttribute("wire:click"),
+			"attribute of raw coords",
 		)
-		const coords: { lat: string; lon: string } = JSON.parse(coordsMatch[0])
+		const coordinates = parseMapPinCoordinates(coordsRaw)
 
 		const url = required(
 			apartment.querySelector(".list__details a")?.getAttribute("href"),
@@ -123,10 +137,7 @@ export default class InBerlinWohnenScraper extends Scraper {
 				street: required(addr.street, "street"),
 				houseNumber: required(addr.houseNumber, "houseNumber"),
 				neighborhood: addr.precinct,
-				coordinates: {
-					lat: Number(coords.lat),
-					lng: Number(coords.lon),
-				},
+				coordinates,
 			},
 			spaceQm: this.parseGermanFloatOrNull(table.get("Wohnfläche")),
 			rooms: this.parseGermanFloat(table.get("Zimmeranzahl") ?? ""),
