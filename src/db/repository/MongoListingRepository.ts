@@ -82,7 +82,7 @@ function flattenLeaves(
 ): void {
 	for (const [key, leaf] of Object.entries(value)) {
 		const path = `${prefix}.${key}`
-		if (leaf !== null && typeof leaf === "object" && !Array.isArray(leaf)) {
+		if (leaf !== null && leaf?.constructor === Object) {
 			flattenLeaves(leaf as Record<string, unknown>, path, target)
 		} else {
 			target[path] = leaf
@@ -229,9 +229,11 @@ export default class MongoListingRepository implements ListingRepository {
 		try {
 			session.startTransaction()
 
-			await this.#listingCollection.bulkWrite(toUpsertOps(listings), {
-				session,
-			})
+			if (listings.length > 0) {
+				await this.#listingCollection.bulkWrite(toUpsertOps(listings), {
+					session,
+				})
+			}
 
 			if (docsToArchive.length > 0) {
 				const archivedDocs: ArchivedApartmentListing[] = docsToArchive.map(
