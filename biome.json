@@ -7,7 +7,14 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!photon", "!.zed", "!bin"]
+		"includes": [
+			"**",
+			"!photon",
+			"!.zed",
+			"!bin",
+			"!.claude",
+			"!src/tests/fixtures"
+		]
 	},
 	"formatter": {
 		"enabled": true,
