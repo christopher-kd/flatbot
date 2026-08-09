@@ -84,7 +84,9 @@ class ScraperRunner {
 				(l) =>
 					l.organization === "Stadt und Land" ||
 					l.organization === "Berlinovo" ||
-					l.organization === "Gewobag",
+					l.organization === "Gewobag" ||
+					l.organization === "HOWOGE" ||
+					l.organization === "WBM",
 			)
 			const coordsBatch2 = listings.filter((l) => l.organization === "degewo")
 			const addressFor1 = (l: ApartmentListingLocation) =>
@@ -97,7 +99,7 @@ class ScraperRunner {
 					photonClient: this.#photonClient,
 					batches: [
 						{
-							label: "Stadt und Land, Berlinovo, Gewobag",
+							label: "Stadt und Land, Berlinovo, Gewobag, HOWOGE, WBM",
 							listings: coordsBatch1,
 							addressFor: addressFor1,
 						},

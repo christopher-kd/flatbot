@@ -204,8 +204,9 @@ describe("ScraperRunner.run", () => {
 				}),
 			],
 		})
-		// WBM isn't in either coordinate batch - its undefined coordinates
-		// should never trigger a Photon call at all.
+		// WBM never populates coordinates from its own site (100%
+		// aggregator-dependent), HOWOGE's project-teaser-sourced listings
+		// never get coordinates either - both share Gewobag's address format.
 		const wbm = makeScraper("WBM", {
 			listings: [
 				makeListing("WBM", {
@@ -218,15 +219,43 @@ describe("ScraperRunner.run", () => {
 				}),
 			],
 		})
+		const howoge = makeScraper("HOWOGE", {
+			listings: [
+				makeListing("HOWOGE", {
+					location: {
+						city: "Berlin",
+						street: "Quuxstr.",
+						houseNumber: "7",
+						postalCode: "10115",
+					},
+				}),
+			],
+		})
+		// GESOBAU isn't in either coordinate batch - its undefined coordinates
+		// should never trigger a Photon call at all.
+		const gesobau = makeScraper("GESOBAU", {
+			listings: [
+				makeListing("GESOBAU", {
+					location: {
+						city: "Berlin",
+						street: "Quxstr.",
+						houseNumber: "1",
+						postalCode: "10115",
+					},
+				}),
+			],
+		})
 
 		await makeRunner({
-			directScrapers: [gewobag, degewo, wbm],
+			directScrapers: [gewobag, degewo, wbm, howoge, gesobau],
 			photonClient,
 		}).run()
 
 		expect(calls).toContain("Foostr. 5, 10115 Berlin")
 		expect(calls).toContain("Barstr. 9, Berlin Mitte")
-		expect(calls).toHaveLength(2)
+		expect(calls).toContain("Bazstr. 3, 10115 Berlin")
+		expect(calls).toContain("Quuxstr. 7, 10115 Berlin")
+		expect(calls).toHaveLength(4)
 	})
 
 	test("still scrapes and persists when the Photon healthcheck fails, just skips coordinate backfill", async () => {
