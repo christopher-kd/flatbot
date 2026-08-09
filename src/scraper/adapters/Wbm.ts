@@ -106,7 +106,7 @@ export default class WBM extends Scraper {
 	// .openimmo-search-list-item .imgWrap -> src in prop [data-img-src]
 	// .openimmo-search-list-item .area -> district / area
 	// .openimmo-search-list-item .immo-button-cta -> detail page href
-	private extractListing(listing: HTMLElement): ApartmentListing | null {
+	public extractListing(listing: HTMLElement): ApartmentListing | null {
 		const propertyId = listing.getAttribute("data-id")
 		if (!propertyId) {
 			log.warn("WBM: couldn't extract propertyId, skipping")
@@ -187,7 +187,7 @@ export default class WBM extends Scraper {
 		}
 	}
 
-	protected async getListings(): Promise<ApartmentListing[]> {
+	public async getListings(): Promise<ApartmentListing[]> {
 		// TODO what if there are multiple pages?? too few flwats to test :(
 		const page = await this.fetchHtml(
 			"https://www.wbm.de/wohnungen-berlin/angebote/",
