@@ -71,6 +71,36 @@ function normalizeForStorage(
 	}
 }
 
+// $set on nested-object key (e.g. `costs: {...}`) replaces whole
+// subdocument rather than merging per field. Flattening costs/location/
+// accessibility into dot-notation keys makes every leaf set independently
+// instead.
+function flattenLeaves(
+	value: object,
+	prefix: string,
+	target: Record<string, unknown>,
+): void {
+	for (const [key, leaf] of Object.entries(value)) {
+		const path = `${prefix}.${key}`
+		if (leaf !== null && typeof leaf === "object" && !Array.isArray(leaf)) {
+			flattenLeaves(leaf as Record<string, unknown>, path, target)
+		} else {
+			target[path] = leaf
+		}
+	}
+}
+
+function toSetDocument(
+	normalized: NormalizedApartmentListing,
+): Record<string, unknown> {
+	const { location, costs, accessibility, ...rest } = normalized
+	const set: Record<string, unknown> = { ...rest }
+	flattenLeaves(location, "location", set)
+	flattenLeaves(costs, "costs", set)
+	flattenLeaves(accessibility, "accessibility", set)
+	return set
+}
+
 function toUpsertOps(
 	listings: ApartmentListing[],
 ): mongoDB.AnyBulkWriteOperation<StoredApartmentListing>[] {
@@ -84,7 +114,7 @@ function toUpsertOps(
 					listingId: required(normalized.listingId, "listing.listingId"),
 				},
 				update: {
-					$set: normalized,
+					$set: toSetDocument(normalized),
 					$setOnInsert: { firstSeenAt: Date.now() },
 				},
 				upsert: true,
