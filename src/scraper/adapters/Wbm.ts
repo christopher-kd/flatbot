@@ -115,6 +115,9 @@ export default class WBM extends Scraper {
 		const imageSrc = listing
 			.querySelector(".imgWrap")
 			?.getAttribute("data-img-src")
+		const features = listing
+			.querySelectorAll(".check-property-list li")
+			.map((elem) => elem.textContent.trim())
 
 		return {
 			propertyId,
@@ -156,6 +159,7 @@ export default class WBM extends Scraper {
 				),
 			},
 			images: imageSrc ? [{ fullUrl: `https://wbm.de${imageSrc}` }] : [],
+			features,
 		}
 	}
 
