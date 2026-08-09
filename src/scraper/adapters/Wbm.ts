@@ -14,7 +14,9 @@ export default class WBM extends Scraper {
 	}
 
 	public async backfill(listings: ApartmentListing[]): Promise<void> {
-		await this.runBackfillStep("costs", () => this.backfillData(listings))
+		await this.runBackfillStep("costs and is new building", () =>
+			this.backfillData(listings),
+		)
 	}
 
 	private async backfillData(listings: ApartmentListing[]): Promise<void> {
@@ -24,7 +26,8 @@ export default class WBM extends Scraper {
 				listing.costs.utilityEur === undefined ||
 				listing.costs.totalRentEur === undefined ||
 				listing.costs.depositEur === undefined ||
-				listing.costs.heatingEur === undefined,
+				listing.costs.heatingEur === undefined ||
+				listing.newBuilding === undefined,
 		)
 		await runConcurrent(targets, this.concurrency, async (listing) => {
 			try {
@@ -50,6 +53,17 @@ export default class WBM extends Scraper {
 				)
 				listing.costs.depositEur = coldRentEur === null ? null : coldRentEur * 3
 				listing.costs.heatingEur = null
+
+				const baujahr = page
+					.querySelectorAll(".openimmo-detail__energy-indicators-list-item")
+					.find(
+						(item) =>
+							item.querySelector("span")?.textContent.trim() === "Baujahr:",
+					)
+					?.textContent.replace("Baujahr:", "")
+					.trim()
+				listing.newBuilding =
+					baujahr === undefined ? null : Number(baujahr) >= 2014
 			} catch (err) {
 				log.warn(
 					` -> Failed to backfill costs for id ${listing.propertyId}: ${err}`,
