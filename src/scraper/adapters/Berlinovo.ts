@@ -5,7 +5,6 @@ import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
 import { runConcurrent } from "../util/concurrency"
-import { delay } from "../util/delay"
 import { zipStrings } from "../util/zip"
 import { classifyRestriction, getSpecialNeed, getWbsLevels } from "../wbs"
 
@@ -24,18 +23,6 @@ export default class Berlinovo extends Scraper {
 		if (value === undefined) return null
 		const parsed = Number.parseFloat(value.replace(/[^\d.-]/g, ""))
 		return Number.isNaN(parsed) ? null : parsed
-	}
-
-	public async fetchArea(propertyId: string): Promise<number | null> {
-		const page = await this.fetchHtml(
-			`https://www.berlinovo.de/de/wohnung-id/${propertyId}`,
-		)
-		const areaElem = page.querySelector(
-			".block-field-blocknodeapartmentfield-net-area .field__item",
-		)
-		if (!areaElem) return null
-		await delay(250)
-		return this.parseGermanFloat(areaElem.textContent.trim())
 	}
 
 	public async fetchDetails(url: string): Promise<{
@@ -188,7 +175,7 @@ export default class Berlinovo extends Scraper {
 		})
 	}
 
-	private extractListing(listing: HTMLElement): ApartmentListing {
+	public extractListing(listing: HTMLElement): ApartmentListing {
 		const title = required(
 			listing.querySelector(".title a"),
 			"Berlinovo listing .title a",
@@ -277,7 +264,7 @@ export default class Berlinovo extends Scraper {
 		}
 	}
 
-	protected async getListings(): Promise<ApartmentListing[]> {
+	public async getListings(): Promise<ApartmentListing[]> {
 		// .source-summary-count --> results count, only present/read on page 1
 		// .block-field-blocknodeapartmentfield-net-area .field__item -->
 		//   quadratmeter auf detail page
