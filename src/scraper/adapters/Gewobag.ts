@@ -69,11 +69,13 @@ export default class Gewobag extends Scraper {
 	): Promise<{ map: Map<string, string>; features: string[] }> {
 		const page = await this.fetchHtml(url)
 
+		const tableSelector =
+			"table:not(.details-characteristics):not(.details-further)"
 		const keyElements = page
-			.querySelectorAll("table:not(.details-characteristics) th")
+			.querySelectorAll(`${tableSelector} th`)
 			.map((elem) => elem.innerText.trim())
 		const valueElements = page
-			.querySelectorAll("table:not(.details-characteristics) td")
+			.querySelectorAll(`${tableSelector} td`)
 			.map((elem) => elem.innerText.trim())
 
 		const features = page
@@ -106,7 +108,7 @@ export default class Gewobag extends Scraper {
 	}
 
 	// TODO site has attributes for wbs
-	private extractListing(listing: HTMLElement): ApartmentListing {
+	public extractListing(listing: HTMLElement): ApartmentListing {
 		const url = required(
 			required(
 				listing.querySelector(".angebot-footer a"),
@@ -181,7 +183,7 @@ export default class Gewobag extends Scraper {
 		}
 	}
 
-	protected async getListings(): Promise<ApartmentListing[]> {
+	public async getListings(): Promise<ApartmentListing[]> {
 		// ul.page-numbers a:not(.next) check if visible, if visible, check
 		// last page number
 		const pages = await this.paginateHtmlPages(
