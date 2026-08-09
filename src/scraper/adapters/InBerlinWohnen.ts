@@ -93,7 +93,7 @@ export default class InBerlinWohnenScraper extends Scraper {
 		return zipStrings(keys, values)
 	}
 
-	private extractListing(apartment: HTMLElement): ApartmentListing {
+	public extractListing(apartment: HTMLElement): ApartmentListing {
 		const title = required(
 			apartment.querySelector(".list__details>span:first-child"),
 			"apartment title",
@@ -175,7 +175,7 @@ export default class InBerlinWohnenScraper extends Scraper {
 		}
 	}
 
-	protected async getListings(): Promise<ApartmentListing[]> {
+	public async getListings(): Promise<ApartmentListing[]> {
 		// .pagination .flex button:last-child names the total page count, read
 		// off page 1 only — same shape as Gewobag/Berlinovo, see paginateHtmlPages.
 		const pages = await this.paginateHtmlPages(
