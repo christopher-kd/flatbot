@@ -21,12 +21,7 @@
  * Title-only signal — parses German phrasing from Stadt und Land / HOWOGE.
  */
 
-import type {
-	Restriction,
-	Restrictions,
-	SpecialNeed,
-	WBSLevel,
-} from "../types"
+import type { Restriction, Restrictions, SpecialNeed, WBSLevel } from "../types"
 
 const WBS_LEVELS = [100, 140, 160, 180, 220] as const
 
@@ -260,5 +255,9 @@ export function restrictionFromTitle(title: string): Restrictions {
 	if (restriction === "free") return { kind: "free" }
 	if (restriction === "income-checked")
 		return { kind: "income-checked", wbsLevels: levels }
-	return { kind: "wbs-required", wbsLevels: levels, wbsSpecialNeed: specialNeed }
+	return {
+		kind: "wbs-required",
+		wbsLevels: levels,
+		wbsSpecialNeed: specialNeed,
+	}
 }
