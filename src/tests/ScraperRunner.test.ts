@@ -229,19 +229,37 @@ describe("ScraperRunner.run", () => {
 		expect(calls).toHaveLength(2)
 	})
 
-	test("throws when the Photon healthcheck fails, without running any scraper, but still disconnects", async () => {
-		const fetchListings = mock(async () => [])
-		const scraper = makeScraper("WBM", { fetchListings })
+	test("still scrapes and persists when the Photon healthcheck fails, just skips coordinate backfill", async () => {
+		const fetchListings = mock(async () => [
+			makeListing("Gewobag", {
+				location: {
+					city: "Berlin",
+					street: "Foostr.",
+					houseNumber: "5",
+					postalCode: "10115",
+				},
+			}),
+		])
+		const scraper = makeScraper("Gewobag", { fetchListings })
 		const disconnect = mock(async () => {})
+		const fetchCoordinates = mock(async () => ({ lat: 1, lng: 2 }))
+		const updateListings = mockUpdateListings()
 
 		const runner = makeRunner({
 			directScrapers: [scraper],
-			photonClient: makePhotonClient({ healthcheck: async () => false }),
+			photonClient: makePhotonClient({
+				healthcheck: async () => false,
+				fetchCoordinates,
+			}),
 			dbClient: makeDbClient(disconnect),
+			listingRepository: makeRepository(updateListings),
 		})
 
-		await expectToThrow(runner.run(), /Photon/)
-		expect(fetchListings).not.toHaveBeenCalled()
+		await runner.run()
+
+		expect(fetchListings).toHaveBeenCalledTimes(1)
+		expect(fetchCoordinates).not.toHaveBeenCalled()
+		expect(updateListings).toHaveBeenCalledTimes(1)
 		expect(disconnect).toHaveBeenCalledTimes(1)
 	})
 

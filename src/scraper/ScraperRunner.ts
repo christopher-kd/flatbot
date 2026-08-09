@@ -57,8 +57,6 @@ class ScraperRunner {
 		const dynamic = getLogStyle() === "dynamic"
 
 		try {
-			if (!dynamic) await this.healthcheckPhase()
-
 			log.info("Searching for new flats...")
 			const { listings, scrapedOrganizations } = dynamic
 				? await this.scrapeDynamic()
@@ -107,11 +105,17 @@ class ScraperRunner {
 					],
 				})
 			} else {
-				log.info("Filling in missing coordinates with Photon...")
-				await Promise.all([
-					fillMissingCoordinates(this.#photonClient, coordsBatch1, addressFor1),
-					fillMissingCoordinates(this.#photonClient, coordsBatch2, addressFor2),
-				])
+				log.info("Checking Photon connection for coordinate backfill...")
+				const photonHealthy = await this.#photonClient.healthcheck()
+				if (photonHealthy) {
+					log.info("Filling in missing coordinates with Photon...")
+					await Promise.all([
+						fillMissingCoordinates(this.#photonClient, coordsBatch1, addressFor1),
+						fillMissingCoordinates(this.#photonClient, coordsBatch2, addressFor2),
+					])
+				} else {
+					log.warn("Photon unreachable — skipping coordinate backfill this run.")
+				}
 			}
 
 			if (dynamic) {
@@ -130,22 +134,11 @@ class ScraperRunner {
 		log.info("Bye, bye!")
 	}
 
-	private async healthcheckPhase(): Promise<void> {
-		log.info("Performing healthcheck on Photon endpoint...")
-		const healthy = await this.#photonClient.healthcheck()
-		if (!healthy)
-			throw new Error(
-				"Couldn't establish connection to Photon endpoint. " +
-					"Make sure the service is running and reachable.",
-			)
-	}
-
 	private async scrapeDynamic(): Promise<{
 		listings: ApartmentListing[]
 		scrapedOrganizations: Organization[]
 	}> {
 		return runFetchAndMergeWithLiveBoard({
-			photonClient: this.#photonClient,
 			directScrapers: this.#directScrapers,
 			aggregatorScraper: this.#aggregatorScraper,
 			execute: (scraper) => this.executeScraper(scraper),

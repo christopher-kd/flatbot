@@ -23,12 +23,11 @@ const CHECK_LOGS = "check logs or run with LOG_STYLE=\"normal\""
 const RENDERER_OPTIONS = { collapseSubtasks: false, collapseErrors: false }
 
 export async function runFetchAndMergeWithLiveBoard(params: {
-	photonClient: PhotonClient
 	directScrapers: Scraper[]
 	aggregatorScraper: Scraper
 	execute: (scraper: Scraper) => Promise<ScraperRunResult>
 }): Promise<{ listings: ApartmentListing[]; scrapedOrganizations: Organization[] }> {
-	const { photonClient, directScrapers, aggregatorScraper, execute } = params
+	const { directScrapers, aggregatorScraper, execute } = params
 	const allScrapers = [...directScrapers, aggregatorScraper]
 	const results: ScraperRunResult[] = new Array(allScrapers.length)
 	let merged: ApartmentListing[] = []
@@ -37,21 +36,6 @@ export async function runFetchAndMergeWithLiveBoard(params: {
 
 	const tasks = new Listr(
 		[
-			{
-				title: "Checking Photon connection",
-				task: async (_ctx, task) => {
-					const healthy = await photonClient.healthcheck()
-					if (!healthy) {
-						log.error(
-							"Couldn't establish connection to Photon endpoint. " +
-								"Make sure the service is running and reachable.",
-						)
-						task.title = "Checking Photon connection"
-						throw new Error(CHECK_LOGS)
-					}
-					task.title = "Checking Photon connection — ok"
-				},
-			},
 			{
 				title: "Fetching listings",
 				task: (_ctx, task) =>
@@ -216,10 +200,23 @@ export async function runCoordinateFillWithLiveBoard(params: {
 }): Promise<void> {
 	const { photonClient, batches } = params
 
-	const tasks = new Listr(
+	const tasks = new Listr<{ photonHealthy: boolean }>(
 		[
 			{
+				title: "Checking Photon connection",
+				task: async (ctx, task) => {
+					ctx.photonHealthy = await photonClient.healthcheck()
+					task.title = ctx.photonHealthy
+						? "Checking Photon connection — ok"
+						: "Checking Photon connection — unreachable"
+				},
+			},
+			{
 				title: "Backfilling coordinates",
+				skip: (ctx) =>
+					ctx.photonHealthy
+						? false
+						: "Photon unreachable — skipping coordinate backfill",
 				task: (_ctx, task) =>
 					task.newListr(
 						batches.map(({ label, listings, addressFor }) => ({
