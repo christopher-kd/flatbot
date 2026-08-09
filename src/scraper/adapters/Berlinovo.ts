@@ -214,9 +214,9 @@ export default class Berlinovo extends Scraper {
 			"{street} {houseNumber}",
 		)
 
-		const imageHref = img?.getAttribute("href")
-		const image: ApartmentListingImage | null = imageHref
-			? { fullUrl: imageHref }
+		const imageSrc = img?.getAttribute("src")
+		const image: ApartmentListingImage | null = imageSrc
+			? { fullUrl: `https://berlinovo.de${imageSrc}` }
 			: null
 
 		// could be missing from listing item

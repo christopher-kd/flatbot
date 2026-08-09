@@ -108,11 +108,11 @@ export default class Gesobau extends Scraper {
 		const street = elem.raw.adresse_stringS.split(" ")
 		const houseNumber = street.pop() ?? ""
 		const imagesObj: ApartmentListingImage[] = (() => {
-			const src = elem.image?.figure.media.image.src
-			// GESOBAU serves blank placeholder SVG in place of real photo
-			// when a listing has none
-			if (src && !src.startsWith("data:image/svg+xml")) {
-				return [{ fullUrl: src }]
+			// .image.src always a lazy-load placeholder SVG (blank, data URI);
+			// real photo path is .image.srcNoscript
+			const src = elem.image?.figure.media.image.srcNoscript
+			if (src) {
+				return [{ fullUrl: `https://gesobau.de${src}` }]
 			}
 			return []
 		})()

@@ -67,12 +67,7 @@ function normalizeForStorage(
 			wheelchair: listing.accessibility?.wheelchair ?? null,
 			barrierFree: listing.accessibility?.barrierFree,
 		},
-		images:
-			listing.images == null
-				? []
-				: Array.isArray(listing.images)
-					? listing.images
-					: [listing.images],
+		images: listing.images,
 	}
 }
 
