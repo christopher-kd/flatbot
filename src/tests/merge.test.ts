@@ -225,3 +225,41 @@ describe("mergeAggregatorListings - location.coordinates tri-state", () => {
 		expect(merged.location.coordinates).toEqual({ lat: 52.5, lng: 13.4 })
 	})
 })
+
+describe("mergeAggregatorListings - features", () => {
+	test("direct undefined, aggregator has value - aggregator fills the gap", () => {
+		const direct = makeListing({ features: undefined })
+		const aggregator = makeListing({ features: ["Balkon"] })
+
+		const [merged] = mergeAggregatorListings([direct], [aggregator])
+
+		expect(merged.features).toEqual(["Balkon"])
+	})
+
+	test("direct has a value, aggregator has a different value - direct wins", () => {
+		const direct = makeListing({ features: ["Aufzug"] })
+		const aggregator = makeListing({ features: ["Balkon"] })
+
+		const [merged] = mergeAggregatorListings([direct], [aggregator])
+
+		expect(merged.features).toEqual(["Aufzug"])
+	})
+
+	test("direct has an empty array (confirmed none) - direct's empty array wins over aggregator", () => {
+		const direct = makeListing({ features: [] })
+		const aggregator = makeListing({ features: ["Balkon"] })
+
+		const [merged] = mergeAggregatorListings([direct], [aggregator])
+
+		expect(merged.features).toEqual([])
+	})
+
+	test("both undefined - stays undefined, not silently dropped", () => {
+		const direct = makeListing({ features: undefined })
+		const aggregator = makeListing({ features: undefined })
+
+		const [merged] = mergeAggregatorListings([direct], [aggregator])
+
+		expect(merged.features).toBeUndefined()
+	})
+})

@@ -161,6 +161,7 @@ function mergeApartmentListings(
 		),
 		costs: mergeCosts(direct.costs, aggregator.costs),
 		images: mergeImages(direct.images, aggregator.images),
+		features: pick(direct.features, aggregator.features),
 	}
 }
 
