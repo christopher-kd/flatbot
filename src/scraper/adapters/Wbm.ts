@@ -27,7 +27,8 @@ export default class WBM extends Scraper {
 				listing.costs.totalRentEur === undefined ||
 				listing.costs.depositEur === undefined ||
 				listing.costs.heatingEur === undefined ||
-				listing.newBuilding === undefined,
+				listing.newBuilding === undefined ||
+				listing.accessibility?.barrierFree === undefined,
 		)
 		await runConcurrent(targets, this.concurrency, async (listing) => {
 			try {
@@ -64,6 +65,22 @@ export default class WBM extends Scraper {
 					.trim()
 				listing.newBuilding =
 					baujahr === undefined ? null : Number(baujahr) >= 2014
+
+				// No structured accessibility field on this site
+				// Positive-match only - absence doesn't prove not accessible.
+				const introText =
+					page
+						.querySelector(".openimmo-detail__intro-text")
+						?.textContent.trim() ?? ""
+				listing.accessibility = {
+					...listing.accessibility,
+					barrierFree: /barrierefrei/i.test(`${listing.title} ${introText}`)
+						? true
+						: null,
+					// wheelchair isn't tri-state - no match leaves it as-is,
+					// doesn't assert false.
+					...(/rollstuhl/i.test(introText) ? { wheelchair: true } : {}),
+				}
 			} catch (err) {
 				log.warn(
 					` -> Failed to backfill costs for id ${listing.propertyId}: ${err}`,
