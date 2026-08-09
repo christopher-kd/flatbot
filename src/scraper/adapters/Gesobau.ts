@@ -102,7 +102,7 @@ export default class Gesobau extends Scraper {
 		listing.features = features
 	}
 
-	private async extractListing(
+	public async extractListing(
 		elem: GesobauResponse[number],
 	): Promise<ApartmentListing> {
 		const street = elem.raw.adresse_stringS.split(" ")
@@ -171,7 +171,7 @@ export default class Gesobau extends Scraper {
 		}
 	}
 
-	protected async getListings(): Promise<ApartmentListing[]> {
+	public async getListings(): Promise<ApartmentListing[]> {
 		const searchUrl = new URL("https://www.gesobau.de/mieten/wohnungssuche/")
 		searchUrl.search = new URLSearchParams({
 			resultsPerPage: "10000",
@@ -191,7 +191,11 @@ export default class Gesobau extends Scraper {
 
 		const result: ApartmentListing[] = []
 		for (const elem of json) {
-			result.push(await this.extractListing(elem))
+			try {
+				result.push(await this.extractListing(elem))
+			} catch (err) {
+				log.warn(`Gesobau: failed to extract listing: ${err}`)
+			}
 		}
 		return this.dedupeByPropertyId(result)
 	}
