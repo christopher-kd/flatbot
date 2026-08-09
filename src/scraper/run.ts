@@ -1,7 +1,6 @@
 import { exit } from "node:process"
 import createListingRepository from "../db/createListingRepository"
 import log from "../logger/logger"
-import type Scraper from "./Scraper"
 import Berlinovo from "./adapters/Berlinovo"
 import Degewo from "./adapters/Degewo"
 import DeutscheWohnen from "./adapters/DeutscheWohnen"
@@ -13,6 +12,7 @@ import StadtUndLand from "./adapters/StadtUndLand"
 import Vonovia from "./adapters/Vonovia"
 import Wbm from "./adapters/Wbm"
 import PhotonClient from "./PhotonClient"
+import type Scraper from "./Scraper"
 import ScraperRunner from "./ScraperRunner"
 
 const { dbClient, listingRepository } = await createListingRepository()

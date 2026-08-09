@@ -1,0 +1,18 @@
+services:
+  scraper:
+    build: .
+    restart: unless-stopped
+    environment:
+      LOG_STYLE: normal
+      DB_CONN_STRING: ${DB_CONN_STRING:?}
+      DB_NAME: ${DB_NAME:-flatbot}
+      DB_LISTINGS_COLLECTION: ${DB_LISTINGS_COLLECTION:-listings}
+      DB_LISTINGS_ARCHIVE_COLLECTION: ${DB_LISTINGS_ARCHIVE_COLLECTION:-listings_archive}
+      PHOTON_API_HOST: ${PHOTON_API_HOST:-localhost}
+      PHOTON_API_PORT: ${PHOTON_API_PORT:-2322}
+      SCRAPE_INTERVAL_SECONDS: ${SCRAPE_INTERVAL_SECONDS:-600}
+    volumes:
+      - scraper-logs:/app/logs
+
+volumes:
+  scraper-logs:
