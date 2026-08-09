@@ -124,7 +124,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 		})
 	}
 
-	private async fetchDetails(
+	public async fetchDetails(
 		url: string,
 	): Promise<{ tableData: Map<string, string>; features: string[] }> {
 		const page = await this.withProxyFallback((init) =>
@@ -237,7 +237,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 		return fetchResults.flatMap((f) => f.results)
 	}
 
-	private extractListing(
+	public extractListing(
 		listing: VonoviaGroupResponse["results"][number],
 	): ApartmentListing[] {
 		const street_raw = listing.strasse.split(" ")
@@ -292,7 +292,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 		]
 	}
 
-	protected async getListings(): Promise<ApartmentListing[]> {
+	public async getListings(): Promise<ApartmentListing[]> {
 		const listings = await this.fetchAllListings()
 		return listings.flatMap((listing) => this.extractListing(listing))
 	}
