@@ -95,7 +95,7 @@ export default class Degewo extends Scraper {
 				listing.features = data.features
 				listing.accessibility ??= {}
 				listing.accessibility.barrierFree =
-					data.features.findIndex((item) => item === "Barrierefrei") >= 0
+					data.features.indexOf("Barrierefrei") >= 0
 			} catch (err) {
 				log.warn(
 					` -> Failed to backfill data for id ${listing.propertyId}: ${err}`,

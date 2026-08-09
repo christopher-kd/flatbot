@@ -1,6 +1,5 @@
 import parse from "node-html-parser"
 import type { ApartmentListing } from "../types"
-import log from "../logger/logger"
 
 type LivenessCheckTarget = Pick<
 	ApartmentListing,
