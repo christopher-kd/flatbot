@@ -69,7 +69,7 @@ describe("Howoge.extractListing", () => {
 			street: "Streitstraße",
 			houseNumber: "5",
 			neighborhood: "Hakenfelde",
-			coordinates: { lat: 52.5575599, lng: 13.209115 },
+			coordinates: { type: "Point", coordinates: [13.209115, 52.5575599] },
 		})
 		expect(listing.restrictions).toEqual({
 			kind: "wbs-required",

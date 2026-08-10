@@ -154,32 +154,35 @@ describe("mergeAggregatorListings - location.coordinates tri-state", () => {
 		const aggregator = makeListing({
 			location: {
 				...makeListing().location,
-				coordinates: { lat: 52.5, lng: 13.4 },
+				coordinates: { type: "Point", coordinates: [13.4, 52.5] },
 			},
 		})
 
 		const [merged] = mergeAggregatorListings([direct], [aggregator])
 
-		expect(merged.location.coordinates).toEqual({ lat: 52.5, lng: 13.4 })
+		expect(merged.location.coordinates).toEqual({ type: "Point", coordinates: [13.4, 52.5] })
 	})
 
 	test("direct has a value, aggregator has a different value - direct wins", () => {
 		const direct = makeListing({
 			location: {
 				...makeListing().location,
-				coordinates: { lat: 52.1, lng: 13.1 },
+				coordinates: { type: "Point", coordinates: [13.1, 52.1] },
 			},
 		})
 		const aggregator = makeListing({
 			location: {
 				...makeListing().location,
-				coordinates: { lat: 52.9, lng: 13.9 },
+				coordinates: { type: "Point", coordinates: [13.9, 52.9] },
 			},
 		})
 
 		const [merged] = mergeAggregatorListings([direct], [aggregator])
 
-		expect(merged.location.coordinates).toEqual({ lat: 52.1, lng: 13.1 })
+		expect(merged.location.coordinates).toEqual({
+			type: "Point",
+			coordinates: [13.1, 52.1],
+		})
 	})
 
 	test("direct is null (confirmed unresolvable), aggregator has value - aggregator wins", () => {
@@ -189,13 +192,13 @@ describe("mergeAggregatorListings - location.coordinates tri-state", () => {
 		const aggregator = makeListing({
 			location: {
 				...makeListing().location,
-				coordinates: { lat: 52.5, lng: 13.4 },
+				coordinates: { type: "Point", coordinates: [13.4, 52.5] },
 			},
 		})
 
 		const [merged] = mergeAggregatorListings([direct], [aggregator])
 
-		expect(merged.location.coordinates).toEqual({ lat: 52.5, lng: 13.4 })
+		expect(merged.location.coordinates).toEqual({ type: "Point", coordinates: [13.4, 52.5] })
 	})
 
 	test("both undefined - stays undefined, not coerced to null", () => {
@@ -215,14 +218,14 @@ describe("mergeAggregatorListings - location.coordinates tri-state", () => {
 			location: {
 				...makeListing().location,
 				street: "Aggregatorstr.",
-				coordinates: { lat: 52.5, lng: 13.4 },
+				coordinates: { type: "Point", coordinates: [13.4, 52.5] },
 			},
 		})
 
 		const [merged] = mergeAggregatorListings([direct], [aggregator])
 
 		expect(merged.location.street).toBe("Direktstr.")
-		expect(merged.location.coordinates).toEqual({ lat: 52.5, lng: 13.4 })
+		expect(merged.location.coordinates).toEqual({ type: "Point", coordinates: [13.4, 52.5] })
 	})
 })
 

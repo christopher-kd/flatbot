@@ -1,7 +1,11 @@
 import { describe, expect, test } from "bun:test"
 import { fillMissingCoordinates } from "../scraper/backfill"
 import type PhotonClient from "../scraper/PhotonClient"
-import type { ApartmentListing, ApartmentListingLocation } from "../types"
+import type {
+	ApartmentListing,
+	ApartmentListingLocation,
+	ApartmentListingLocationCoordinates,
+} from "../types"
 
 function makeListing(
 	overrides: Partial<ApartmentListing> = {},
@@ -31,7 +35,7 @@ function makeListing(
 function makePhotonClient(
 	fetchCoordinates: (
 		address: string,
-	) => Promise<{ lat: number; lng: number } | null>,
+	) => Promise<ApartmentListingLocationCoordinates | null>,
 ): PhotonClient {
 	return { fetchCoordinates } as unknown as PhotonClient
 }
@@ -49,7 +53,7 @@ describe("fillMissingCoordinates", () => {
 			listingId: "WBM:2",
 			location: {
 				...makeListing().location,
-				coordinates: { lat: 1, lng: 2 },
+				coordinates: { type: "Point", coordinates: [2, 1] },
 			},
 		})
 		const target = makeListing({
@@ -60,7 +64,7 @@ describe("fillMissingCoordinates", () => {
 		const requestedAddresses: string[] = []
 		const photonClient = makePhotonClient(async (address) => {
 			requestedAddresses.push(address)
-			return { lat: 52.5, lng: 13.4 }
+			return { type: "Point", coordinates: [13.4, 52.5] }
 		})
 
 		await fillMissingCoordinates(
@@ -71,8 +75,14 @@ describe("fillMissingCoordinates", () => {
 
 		expect(requestedAddresses).toEqual(["Teststr. 1"])
 		expect(untouched.location.coordinates).toBeNull()
-		expect(alreadySet.location.coordinates).toEqual({ lat: 1, lng: 2 })
-		expect(target.location.coordinates).toEqual({ lat: 52.5, lng: 13.4 })
+		expect(alreadySet.location.coordinates).toEqual({
+			type: "Point",
+			coordinates: [2, 1],
+		})
+		expect(target.location.coordinates).toEqual({
+			type: "Point",
+			coordinates: [13.4, 52.5],
+		})
 	})
 
 	test("writes null (not undefined) when Photon confirms zero results", async () => {
@@ -107,7 +117,7 @@ describe("fillMissingCoordinates", () => {
 
 		const photonClient = makePhotonClient(async (address) => {
 			if (address.startsWith("Failstr.")) throw new Error("boom")
-			return { lat: 52.5, lng: 13.4 }
+			return { type: "Point", coordinates: [13.4, 52.5] }
 		})
 
 		await fillMissingCoordinates(
@@ -117,6 +127,9 @@ describe("fillMissingCoordinates", () => {
 		)
 
 		expect(failing.location.coordinates).toBeUndefined()
-		expect(succeeding.location.coordinates).toEqual({ lat: 52.5, lng: 13.4 })
+		expect(succeeding.location.coordinates).toEqual({
+			type: "Point",
+			coordinates: [13.4, 52.5],
+		})
 	})
 })

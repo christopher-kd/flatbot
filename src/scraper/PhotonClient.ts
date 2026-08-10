@@ -1,6 +1,7 @@
 import { env } from "bun"
 import log from "../logger/logger"
 import type { GeoJsonResponse } from "../types/photon"
+import type { ApartmentListingLocationCoordinates } from "../types"
 import { required } from "./util/assert"
 
 export default class PhotonClient {
@@ -27,14 +28,11 @@ export default class PhotonClient {
 
 	async fetchCoordinates(
 		address: string,
-	): Promise<{ lat: number; lng: number } | null> {
+	): Promise<ApartmentListingLocationCoordinates | null> {
 		const r: GeoJsonResponse = await (
 			await fetch(`http://${this.#host}:${this.#port}/api/?q=${address}`)
 		).json()
 		if (r.features.length <= 0) return null
-		return {
-			lat: r.features[0].geometry.coordinates[1],
-			lng: r.features[0].geometry.coordinates[0],
-		}
+		return r.features[0].geometry
 	}
 }

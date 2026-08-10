@@ -5,7 +5,11 @@ import * as realConsoleReport from "../scraper/consoleReport"
 import type PhotonClient from "../scraper/PhotonClient"
 import type Scraper from "../scraper/Scraper"
 import ScraperRunner from "../scraper/ScraperRunner"
-import type { ApartmentListing, Organization } from "../types"
+import type {
+	ApartmentListing,
+	ApartmentListingLocationCoordinates,
+	Organization,
+} from "../types"
 
 // consoleReport.printBanner reads flavor-text file for console art -
 // stub out so tests don't depend on that file existing.
@@ -101,7 +105,7 @@ function makePhotonClient(
 		healthcheck?: () => Promise<boolean>
 		fetchCoordinates?: (
 			address: string,
-		) => Promise<{ lat: number; lng: number } | null>
+		) => Promise<ApartmentListingLocationCoordinates | null>
 	} = {},
 ): PhotonClient {
 	return {
@@ -177,7 +181,7 @@ describe("ScraperRunner.run", () => {
 		const photonClient = makePhotonClient({
 			fetchCoordinates: async (address) => {
 				calls.push(address)
-				return { lat: 1, lng: 2 }
+				return { type: "Point", coordinates: [2, 1] }
 			},
 		})
 		const gewobag = makeScraper("Gewobag", {
@@ -271,7 +275,10 @@ describe("ScraperRunner.run", () => {
 		])
 		const scraper = makeScraper("Gewobag", { fetchListings })
 		const disconnect = mock(async () => {})
-		const fetchCoordinates = mock(async () => ({ lat: 1, lng: 2 }))
+		const fetchCoordinates = mock(async () => ({
+			type: "Point" as const,
+			coordinates: [2, 1] as [number, number],
+		}))
 		const updateListings = mockUpdateListings()
 
 		const runner = makeRunner({

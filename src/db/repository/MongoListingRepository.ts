@@ -6,6 +6,7 @@ import log from "../../logger/logger"
 import { checkListingLiveness } from "../../scraper/liveness"
 import { required } from "../../scraper/util/assert"
 import { runConcurrent } from "../../scraper/util/concurrency"
+import { geoJSONFrom } from "../../scraper/util/geoJson"
 import { groupByOrganization } from "../../scraper/util/groupByOrganization"
 import type {
 	ApartmentListing,
@@ -47,10 +48,10 @@ function normalizeForStorage(
 		location: {
 			...listing.location,
 			coordinates: listing.location.coordinates
-				? {
-						lat: toDouble(listing.location.coordinates.lat),
-						lng: toDouble(listing.location.coordinates.lng),
-					}
+				? geoJSONFrom(
+						toDouble(listing.location.coordinates.coordinates[0]),
+						toDouble(listing.location.coordinates.coordinates[1]),
+					)
 				: listing.location.coordinates,
 		},
 		costs: {

@@ -82,7 +82,7 @@ describe("Gesobau.extractListing", () => {
 			city: "Berlin",
 			neighborhood: "Marzahn-Hellersdorf",
 			houseNumber: "152",
-			coordinates: { lat: 52.54371, lng: 13.59482 },
+			coordinates: { type: "Point", coordinates: [13.59482, 52.54371] },
 		})
 		expect(listing.spaceQm).toBe(44.73)
 		expect(listing.rooms).toBe(1)

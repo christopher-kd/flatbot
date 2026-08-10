@@ -22,8 +22,8 @@ describe("parseMapPinCoordinates", () => {
 			'$dispatch(\'flatClicked\', {"lat":"52.54665322","lon":"13.50150560","id":20135});'
 
 		expect(parseMapPinCoordinates(wireClick)).toEqual({
-			lat: 52.54665322,
-			lng: 13.5015056,
+			type: "Point",
+			coordinates: [13.5015056, 52.54665322],
 		})
 	})
 

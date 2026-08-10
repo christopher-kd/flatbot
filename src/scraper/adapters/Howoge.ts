@@ -9,6 +9,7 @@ import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
 import { runConcurrent } from "../util/concurrency"
+import { geoJSONFrom } from "../util/geoJson"
 import { zipStrings } from "../util/zip"
 import { getSpecialNeed, getWbsLevels, restrictionFromTitle } from "../wbs"
 import type HowogeResponse from "./Howoge.types"
@@ -169,10 +170,10 @@ class Howoge extends Scraper {
 					`houseNumber in "${immo.title}"`,
 				),
 				neighborhood: immo.district,
-				coordinates: {
-					lat: Number(immo.coordinates.lat),
-					lng: Number(immo.coordinates.lng),
-				},
+				coordinates: geoJSONFrom(
+					Number(immo.coordinates.lng),
+					Number(immo.coordinates.lat),
+				),
 			},
 			accessibility: {
 				wheelchair: immo.features.includes("rollstuhlgerecht"),

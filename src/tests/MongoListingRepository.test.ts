@@ -103,6 +103,24 @@ describe.skipIf(!mongoAvailable)("MongoListingRepository (integration)", () => {
 		return doc?.t
 	}
 
+	async function bsonTypeOfArrayElem(
+		listingId: string,
+		field: string,
+		index: number,
+	): Promise<string | undefined> {
+		const [doc] = await listingCollection
+			.aggregate([
+				{ $match: { listingId } },
+				{
+					$project: {
+						t: { $type: { $arrayElemAt: [`$${field}`, index] } },
+					},
+				},
+			])
+			.toArray()
+		return doc?.t
+	}
+
 	describe("updateListings - BSON numeric typing", () => {
 		test("stores numeric fields as BSON double, never int32, even for whole numbers", async () => {
 			const listing = makeListing("WBM", {
@@ -119,7 +137,7 @@ describe.skipIf(!mongoAvailable)("MongoListingRepository (integration)", () => {
 					city: "Berlin",
 					street: "Teststr.",
 					houseNumber: "1",
-					coordinates: { lat: 52, lng: 13 },
+					coordinates: { type: "Point", coordinates: [13, 52] },
 				},
 			})
 
@@ -133,11 +151,23 @@ describe.skipIf(!mongoAvailable)("MongoListingRepository (integration)", () => {
 				"costs.heatingEur",
 				"costs.totalRentEur",
 				"costs.depositEur",
-				"location.coordinates.lat",
-				"location.coordinates.lng",
 			]) {
 				expect(await bsonTypeOf("WBM:1", field)).toBe("double")
 			}
+			expect(
+				await bsonTypeOfArrayElem(
+					"WBM:1",
+					"location.coordinates.coordinates",
+					0,
+				),
+			).toBe("double")
+			expect(
+				await bsonTypeOfArrayElem(
+					"WBM:1",
+					"location.coordinates.coordinates",
+					1,
+				),
+			).toBe("double")
 		})
 
 		test("keeps a confirmed-absent numeric field as null, not Double(0)", async () => {
@@ -270,7 +300,7 @@ describe.skipIf(!mongoAvailable)("MongoListingRepository (integration)", () => {
 							city: "Berlin",
 							street: "Teststr.",
 							houseNumber: "1",
-							coordinates: { lat: 52, lng: 13 },
+							coordinates: { type: "Point", coordinates: [13, 52] },
 						},
 						features: ["Balkon"],
 						accessibility: { barrierFree: true },
@@ -287,7 +317,10 @@ describe.skipIf(!mongoAvailable)("MongoListingRepository (integration)", () => {
 			expect(fields?.costs?.coldRentEur).toBe(500)
 			expect(fields?.costs?.heatingEur).toBe(null)
 			expect(fields?.costs?.utilityEur).toBeUndefined()
-			expect(fields?.location?.coordinates).toEqual({ lat: 52, lng: 13 })
+			expect(fields?.location?.coordinates).toEqual({
+				type: "Point",
+				coordinates: [13, 52],
+			})
 			expect(fields?.features).toEqual(["Balkon"])
 			expect(fields?.accessibility?.barrierFree).toBe(true)
 		})

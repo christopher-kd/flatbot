@@ -1,9 +1,14 @@
 import type { HTMLElement } from "node-html-parser"
 import log from "../../logger/logger"
-import type { ApartmentListing, Organization } from "../../types"
+import type {
+	ApartmentListing,
+	ApartmentListingLocationCoordinates,
+	Organization,
+} from "../../types"
 import Scraper from "../Scraper"
 import { parseAddress } from "../util/address"
 import { required } from "../util/assert"
+import { geoJSONFrom } from "../util/geoJson"
 import { zipStrings } from "../util/zip"
 import { classifyRestriction, restrictionFromTitle } from "../wbs"
 import type { FeatureArray } from "./InBerlinWohnen.types"
@@ -15,7 +20,7 @@ const WOHNUNGSFINDER_URL = "https://www.inberlinwohnen.de/wohnungsfinder"
 // a bad-but-defined value
 export function parseMapPinCoordinates(
 	wireClick: string,
-): { lat: number; lng: number } | undefined {
+): ApartmentListingLocationCoordinates | undefined {
 	const coordsMatch = required(
 		wireClick.match(/{.*}/),
 		"coords JSON in raw attribute",
@@ -23,7 +28,7 @@ export function parseMapPinCoordinates(
 	const coords: { lat: string; lon: string } = JSON.parse(coordsMatch[0])
 	const lat = Number(coords.lat)
 	const lng = Number(coords.lon)
-	return lat === lng ? undefined : { lat, lng }
+	return lat === lng ? undefined : geoJSONFrom(lng, lat)
 }
 
 export default class InBerlinWohnenScraper extends Scraper {

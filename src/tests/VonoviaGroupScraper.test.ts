@@ -110,7 +110,7 @@ describe("VonoviaGroupScraper.extractListing", () => {
 			city: "Berlin",
 			neighborhood: "Lichtenrade",
 			postalCode: "12305",
-			coordinates: { lat: 52.3878788, lng: 13.4088797 },
+			coordinates: { type: "Point", coordinates: [13.4088797, 52.3878788] },
 		})
 		expect(listing.spaceQm).toBe(63.25)
 		expect(listing.rooms).toBe(2)

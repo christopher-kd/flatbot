@@ -9,6 +9,7 @@ import ProxyClient from "../ProxyClient"
 import Scraper from "../Scraper"
 import { runConcurrent } from "../util/concurrency"
 import { delay } from "../util/delay"
+import { geoJSONFrom } from "../util/geoJson"
 import { zipStrings } from "../util/zip"
 import type VonoviaGroupResponse from "./VonoviaGroup.types"
 
@@ -279,7 +280,7 @@ export default abstract class VonoviaGroupScraper extends Scraper {
 					coordinates:
 						listing.lat === 0 && listing.lng === 0
 							? null
-							: { lat: listing.lat, lng: listing.lng },
+							: geoJSONFrom(listing.lng, listing.lat),
 				},
 				spaceQm: listing.groesse,
 				rooms: listing.anzahl_zimmer,

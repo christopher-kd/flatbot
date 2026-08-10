@@ -44,8 +44,8 @@ export interface ApartmentListingLocation {
 }
 
 export interface ApartmentListingLocationCoordinates {
-	lat: number
-	lng: number
+	type: "Point"
+	coordinates: [lng: number, lat: number]
 }
 
 export interface ApartmentListingImage {

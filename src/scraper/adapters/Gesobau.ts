@@ -3,6 +3,7 @@ import type { ApartmentListing, ApartmentListingImage } from "../../types"
 import Scraper from "../Scraper"
 import { required } from "../util/assert"
 import { runConcurrent } from "../util/concurrency"
+import { geoJSONFrom } from "../util/geoJson"
 import { classifyRestriction, getSpecialNeed, getWbsLevels } from "../wbs"
 import type GesobauResponse from "./Gesobau.types"
 
@@ -140,10 +141,7 @@ export default class Gesobau extends Scraper {
 				city: elem.raw.ort_stringS,
 				neighborhood: elem.raw.region_stringM[0],
 				houseNumber,
-				coordinates: {
-					lat: elem.lat,
-					lng: elem.lng,
-				},
+				coordinates: geoJSONFrom(elem.lng, elem.lat),
 			},
 			spaceQm: required(elem.raw.wohnflaeche_floatS, "space in m²"),
 			rooms: roomCount,

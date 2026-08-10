@@ -9,6 +9,7 @@
 		"scraper-debug": "node --import tsx src/scraper/run.ts",
 		"photon": "java -jar ./bin/photon/photon-1.2.1.jar serve -data-dir ./bin/photon",
 		"test": "bun test",
+		"migrate:coordinates-geojson": "bun src/db/migrateCoordinatesToGeoJson.ts",
 		"lint": "bunx --bun @biomejs/biome lint",
 		"lintfix": "bunx --bun @biomejs/biome lint --write ./src"
 	},
