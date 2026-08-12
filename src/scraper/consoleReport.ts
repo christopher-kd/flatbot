@@ -1,9 +1,7 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
 import { printBanner as renderBanner } from "../core/banner"
 import log from "../logger/logger"
-import type { ScraperRunResult } from "./ScraperRunner.types"
 import type Scraper from "./Scraper"
+import type { ScraperRunResult } from "./ScraperRunner.types"
 
 export function logScraperResult(
 	organization: string,
@@ -44,10 +42,5 @@ export async function runScrapersPlain(
 }
 
 export async function printBanner() {
-	const searchMessageList: string[] = JSON.parse(
-		readFileSync(join(import.meta.dirname, "searchMessages.json"), "utf-8"),
-	)
-	const randomMessage =
-		searchMessageList[Math.floor(Math.random() * searchMessageList.length)]
-	await renderBanner(randomMessage)
+	await renderBanner()
 }
