@@ -1,14 +1,51 @@
 services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - mongo-data:/data/db
+
+  mongo-init:
+    image: mongo:7
+    restart: "no"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    entrypoint: ["mongosh"]
+    command:
+      - "--host"
+      - "mongo"
+      - "--quiet"
+      - "--eval"
+      - "try { rs.status() } catch (e) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongo:27017'}]}) }"
+
+  photon:
+    build:
+      context: .
+      dockerfile: docker/photon.Dockerfile
+    restart: unless-stopped
+    volumes:
+      - photon-data:/photon/photon_data
+
   scraper:
     build: .
     restart: unless-stopped
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
     environment:
       LOG_STYLE: normal
-      DB_CONN_STRING: ${DB_CONN_STRING:?}
+      DB_CONN_STRING: ${DB_CONN_STRING:-mongodb://mongo:27017/?replicaSet=rs0}
       DB_NAME: ${DB_NAME:-flatbot}
       DB_LISTINGS_COLLECTION: ${DB_LISTINGS_COLLECTION:-listings}
       DB_LISTINGS_ARCHIVE_COLLECTION: ${DB_LISTINGS_ARCHIVE_COLLECTION:-listings_archive}
-      PHOTON_API_HOST: ${PHOTON_API_HOST:-localhost}
+      PHOTON_API_HOST: ${PHOTON_API_HOST:-photon}
       PHOTON_API_PORT: ${PHOTON_API_PORT:-2322}
       SCRAPE_INTERVAL_SECONDS: ${SCRAPE_INTERVAL_SECONDS:-600}
     volumes:
@@ -16,3 +53,5 @@ services:
 
 volumes:
   scraper-logs:
+  mongo-data:
+  photon-data:
