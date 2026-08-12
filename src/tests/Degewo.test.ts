@@ -128,7 +128,8 @@ describe("Degewo.extractListing", () => {
 	test("returns null and logs a warning when the address doesn't match the expected template, instead of throwing", async () => {
 		const warnSpy = spyOn(log, "warn").mockImplementation(() => undefined)
 		const root = parse(`
-			<div class="c-teaser--apartment" data-openimmo-bookmark-item-uid="X1">
+			<div class="c-teaser--apartment">
+				<button data-openimmo-bookmark-item-uid="X1"></button>
 				<h3><a href="/immosuche/details/x">Broken listing</a></h3>
 				<p>this address has no pipe separator at all</p>
 			</div>
