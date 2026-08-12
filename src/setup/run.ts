@@ -146,7 +146,7 @@ function createDownloadBars(count: number): SingleBar[] {
 }
 
 async function main() {
-	await printBanner("Setup project")
+	await printBanner()
 
 	const bars = createDownloadBars(downloadables.length)
 	const downloads: Promise<void>[] = []
