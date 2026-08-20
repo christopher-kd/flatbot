@@ -1,13 +1,13 @@
-import { parse } from "node-html-parser"
 import { afterEach, describe, expect, mock, spyOn, test } from "bun:test"
-import log from "../logger/logger"
-import Gewobag from "../scraper/adapters/Gewobag"
-import type { ApartmentListing } from "../types"
+import { parse } from "node-html-parser"
+import log from "../../../logger/logger"
+import Gewobag from "../../../scraper/adapters/Gewobag"
+import type { ApartmentListing } from "../../../types"
 
 const gewobag = new Gewobag()
 
 async function loadFixtureText(name: string): Promise<string> {
-	return Bun.file(`${import.meta.dir}/fixtures/gewobag/${name}`).text()
+	return Bun.file(`${import.meta.dir}/../fixtures/gewobag/${name}`).text()
 }
 
 async function loadListItems(page: number) {

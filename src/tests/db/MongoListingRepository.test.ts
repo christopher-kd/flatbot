@@ -9,13 +9,13 @@ import {
 	test,
 } from "bun:test"
 import { type Collection, MongoClient } from "mongodb"
-import MongoListingRepository from "../db/repository/MongoListingRepository"
+import MongoListingRepository from "../../db/repository/MongoListingRepository"
 import type {
 	ApartmentListing,
 	ArchivedApartmentListing,
 	Organization,
 	StoredApartmentListing,
-} from "../types"
+} from "../../types"
 
 // Tests hit real MongoDB replica set (transactions require one) on
 // an isolated, disposable database.

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, mock, spyOn, test } from "bun:test"
-import { checkListingLiveness } from "../scraper/liveness"
-import type { ApartmentListing, Organization } from "../types"
+import { checkListingLiveness } from "../../scraper/liveness"
+import type { ApartmentListing, Organization } from "../../types"
 
 type LivenessCheckTarget = Pick<
 	ApartmentListing,

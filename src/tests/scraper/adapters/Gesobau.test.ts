@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, mock, spyOn, test } from "bun:test"
-import log from "../logger/logger"
-import Gesobau from "../scraper/adapters/Gesobau"
-import type GesobauResponse from "../scraper/adapters/Gesobau.types"
-import type { ApartmentListing } from "../types"
-import listings from "./fixtures/gesobau/listings.json"
+import log from "../../../logger/logger"
+import Gesobau from "../../../scraper/adapters/Gesobau"
+import type GesobauResponse from "../../../scraper/adapters/Gesobau.types"
+import type { ApartmentListing } from "../../../types"
+import listings from "../fixtures/gesobau/listings.json"
 
 const gesobau = new Gesobau()
 
@@ -16,7 +16,7 @@ function findImmo(predicate: (o: Immo) => boolean): Immo {
 }
 
 async function loadFixtureText(name: string): Promise<string> {
-	return Bun.file(`${import.meta.dir}/fixtures/gesobau/${name}`).text()
+	return Bun.file(`${import.meta.dir}/../fixtures/gesobau/${name}`).text()
 }
 
 function makeListing(

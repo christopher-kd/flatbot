@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, mock, spyOn, test } from "bun:test"
 import type { HTMLElement } from "node-html-parser"
-import log from "../logger/logger"
-import Scraper from "../scraper/Scraper"
-import type { ApartmentListing, Organization } from "../types"
+import log from "../../logger/logger"
+import Scraper from "../../scraper/Scraper"
+import type { ApartmentListing, Organization } from "../../types"
 
 class TestScraper extends Scraper {
 	public listings: ApartmentListing[] = []
@@ -242,10 +242,10 @@ describe("getRequestCount", () => {
 		const fresh = new TestScraper()
 		spyOn(globalThis, "fetch").mockImplementation(
 			(async () => new Response("ok")) as unknown as typeof fetch,
-    )
+		)
 
 		await fresh.callFetchText("https://example.com")
-    await fresh.callFetchText("https://example.com")
+		await fresh.callFetchText("https://example.com")
 
 		expect(fresh.getRequestCount()).toBe(2)
 	})
@@ -255,9 +255,9 @@ describe("getRequestCount", () => {
 		const b = new TestScraper()
 		spyOn(globalThis, "fetch").mockImplementation(
 			(async () => new Response("ok")) as unknown as typeof fetch,
-    )
+		)
 
-    await a.callFetchText("https://example.com")
+		await a.callFetchText("https://example.com")
 
 		expect(a.getRequestCount()).toBe(1)
 		expect(b.getRequestCount()).toBe(0)

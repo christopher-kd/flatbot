@@ -1,15 +1,15 @@
 import { afterEach, describe, expect, mock, spyOn, test } from "bun:test"
-import log from "../logger/logger"
-import Vonovia from "../scraper/adapters/Vonovia"
-import type VonoviaGroupResponse from "../scraper/adapters/VonoviaGroup.types"
-import ProxyClient from "../scraper/ProxyClient"
-import type { ApartmentListing } from "../types"
-import listPage1 from "./fixtures/vonoviagroup/listPage1.json"
+import log from "../../../logger/logger"
+import Vonovia from "../../../scraper/adapters/Vonovia"
+import type VonoviaGroupResponse from "../../../scraper/adapters/VonoviaGroup.types"
+import ProxyClient from "../../../scraper/ProxyClient"
+import type { ApartmentListing } from "../../../types"
+import listPage1 from "../fixtures/vonoviagroup/listPage1.json"
 
 type VonoviaResult = VonoviaGroupResponse["results"][number]
 
 async function loadFixtureText(name: string): Promise<string> {
-	return Bun.file(`${import.meta.dir}/fixtures/vonoviagroup/${name}`).text()
+	return Bun.file(`${import.meta.dir}/../fixtures/vonoviagroup/${name}`).text()
 }
 
 // listPage1's own paging.info.count (18) is honest about the real site

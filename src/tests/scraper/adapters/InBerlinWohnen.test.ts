@@ -1,14 +1,16 @@
-import { parse } from "node-html-parser"
 import { afterEach, describe, expect, mock, spyOn, test } from "bun:test"
-import log from "../logger/logger"
+import { parse } from "node-html-parser"
+import log from "../../../logger/logger"
 import InBerlinWohnenScraper, {
 	parseMapPinCoordinates,
-} from "../scraper/adapters/InBerlinWohnen"
+} from "../../../scraper/adapters/InBerlinWohnen"
 
 const scraper = new InBerlinWohnenScraper()
 
 async function loadFixtureText(name: string): Promise<string> {
-	return Bun.file(`${import.meta.dir}/fixtures/inberlinwohnen/${name}`).text()
+	return Bun.file(
+		`${import.meta.dir}/../fixtures/inberlinwohnen/${name}`,
+	).text()
 }
 
 async function loadApartments(page: number) {

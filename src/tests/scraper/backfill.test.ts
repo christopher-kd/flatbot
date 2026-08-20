@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test"
-import { fillMissingCoordinates } from "../scraper/backfill"
-import type PhotonClient from "../scraper/PhotonClient"
+import { fillMissingCoordinates } from "../../scraper/backfill"
+import type PhotonClient from "../../scraper/PhotonClient"
 import type {
 	ApartmentListing,
 	ApartmentListingLocation,
 	ApartmentListingLocationCoordinates,
-} from "../types"
+} from "../../types"
 
 function makeListing(
 	overrides: Partial<ApartmentListing> = {},

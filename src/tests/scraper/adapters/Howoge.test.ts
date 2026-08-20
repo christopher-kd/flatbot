@@ -1,9 +1,9 @@
-import { parse } from "node-html-parser"
 import { afterEach, describe, expect, mock, spyOn, test } from "bun:test"
-import log from "../logger/logger"
-import Howoge from "../scraper/adapters/Howoge"
-import type { ApartmentListing } from "../types"
-import immoList from "./fixtures/howoge/immoList.json"
+import { parse } from "node-html-parser"
+import log from "../../../logger/logger"
+import Howoge from "../../../scraper/adapters/Howoge"
+import type { ApartmentListing } from "../../../types"
+import immoList from "../fixtures/howoge/immoList.json"
 
 const howoge = new Howoge()
 const TEASER_URL =
@@ -20,13 +20,13 @@ function findImmo(predicate: (o: Immo) => boolean): Immo {
 
 async function loadTeaserFlats() {
 	const html = await Bun.file(
-		`${import.meta.dir}/fixtures/howoge/projectTeaser.html`,
+		`${import.meta.dir}/../fixtures/howoge/projectTeaser.html`,
 	).text()
 	return parse(html).querySelectorAll(".flat-single")
 }
 
 async function loadFixtureText(name: string): Promise<string> {
-	return Bun.file(`${import.meta.dir}/fixtures/howoge/${name}`).text()
+	return Bun.file(`${import.meta.dir}/../fixtures/howoge/${name}`).text()
 }
 
 function makeListing(

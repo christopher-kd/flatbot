@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
-import type { ListingQueryFilters } from "../db/repository/ListingRepository"
-import { buildMongoFilter } from "../db/repository/listingQueryFilters"
+import type { ListingQueryFilters } from "../../db/repository/ListingRepository"
+import { buildMongoFilter } from "../../db/repository/listingQueryFilters"
 
 describe("buildMongoFilter", () => {
 	test("empty filters produce an empty match object", () => {

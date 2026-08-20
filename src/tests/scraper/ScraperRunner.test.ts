@@ -1,19 +1,19 @@
 import { describe, expect, mock, test } from "bun:test"
-import type MongoDatabaseClient from "../db/MongoDatabaseClient"
-import type ListingRepository from "../db/repository/ListingRepository"
-import * as realConsoleReport from "../scraper/consoleReport"
-import type PhotonClient from "../scraper/PhotonClient"
-import type Scraper from "../scraper/Scraper"
-import ScraperRunner from "../scraper/ScraperRunner"
+import type MongoDatabaseClient from "../../db/MongoDatabaseClient"
+import type ListingRepository from "../../db/repository/ListingRepository"
+import * as realConsoleReport from "../../scraper/consoleReport"
+import type PhotonClient from "../../scraper/PhotonClient"
+import type Scraper from "../../scraper/Scraper"
+import ScraperRunner from "../../scraper/ScraperRunner"
 import type {
 	ApartmentListing,
 	ApartmentListingLocationCoordinates,
 	Organization,
-} from "../types"
+} from "../../types"
 
 // consoleReport.printBanner reads flavor-text file for console art -
 // stub out so tests don't depend on that file existing.
-mock.module("../scraper/consoleReport", () => ({
+mock.module("../../scraper/consoleReport", () => ({
 	...realConsoleReport,
 	printBanner: async () => {},
 }))

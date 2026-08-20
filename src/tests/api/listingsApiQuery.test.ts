@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
-import { toRepositoryFilters, toRepositorySort } from "../api/listings/query"
-import { listingsQuerySchema } from "../api/listings/schema"
+import { toRepositoryFilters, toRepositorySort } from "../../api/listings/query"
+import { listingsQuerySchema } from "../../api/listings/schema"
 
 function parseQuery(input: Record<string, string | string[]>) {
 	return listingsQuerySchema.parse(input)

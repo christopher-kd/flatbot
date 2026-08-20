@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
-import { mergeAggregatorListings } from "../scraper/merge"
-import type { ApartmentListing } from "../types"
+import { mergeAggregatorListings } from "../../scraper/merge"
+import type { ApartmentListing } from "../../types"
 
 function makeListing(
 	overrides: Partial<ApartmentListing> = {},
@@ -160,7 +160,10 @@ describe("mergeAggregatorListings - location.coordinates tri-state", () => {
 
 		const [merged] = mergeAggregatorListings([direct], [aggregator])
 
-		expect(merged.location.coordinates).toEqual({ type: "Point", coordinates: [13.4, 52.5] })
+		expect(merged.location.coordinates).toEqual({
+			type: "Point",
+			coordinates: [13.4, 52.5],
+		})
 	})
 
 	test("direct has a value, aggregator has a different value - direct wins", () => {
@@ -198,7 +201,10 @@ describe("mergeAggregatorListings - location.coordinates tri-state", () => {
 
 		const [merged] = mergeAggregatorListings([direct], [aggregator])
 
-		expect(merged.location.coordinates).toEqual({ type: "Point", coordinates: [13.4, 52.5] })
+		expect(merged.location.coordinates).toEqual({
+			type: "Point",
+			coordinates: [13.4, 52.5],
+		})
 	})
 
 	test("both undefined - stays undefined, not coerced to null", () => {
@@ -225,7 +231,10 @@ describe("mergeAggregatorListings - location.coordinates tri-state", () => {
 		const [merged] = mergeAggregatorListings([direct], [aggregator])
 
 		expect(merged.location.street).toBe("Direktstr.")
-		expect(merged.location.coordinates).toEqual({ type: "Point", coordinates: [13.4, 52.5] })
+		expect(merged.location.coordinates).toEqual({
+			type: "Point",
+			coordinates: [13.4, 52.5],
+		})
 	})
 })
 

@@ -1,21 +1,21 @@
 import { afterEach, describe, expect, mock, spyOn, test } from "bun:test"
-import log from "../logger/logger"
-import StadtUndLand from "../scraper/adapters/StadtUndLand"
+import log from "../../../logger/logger"
+import StadtUndLand from "../../../scraper/adapters/StadtUndLand"
 import type {
 	DistrictData,
 	StadtUndLandReponse,
-} from "../scraper/adapters/StadtUndLand.types"
-import type { ApartmentListing } from "../types"
-import apartmentsNew from "./fixtures/stadtundland/apartments-new.json"
-import apartmentsPage0 from "./fixtures/stadtundland/apartments-page0.json"
-import districts from "./fixtures/stadtundland/districts.json"
+} from "../../../scraper/adapters/StadtUndLand.types"
+import type { ApartmentListing } from "../../../types"
+import apartmentsNew from "../fixtures/stadtundland/apartments-new.json"
+import apartmentsPage0 from "../fixtures/stadtundland/apartments-page0.json"
+import districts from "../fixtures/stadtundland/districts.json"
 
 const sul = new StadtUndLand()
 
 type Apartment = StadtUndLandReponse["data"][number]
 
 async function loadFixtureText(name: string): Promise<string> {
-	return Bun.file(`${import.meta.dir}/fixtures/stadtundland/${name}`).text()
+	return Bun.file(`${import.meta.dir}/../fixtures/stadtundland/${name}`).text()
 }
 
 function findApartment(immoNumber: string): Apartment {
