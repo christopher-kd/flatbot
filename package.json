@@ -4,6 +4,8 @@
 	"type": "module",
 	"module": "tsconfig.app.json",
 	"scripts": {
+	  "api": "bun run src/api/run.ts",
+	  "api-dev": "bun run --hot src/api/run.ts",
 		"scraper": "bun src/scraper/run.ts",
 		"setup": "bun src/setup/run.ts",
 		"scraper-debug": "node --import tsx src/scraper/run.ts",
@@ -14,6 +16,9 @@
 		"lintfix": "bunx --bun @biomejs/biome lint --write ./src"
 	},
 	"dependencies": {
+	  "hono": "^4.13.1",
+	  "@hono/zod-validator": "^0.9.0",
+		"zod": "^4.4.3",
 		"@clack/prompts": "^1.6.0",
 		"bson": "7.2.0",
 		"cli-progress": "^3.12.0",

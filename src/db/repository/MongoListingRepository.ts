@@ -19,7 +19,11 @@ import type ListingRepository from "./ListingRepository"
 import {
 	BACKFILL_FIELD_PATHS,
 	type KnownBackfillFields,
+	type ListingQueryFilters,
+	type ListingQueryResult,
+	type ListingQuerySort,
 } from "./ListingRepository"
+import { buildMongoFilter } from "./listingQueryFilters"
 
 const LIVENESS_CHECK_PER_ORG_CONCURRENCY = 4
 
@@ -258,5 +262,98 @@ export default class MongoListingRepository implements ListingRepository {
 		}
 
 		return
+	}
+
+	async findByListingId(
+		listingId: string,
+	): Promise<StoredApartmentListing | null> {
+		return this.#listingCollection.findOne(
+			{ listingId },
+			{ projection: { _id: 0 } },
+		)
+	}
+
+	async queryListings(
+		filters: ListingQueryFilters,
+		sort: ListingQuerySort | undefined,
+		limit: number,
+		offset: number,
+	): Promise<ListingQueryResult> {
+		if (filters.geo) {
+			return this.#queryListingsGeo(filters, filters.geo, sort, limit, offset)
+		}
+
+		const filter = buildMongoFilter(filters)
+		const sortSpec: [string, mongoDB.SortDirection][] =
+			sort && sort.kind === "field"
+				? [[sort.mongoPath, sort.direction === "asc" ? 1 : -1]]
+				: []
+
+		const [docs, total] = await Promise.all([
+			this.#listingCollection
+				.find(filter, { projection: { _id: 0 } })
+				.sort(sortSpec)
+				.skip(offset)
+				.limit(limit)
+				.toArray(),
+			this.#listingCollection.countDocuments(filter),
+		])
+
+		return { items: docs.map((listing) => ({ listing })), total }
+	}
+
+	async #queryListingsGeo(
+		filters: ListingQueryFilters,
+		geo: { lat: number; lng: number; radiusKm: number },
+		sort: ListingQuerySort | undefined,
+		limit: number,
+		offset: number,
+	): Promise<ListingQueryResult> {
+		const geoNearStage = {
+			$geoNear: {
+				near: geoJSONFrom(geo.lng, geo.lat),
+				distanceField: "distanceMeters",
+				maxDistance: geo.radiusKm * 1000,
+				spherical: true,
+				query: buildMongoFilter({ ...filters, geo: undefined }),
+			},
+		}
+
+		const pipeline: Record<string, unknown>[] = [geoNearStage]
+
+		// $geoNear already sorts by distance ascending - only need $sort for a
+		// different field, or to reverse to descending distance.
+		if (sort && sort.kind === "field") {
+			pipeline.push({
+				$sort: { [sort.mongoPath]: sort.direction === "asc" ? 1 : -1 },
+			})
+		} else if (sort && sort.kind === "distance" && sort.direction === "desc") {
+			pipeline.push({ $sort: { distanceMeters: -1 } })
+		}
+
+		pipeline.push(
+			{ $skip: offset },
+			{ $limit: limit },
+			{ $project: { _id: 0 } },
+		)
+
+		const [docs, countResult] = await Promise.all([
+			this.#listingCollection
+				.aggregate<StoredApartmentListing & { distanceMeters: number }>(
+					pipeline,
+				)
+				.toArray(),
+			this.#listingCollection
+				.aggregate<{ count: number }>([geoNearStage, { $count: "count" }])
+				.toArray(),
+		])
+
+		return {
+			items: docs.map(({ distanceMeters, ...listing }) => ({
+				listing: listing as StoredApartmentListing,
+				distanceKm: distanceMeters / 1000,
+			})),
+			total: countResult[0]?.count ?? 0,
+		}
 	}
 }

@@ -4,6 +4,7 @@ import type {
 	ApartmentListingCosts,
 	ApartmentListingLocation,
 	Organization,
+	StoredApartmentListing,
 } from "../../types"
 
 export interface KnownBackfillFields {
@@ -37,6 +38,39 @@ export const BACKFILL_FIELD_PATHS = [
 	"accessibility.barrierFree",
 ] as const
 
+export interface ListingQueryFilters {
+	minPrice?: number
+	maxPrice?: number
+	minRooms?: number
+	maxRooms?: number
+	minSpace?: number
+	maxSpace?: number
+	organization?: string[]
+	restrictionKind?: string[]
+	wbsLevel?: number[]
+	wheelchair?: boolean
+	barrierFree?: boolean
+	senior?: boolean
+	newBuilding?: boolean
+	geo?: { lat: number; lng: number; radiusKm: number }
+}
+
+// mongoPath is trusted, already-resolved - API layer maps user sort keys to
+// real paths via MONGO_SORT_FIELDS (api/listings/schema.ts) before calling in.
+export type ListingQuerySort =
+	| { kind: "field"; mongoPath: string; direction: "asc" | "desc" }
+	| { kind: "distance"; direction: "asc" | "desc" }
+
+export interface ListingQueryResultItem {
+	listing: StoredApartmentListing
+	distanceKm?: number
+}
+
+export interface ListingQueryResult {
+	items: ListingQueryResultItem[]
+	total: number
+}
+
 export default interface ListingRepository {
 	updateListings(
 		listings: ApartmentListing[],
@@ -47,4 +81,13 @@ export default interface ListingRepository {
 	findKnownBackfillFields(
 		listingIds: string[],
 	): Promise<Map<string, KnownBackfillFields>>
+
+	queryListings(
+		filters: ListingQueryFilters,
+		sort: ListingQuerySort | undefined,
+		limit: number,
+		offset: number,
+	): Promise<ListingQueryResult>
+
+	findByListingId(listingId: string): Promise<StoredApartmentListing | null>
 }

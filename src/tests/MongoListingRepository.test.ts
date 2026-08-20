@@ -17,7 +17,7 @@ import type {
 	StoredApartmentListing,
 } from "../types"
 
-// These tests hit a real MongoDB replica set (transactions require one) on
+// Tests hit real MongoDB replica set (transactions require one) on
 // an isolated, disposable database.
 // Skips cleanly (not fail) if no reachable Mongo is configured.
 const TEST_DB_NAME = "flatbot_test_mongolistingrepository"
@@ -77,6 +77,10 @@ describe.skipIf(!mongoAvailable)("MongoListingRepository (integration)", () => {
 			listingCollection,
 			archiveCollection,
 		)
+		// createListingRepository() does this on startup outside tests - this
+		// suite constructs MongoListingRepository directly, so it needs its own
+		// index for the geo queryListings tests below.
+		await listingCollection.createIndex({ "location.coordinates": "2dsphere" })
 	})
 
 	afterEach(async () => {
@@ -323,6 +327,261 @@ describe.skipIf(!mongoAvailable)("MongoListingRepository (integration)", () => {
 			})
 			expect(fields?.features).toEqual(["Balkon"])
 			expect(fields?.accessibility?.barrierFree).toBe(true)
+		})
+	})
+
+	describe("queryListings", () => {
+		test("filters by price range", async () => {
+			await repository.updateListings(
+				[
+					makeListing("WBM", { costs: { totalRentEur: 500 } }),
+					{ ...makeListing("HOWOGE"), costs: { totalRentEur: 1500 } },
+				],
+				["WBM", "HOWOGE"],
+			)
+
+			const { items, total } = await repository.queryListings(
+				{ minPrice: 400, maxPrice: 1000 },
+				undefined,
+				20,
+				0,
+			)
+
+			expect(total).toBe(1)
+			expect(items).toHaveLength(1)
+			expect(items[0]?.listing.listingId).toBe("WBM:1")
+		})
+
+		test("filters by organization $in", async () => {
+			await repository.updateListings(
+				[makeListing("WBM"), makeListing("HOWOGE")],
+				["WBM", "HOWOGE"],
+			)
+
+			const { items, total } = await repository.queryListings(
+				{ organization: ["WBM"] },
+				undefined,
+				20,
+				0,
+			)
+
+			expect(total).toBe(1)
+			expect(items[0]?.listing.organization).toBe("WBM")
+		})
+
+		test("filters by restrictionKind and wbsLevel $in", async () => {
+			await repository.updateListings(
+				[
+					makeListing("WBM", {
+						restrictions: {
+							kind: "wbs-required",
+							wbsLevels: [140],
+							wbsSpecialNeed: null,
+						},
+					}),
+					makeListing("HOWOGE", { restrictions: { kind: "free" } }),
+				],
+				["WBM", "HOWOGE"],
+			)
+
+			const byRestriction = await repository.queryListings(
+				{ restrictionKind: ["wbs-required"] },
+				undefined,
+				20,
+				0,
+			)
+			expect(byRestriction.total).toBe(1)
+			expect(byRestriction.items[0]?.listing.listingId).toBe("WBM:1")
+
+			const byWbsLevel = await repository.queryListings(
+				{ wbsLevel: [140] },
+				undefined,
+				20,
+				0,
+			)
+			expect(byWbsLevel.total).toBe(1)
+			expect(byWbsLevel.items[0]?.listing.listingId).toBe("WBM:1")
+		})
+
+		test("filters by boolean accessibility and newBuilding fields", async () => {
+			await repository.updateListings(
+				[
+					makeListing("WBM", {
+						newBuilding: true,
+						accessibility: { barrierFree: true },
+					}),
+					makeListing("HOWOGE", {
+						newBuilding: false,
+						accessibility: { barrierFree: false },
+					}),
+				],
+				["WBM", "HOWOGE"],
+			)
+
+			const result = await repository.queryListings(
+				{ newBuilding: true, barrierFree: true },
+				undefined,
+				20,
+				0,
+			)
+
+			expect(result.total).toBe(1)
+			expect(result.items[0]?.listing.listingId).toBe("WBM:1")
+		})
+
+		test("paginates via limit/offset and reports the unpaginated total", async () => {
+			await repository.updateListings(
+				[
+					{ ...makeListing("WBM"), rooms: 1 },
+					{ ...makeListing("HOWOGE"), rooms: 2 },
+					{ ...makeListing("degewo"), rooms: 3 },
+				],
+				["WBM", "HOWOGE", "degewo"],
+			)
+
+			const page = await repository.queryListings(
+				{},
+				{ kind: "field", mongoPath: "rooms", direction: "asc" },
+				1,
+				1,
+			)
+
+			expect(page.total).toBe(3)
+			expect(page.items).toHaveLength(1)
+			expect(page.items[0]?.listing.rooms).toBe(2)
+		})
+
+		test("sorts ascending and descending by a mapped field", async () => {
+			await repository.updateListings(
+				[
+					{ ...makeListing("WBM"), rooms: 3 },
+					{ ...makeListing("HOWOGE"), rooms: 1 },
+					{ ...makeListing("degewo"), rooms: 2 },
+				],
+				["WBM", "HOWOGE", "degewo"],
+			)
+
+			const asc = await repository.queryListings(
+				{},
+				{ kind: "field", mongoPath: "rooms", direction: "asc" },
+				20,
+				0,
+			)
+			expect(asc.items.map((i) => i.listing.rooms)).toEqual([1, 2, 3])
+
+			const desc = await repository.queryListings(
+				{},
+				{ kind: "field", mongoPath: "rooms", direction: "desc" },
+				20,
+				0,
+			)
+			expect(desc.items.map((i) => i.listing.rooms)).toEqual([3, 2, 1])
+		})
+
+		test("geo query returns only in-radius listings with distanceKm, sorted ascending by default", async () => {
+			// Berlin center, ~2km away, and ~50km away (Potsdam).
+			await repository.updateListings(
+				[
+					{
+						...makeListing("WBM"),
+						location: {
+							city: "Berlin",
+							street: "Teststr.",
+							houseNumber: "1",
+							coordinates: { type: "Point", coordinates: [13.405, 52.52] },
+						},
+					},
+					{
+						...makeListing("HOWOGE"),
+						location: {
+							city: "Berlin",
+							street: "Teststr.",
+							houseNumber: "2",
+							coordinates: { type: "Point", coordinates: [13.42, 52.53] },
+						},
+					},
+					{
+						...makeListing("degewo"),
+						location: {
+							city: "Potsdam",
+							street: "Teststr.",
+							houseNumber: "3",
+							coordinates: { type: "Point", coordinates: [13.06, 52.4] },
+						},
+					},
+				],
+				["WBM", "HOWOGE", "degewo"],
+			)
+
+			const { items, total } = await repository.queryListings(
+				{ geo: { lat: 52.52, lng: 13.405, radiusKm: 5 } },
+				undefined,
+				20,
+				0,
+			)
+
+			expect(total).toBe(2)
+			expect(items.map((i) => i.listing.listingId)).toEqual([
+				"WBM:1",
+				"HOWOGE:1",
+			])
+			expect(items[0]?.distanceKm).toBeCloseTo(0, 1)
+			expect(items[1]?.distanceKm).toBeGreaterThan(items[0]?.distanceKm ?? 0)
+		})
+
+		test("geo query with sort=distance:desc reverses the natural ascending order", async () => {
+			await repository.updateListings(
+				[
+					{
+						...makeListing("WBM"),
+						location: {
+							city: "Berlin",
+							street: "Teststr.",
+							houseNumber: "1",
+							coordinates: { type: "Point", coordinates: [13.405, 52.52] },
+						},
+					},
+					{
+						...makeListing("HOWOGE"),
+						location: {
+							city: "Berlin",
+							street: "Teststr.",
+							houseNumber: "2",
+							coordinates: { type: "Point", coordinates: [13.42, 52.53] },
+						},
+					},
+				],
+				["WBM", "HOWOGE"],
+			)
+
+			const { items } = await repository.queryListings(
+				{ geo: { lat: 52.52, lng: 13.405, radiusKm: 5 } },
+				{ kind: "distance", direction: "desc" },
+				20,
+				0,
+			)
+
+			expect(items.map((i) => i.listing.listingId)).toEqual([
+				"HOWOGE:1",
+				"WBM:1",
+			])
+		})
+	})
+
+	describe("findByListingId", () => {
+		test("returns the stored listing without a Mongo _id field", async () => {
+			await repository.updateListings([makeListing("WBM")], ["WBM"])
+
+			const listing = await repository.findByListingId("WBM:1")
+
+			expect(listing?.listingId).toBe("WBM:1")
+			expect(listing).not.toHaveProperty("_id")
+		})
+
+		test("returns null on a miss", async () => {
+			const listing = await repository.findByListingId("does-not-exist")
+
+			expect(listing).toBeNull()
 		})
 	})
 })
