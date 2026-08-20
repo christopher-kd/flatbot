@@ -6,5 +6,6 @@ TODO.md
 photon/
 .zed/
 .env
+.env.local
 src/scraper/searchMessages.json
 .claude

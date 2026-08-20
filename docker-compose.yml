@@ -51,6 +51,22 @@ services:
     volumes:
       - scraper-logs:/app/logs
 
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    entrypoint: ["bun", "src/api/run.ts"]
+    environment:
+      DB_CONN_STRING: ${DB_CONN_STRING:-mongodb://mongo:27017/?replicaSet=rs0}
+      DB_NAME: ${DB_NAME:-flatbot}
+      DB_LISTINGS_COLLECTION: ${DB_LISTINGS_COLLECTION:-listings}
+      DB_LISTINGS_ARCHIVE_COLLECTION: ${DB_LISTINGS_ARCHIVE_COLLECTION:-listings_archive}
+      PORT: ${PORT:-1470}
+    ports:
+      - "${PORT:-1470}:${PORT:-1470}"
+
 volumes:
   scraper-logs:
   mongo-data:

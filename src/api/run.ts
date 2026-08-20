@@ -12,4 +12,7 @@ const app = new Hono()
 app.get("/health", (c) => c.json({ status: "ok" }))
 app.route("/listings", createListingsRoute(listingRepository))
 
-export default app
+export default {
+	fetch: app.fetch,
+	port: process.env.PORT ?? 1470,
+}
